@@ -1,0 +1,34 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - multi-tenancy.cybozu.com
+  resources:
+  - tenants
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - multi-tenancy.cybozu.com
+  resources:
+  - tenants/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - multi-tenancy.cybozu.com
+  resources:
+  - tenants/status
+  verbs:
+  - get
+  - patch
+  - update
