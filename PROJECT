@@ -1,0 +1,6 @@
+domain: cybozu.com
+layout:
+- go.kubebuilder.io/v3
+projectName: neco-tenant-controller
+repo: github.com/cybozu-go/neco-tenant-controller
+version: "3"
