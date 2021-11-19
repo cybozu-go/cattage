@@ -2,6 +2,7 @@
 CTRL_TOOLS_VERSION=0.7.0
 CTRL_RUNTIME_VERSION := $(shell awk '/sigs.k8s.io\/controller-runtime/ {print substr($$2, 2)}' go.mod)
 KUSTOMIZE_VERSION = 4.4.1
+CRD_TO_MARKDOWN_VERSION = 0.0.3
 
 # Test tools
 BIN_DIR := $(shell pwd)/bin
@@ -49,6 +50,10 @@ manifests: kustomize controller-gen ## Generate WebhookConfiguration, ClusterRol
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+.PHONY: apidoc
+apidoc: crd-to-markdown $(wildcard api/*/*_types.go)
+	$(CRD_TO_MARKDOWN) --links docs/links.csv -f api/v1beta1/tenant_types.go -n Tenant > docs/crd_tenant.md
 
 .PHONY: check-generate
 check-generate:
@@ -101,6 +106,11 @@ $(KUSTOMIZE):
 	mkdir -p bin
 	curl -fsL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv$(KUSTOMIZE_VERSION)/kustomize_v$(KUSTOMIZE_VERSION)_linux_amd64.tar.gz | \
 	tar -C bin -xzf -
+
+CRD_TO_MARKDOWN := $(shell pwd)/bin/crd-to-markdown
+.PHONY: crd-to-markdown
+crd-to-markdown: ## Download crd-to-markdown locally if necessary.
+	$(call go-get-tool,$(CRD_TO_MARKDOWN),github.com/clamoriniere/crd-to-markdown@v$(CRD_TO_MARKDOWN_VERSION))
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
