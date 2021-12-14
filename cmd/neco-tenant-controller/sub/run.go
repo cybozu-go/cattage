@@ -8,14 +8,16 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	tenantv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
+	multitenancyv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
 	"github.com/cybozu-go/neco-tenant-controller/controllers"
+	"github.com/cybozu-go/neco-tenant-controller/hooks"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 func subMain(ns, addr string, port int) error {
@@ -26,7 +28,7 @@ func subMain(ns, addr string, port int) error {
 	if err := clientgoscheme.AddToScheme(scheme); err != nil {
 		return fmt.Errorf("unable to add client-go objects: %w", err)
 	}
-	if err := tenantv1beta1.AddToScheme(scheme); err != nil {
+	if err := multitenancyv1beta1.AddToScheme(scheme); err != nil {
 		return fmt.Errorf("unable to add neco-tenant-controller objects: %w", err)
 	}
 
@@ -65,9 +67,11 @@ func subMain(ns, addr string, port int) error {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)
 	}
 
-	if err = (&tenantv1beta1.Tenant{}).SetupWebhookWithManager(mgr); err != nil {
-		return fmt.Errorf("unable to create Tenant webhook: %w", err)
+	dec, err := admission.NewDecoder(scheme)
+	if err != nil {
+		return fmt.Errorf("unable to create admission decoder: %w", err)
 	}
+	hooks.SetupTenantWebhook(mgr, dec)
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
