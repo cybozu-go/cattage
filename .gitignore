@@ -19,3 +19,5 @@
 
 # go mod
 /vendor
+
+/tilt_modules
