@@ -131,6 +131,7 @@ type TenantStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Cluster
 
 // Tenant is the Schema for the tenants API
 type Tenant struct {

@@ -7,3 +7,10 @@ spec:
   template:
     spec:
       securityContext: null
+      containers:
+        - command:
+            - /manager
+          args:
+            - --leader-elect
+            - --zap-devel=true
+          name: manager

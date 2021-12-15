@@ -5,3 +5,26 @@ metadata:
   namespace: system
 data:
   config.yaml: |
+    namespace:
+      commonLabels:
+        accurate.cybozu.com/template: init-template
+      groupKey: team
+    argocd:
+      namespace: argocd
+      permissiveValidation: true
+      organization: cybozu-go
+      appProjectTemplate: |
+        apiVersion: argoproj.io/v1alpha1
+        kind: AppProject
+        spec:
+          namespaceResourceBlacklist:
+            - group: ""
+              kind: ResourceQuota
+            - group: ""
+              kind: LimitRange
+            - group: networking.k8s.io
+              kind: NetworkPolicy
+          orphanedResources:
+            warn: false
+          sourceRepos:
+            - '*'

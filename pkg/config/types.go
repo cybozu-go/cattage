@@ -16,6 +16,7 @@ type Config struct {
 type NamespaceConfig struct {
 	// CommonLabels are labels to add to all namespaces to be deployed by neco-tenant-controller
 	CommonLabels map[string]string `json:"commonLabels,omitempty"`
+	GroupKey     string            `json:"groupKey"`
 }
 
 // ArgoCDConfig represents the configuration about Argo CD
@@ -25,6 +26,9 @@ type ArgoCDConfig struct {
 	// PermissiveValidation is the mode of validation for Application resources.
 	// If true is set, this does not deny Application resources but issues a warning.
 	PermissiveValidation bool `json:"permissiveValidation"`
+
+	Organization       string `json:"organization"`
+	AppProjectTemplate string `json:"appProjectTemplate"`
 }
 
 // TeleportConfig represents the configuration about Teleport

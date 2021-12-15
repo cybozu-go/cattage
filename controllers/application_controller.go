@@ -18,12 +18,16 @@ type ApplicationReconciler struct {
 
 //+kubebuilder:rbac:groups=argoproj.io,resources=applications,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=argoproj.io,resources=applications/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=argoproj.io,resources=applications/finalizers,verbs=update
 
 func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	app := argocd.Application()
+	if err := r.Get(ctx, req.NamespacedName, app); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	logger.Info("reconcile application", "spec", app.Object)
 
 	return ctrl.Result{}, nil
 }

@@ -63,10 +63,14 @@ func subMain(ns, addr string, port int) error {
 	if err := cfg.Validate(mgr.GetRESTMapper()); err != nil {
 		return fmt.Errorf("invalid configurations: %w", err)
 	}
-
+	ctx := ctrl.SetupSignalHandler()
+	if err := controllers.SetupIndexForNamespace(ctx, mgr, cfg.Namespace.GroupKey); err != nil {
+		return fmt.Errorf("failed to setup indexer for namespaces: %w", err)
+	}
 	if err := (&controllers.TenantReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Config: cfg,
 	}).SetupWithManager(mgr); err != nil {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)
 	}
@@ -94,7 +98,7 @@ func subMain(ns, addr string, port int) error {
 	}
 
 	logger.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(ctx); err != nil {
 		return fmt.Errorf("problem running manager: %s", err)
 	}
 	return nil

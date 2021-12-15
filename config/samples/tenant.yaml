@@ -3,4 +3,7 @@ kind: Tenant
 metadata:
   name: tenant-sample
 spec:
-  # TODO(user): Add fields here
+  namespaces:
+    - name: app-sample
+#    - name: app-foo
+
