@@ -78,6 +78,7 @@ func subMain(ns, addr string, port int) error {
 	if err := (&controllers.ApplicationReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Config: cfg,
 	}).SetupWithManager(mgr); err != nil {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)
 	}
@@ -87,7 +88,7 @@ func subMain(ns, addr string, port int) error {
 		return fmt.Errorf("unable to create admission decoder: %w", err)
 	}
 	hooks.SetupTenantWebhook(mgr, dec)
-	hooks.SetupApplicationWebhook(mgr, dec)
+	hooks.SetupApplicationWebhook(mgr, dec, cfg)
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

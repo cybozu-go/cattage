@@ -108,6 +108,7 @@ func containNamespace(roots []multitenancyv1beta1.NamespaceSpec, ns corev1.Names
 }
 
 func (r *TenantReconciler) removeManagedLabels(ctx context.Context, tenant *multitenancyv1beta1.Tenant, orphan bool) error {
+	logger := log.FromContext(ctx)
 	nss := &corev1.NamespaceList{}
 	if err := r.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
@@ -116,6 +117,7 @@ func (r *TenantReconciler) removeManagedLabels(ctx context.Context, tenant *mult
 		if orphan && containNamespace(tenant.Spec.Namespaces, ns) {
 			continue
 		}
+		logger.Info("Remove labels", "ns", ns)
 		newNs := ns.DeepCopy()
 		delete(newNs.Labels, constants.OwnerTenant)
 		delete(newNs.Labels, r.Config.Namespace.GroupKey)
@@ -169,8 +171,6 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 		if err != nil {
 			return err
 		}
-
-		logger.Info("updated namespace", "op", op)
 
 		rb := &rbacv1.RoleBinding{}
 		rb.SetNamespace(ns.Name)
@@ -264,7 +264,6 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 	if !ok {
 		destinations = []map[string]interface{}{}
 	}
-
 	for _, ns := range nss.Items {
 		destinations = append(destinations, map[string]interface{}{
 			"namespace": ns.Name,
@@ -347,6 +346,10 @@ func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func SetupIndexForNamespace(ctx context.Context, mgr manager.Manager, groupKey string) error {
 	ns := &corev1.Namespace{}
 	return mgr.GetFieldIndexer().IndexField(ctx, ns, constants.NamespaceGroupKey, func(rawObj client.Object) []string {
+		nsType := rawObj.GetLabels()["accurate.cybozu.com/type"]
+		if nsType != "root" {
+			return nil
+		}
 		group := rawObj.GetLabels()[groupKey]
 		if group == "" {
 			return nil

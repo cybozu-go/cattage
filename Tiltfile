@@ -39,7 +39,7 @@ def kubebuilder():
 
     docker_build_with_restart('controller:latest', '.',
      dockerfile_contents=DOCKERFILE,
-     entrypoint='/manager',
+     entrypoint=['/manager', '--zap-devel=true'],
      only=['./bin/manager'],
      live_update=[
            sync('./bin/manager', '/manager'),

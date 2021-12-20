@@ -9,7 +9,7 @@ func AppProject() *unstructured.Unstructured {
 	app := &unstructured.Unstructured{}
 	app.SetGroupVersionKind(schema.GroupVersionKind{
 		Group:   "argoproj.io",
-		Version: "v1alpha1",
+		Version: AppProjectVersion,
 		Kind:    "AppProject",
 	})
 	return app
