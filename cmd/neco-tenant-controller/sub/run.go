@@ -79,7 +79,7 @@ func subMain(ns, addr string, port int) error {
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Config: cfg,
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithManager(ctx, mgr); err != nil {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)
 	}
 

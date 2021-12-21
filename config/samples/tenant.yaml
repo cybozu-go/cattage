@@ -1,9 +1,16 @@
 apiVersion: multi-tenancy.cybozu.com/v1beta1
 kind: Tenant
 metadata:
-  name: tenant-sample
+  name: a-team
 spec:
   namespaces:
-    - name: app-sample
-#    - name: app-foo
+    - name: app-a
+---
+apiVersion: multi-tenancy.cybozu.com/v1beta1
+kind: Tenant
+metadata:
+  name: b-team
+spec:
+  namespaces:
+    - name: app-b
 

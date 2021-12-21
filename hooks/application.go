@@ -74,6 +74,10 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 		return admission.Allowed("")
 	}
 
+	if app.GetDeletionTimestamp() != nil {
+		return admission.Allowed("")
+	}
+
 	ns := &corev1.Namespace{}
 	err := v.Client.Get(ctx, client.ObjectKey{Name: app.GetNamespace()}, ns)
 	if err != nil {
@@ -83,6 +87,24 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 	group, ok := ns.Labels[v.config.Namespace.GroupKey]
 	if !ok {
 		return admission.Denied("an application cannot be created on unmanaged namespaces")
+	}
+
+	apps := argocd.ApplicationList()
+	err = v.Client.List(ctx, apps, client.InNamespace(v.config.ArgoCD.Namespace))
+	if err != nil {
+		return admission.Errored(http.StatusInternalServerError, err)
+	}
+	for _, a := range apps.Items {
+		if app.GetName() == a.GetName() {
+			ownerNs := a.GetLabels()[constants.OwnerAppNamespace]
+			if ownerNs == "" {
+				break
+			}
+			if app.GetNamespace() == ownerNs {
+				break
+			}
+			return admission.Denied("cannot create an application with the same name")
+		}
 	}
 
 	project, found, err := unstructured.NestedString(app.UnstructuredContent(), "spec", "project")

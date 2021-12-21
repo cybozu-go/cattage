@@ -2,20 +2,20 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: sample
-  namespace: app-sample
+  namespace: sub-1
   labels:
     foo: bar
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: tenant-sample
+  project: a-team
   source:
     repoURL: https://github.com/neco-test/apps-sandbox.git
     targetRevision: master
     path: testhttpd
   destination:
     server: https://kubernetes.default.svc
-    namespace: app-test
+    namespace: sub-1
   syncPolicy:
     automated:
       prune: true

@@ -14,3 +14,13 @@ func Application() *unstructured.Unstructured {
 	})
 	return app
 }
+
+func ApplicationList() *unstructured.UnstructuredList {
+	apps := &unstructured.UnstructuredList{}
+	apps.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "argoproj.io",
+		Version: ApplicationVersion,
+		Kind:    "ApplicationList",
+	})
+	return apps
+}

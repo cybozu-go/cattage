@@ -7,6 +7,16 @@ import (
 	"fmt"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"k8s.io/client-go/util/workqueue"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
@@ -50,12 +60,8 @@ func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		if len(ownerNs) == 0 {
 			return ctrl.Result{}, nil
 		}
-		ownerName := argocdApp.GetLabels()[constants.OwnerApplication]
-		if len(ownerName) == 0 {
-			return ctrl.Result{}, nil
-		}
 		tenantApp = argocd.Application()
-		err := r.Get(ctx, client.ObjectKey{Namespace: ownerNs, Name: ownerName}, tenantApp)
+		err := r.Get(ctx, client.ObjectKey{Namespace: ownerNs, Name: argocdApp.GetName()}, tenantApp)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -117,7 +123,14 @@ func (r *ApplicationReconciler) finalize(ctx context.Context, argocdApp *unstruc
 
 func (r *ApplicationReconciler) reconcileApplication(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) error {
 	logger := log.FromContext(ctx)
-	err := r.syncApplicationSpec(ctx, argocdApp, tenantApp)
+
+	err := r.validateProject(ctx, tenantApp)
+	if err != nil {
+		logger.Error(err, "failed to validate application project")
+		return err
+	}
+
+	err = r.syncApplicationSpec(ctx, argocdApp, tenantApp)
 	if err != nil {
 		logger.Error(err, "failed to sync application spec")
 		return err
@@ -126,6 +139,36 @@ func (r *ApplicationReconciler) reconcileApplication(ctx context.Context, argocd
 	if err != nil {
 		logger.Error(err, "failed to sync application status")
 		return err
+	}
+	return nil
+}
+
+func (r *ApplicationReconciler) validateProject(ctx context.Context, tenantApp *unstructured.Unstructured) error {
+	logger := log.FromContext(ctx)
+
+	ns := &corev1.Namespace{}
+	err := r.Get(ctx, client.ObjectKey{Name: tenantApp.GetNamespace()}, ns)
+	if err != nil {
+		return err
+	}
+	group := ns.Labels[r.Config.Namespace.GroupKey]
+	if group == "" {
+		logger.Info("Remove unmanaged application")
+		return r.Delete(ctx, tenantApp)
+	}
+	project, found, err := unstructured.NestedString(tenantApp.UnstructuredContent(), "spec", "project")
+	if err != nil {
+		return err
+	}
+	if !found {
+		return errors.New("spec.project not found")
+	}
+	if project != group {
+		logger.Info("Overwrite project", "before", project, "after", group)
+		err := unstructured.SetNestedField(tenantApp.UnstructuredContent(), group, "spec", "project")
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -173,7 +216,6 @@ func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdA
 		}
 		labels[k] = v
 	}
-	labels[constants.OwnerApplication] = tenantApp.GetName()
 	labels[constants.OwnerAppNamespace] = tenantApp.GetNamespace()
 
 	annotations := make(map[string]string)
@@ -242,8 +284,32 @@ func (r *ApplicationReconciler) syncApplicationStatus(ctx context.Context, argoc
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ApplicationReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
+	logger := log.FromContext(ctx)
+
+	nsHandler := func(o client.Object, q workqueue.RateLimitingInterface) {
+		apps := argocd.ApplicationList()
+		err := mgr.GetClient().List(ctx, apps, client.InNamespace(o.GetName()))
+		if err != nil {
+			logger.Error(err, "failed to list applications")
+			return
+		}
+		for _, app := range apps.Items {
+			q.Add(reconcile.Request{NamespacedName: types.NamespacedName{
+				Namespace: app.GetNamespace(),
+				Name:      app.GetName(),
+			}})
+		}
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(argocd.Application()).
+		Watches(&source.Kind{Type: &corev1.Namespace{}}, handler.Funcs{
+			UpdateFunc: func(ev event.UpdateEvent, q workqueue.RateLimitingInterface) {
+				if ev.ObjectNew.GetDeletionTimestamp() != nil {
+					return
+				}
+				nsHandler(ev.ObjectOld, q)
+			},
+		}).
 		Complete(r)
 }

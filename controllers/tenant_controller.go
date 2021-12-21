@@ -26,7 +26,7 @@ import (
 	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
@@ -130,12 +130,55 @@ func (r *TenantReconciler) removeManagedLabels(ctx context.Context, tenant *mult
 	return nil
 }
 
+func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
+	nss := &corev1.NamespaceList{}
+	if err := r.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
+		return fmt.Errorf("failed to list namespaces: %w", err)
+	}
+
+	for _, ns := range nss.Items {
+		rb := &rbacv1.RoleBinding{}
+		err := r.Client.Get(ctx, client.ObjectKey{Namespace: ns.Name, Name: tenant.Name + "-admin"}, rb)
+		if apierrors.IsNotFound(err) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		err = r.Client.Delete(ctx, rb)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
+	proj := argocd.AppProject()
+	err := r.Get(ctx, client.ObjectKey{Namespace: r.Config.ArgoCD.Namespace, Name: tenant.Name}, proj)
+	if apierrors.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return r.Client.Delete(ctx, proj)
+}
+
 func (r *TenantReconciler) finalize(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
 	if !controllerutil.ContainsFinalizer(tenant, constants.Finalizer) {
 		return nil
 	}
 
 	err := r.removeManagedLabels(ctx, tenant, false)
+	if err != nil {
+		return err
+	}
+	err = r.removeRBAC(ctx, tenant)
+	if err != nil {
+		return err
+	}
+	err = r.removeAppProject(ctx, tenant)
 	if err != nil {
 		return err
 	}
@@ -237,7 +280,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 	proj := argocd.AppProject()
 
 	err := r.Get(ctx, client.ObjectKey{Namespace: r.Config.ArgoCD.Namespace, Name: tenant.Name}, proj)
-	if err != nil && !errors.IsNotFound(err) {
+	if err != nil && !apierrors.IsNotFound(err) {
 		return err
 	}
 
@@ -248,7 +291,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 	}
 
 	nss := &corev1.NamespaceList{}
-	if err := r.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
+	if err := r.List(ctx, nss, client.MatchingLabels{r.Config.Namespace.GroupKey: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 
@@ -260,6 +303,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 
 	spec := proj.UnstructuredContent()["spec"].(map[string]interface{})
 
+	logger.Info("nss", "count", len(nss.Items))
 	destinations, ok := spec["destinations"].([]map[string]interface{})
 	if !ok {
 		destinations = []map[string]interface{}{}
