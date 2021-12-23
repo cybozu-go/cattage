@@ -4,12 +4,14 @@ neco-tenant-controller is a Kubernetes controller to manage tenant team resource
 
 ## Features
 
+### For Administrator
+
 Cluster administrator can creates a [Tenant custom resource](./crd_tenant.md) for each tenant team.
 neco-tenant-controller will automatically apply the following resources needed by the tenant team based on the Tenant resource.
 
 - Manage root namespaces
 
-    Tenant users can use [Accurate][Accurate] to create a SubNamespace.
+    Tenant users can use [Accurate][] to create a SubNamespace.
     Because of that, users need a root namespace.
     neco-tenant-controller creates multiple root namespaces for each tenant team.
     Those namespaces are permission-controlled so that only the tenant users can access them.
@@ -19,6 +21,9 @@ neco-tenant-controller will automatically apply the following resources needed b
     Tenant users need an AppProject resource to deploy their manifests with [Argo CD][Argo CD].
     The AppProject can control namespaces where tenant users can deploy manifests.
     neco-tenant-controller dynamically rewrites the AppProject resource each time tenant users creates a SubNamespace.
+
+
+### For Tenant Users
 
 - Manage Argo CD Application resources
 
@@ -31,18 +36,4 @@ neco-tenant-controller will automatically apply the following resources needed b
     However, that's not appropriate from a security perspective.
     Admission webhook will deny the creation of Application that contains an unauthorized repository.
 
-- Deploy Teleport Node
-
-    Tenant users can use [Teleport][Teleport] to access our Kubernetes cluster.
-    Because of that, Teleport Node Pod is required.
-    neco-tenant-controller will deploy Teleport Node Pods for each tenant team.
-
-- Manage Teleport Applications
-
-    Tenant users can use [Teleport][Teleport] to access applications in our Kubernetes cluster.
-    Because of that, Teleport Application Pod is required.
-    neco-tenant-controller will deploy Teleport Application Pods for each tenant team.
-
-[Accurate]: https://cybozu-go.github.io/accurate/
-[Argo CD]: https://argo-cd.readthedocs.io/
 [Teleport]: https://goteleport.com
