@@ -1,0 +1,11 @@
+controller:
+  config:
+    labelKeys:
+      - team
+    watches:
+      - group: rbac.authorization.k8s.io
+        version: v1
+        kind: Role
+      - group: rbac.authorization.k8s.io
+        version: v1
+        kind: RoleBinding

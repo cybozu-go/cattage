@@ -22,7 +22,7 @@ set -o errexit
 
 # desired cluster name; default is "kind"
 KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME:-kind}"
-KIND_CLUSTER_OPTS="--name ${KIND_CLUSTER_NAME}"
+KIND_CLUSTER_OPTS="--name ${KIND_CLUSTER_NAME} --wait 3m"
 
 if [ -n "${KIND_CLUSTER_IMAGE}" ]; then
   KIND_CLUSTER_OPTS="${KIND_CLUSTER_OPTS} --image ${KIND_CLUSTER_IMAGE}"

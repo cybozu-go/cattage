@@ -1,9 +1,13 @@
 KIND_VERSION = 0.11.1
 KUBERNETES_VERSION = 1.22.2
+ARGOCD_VERSION = 2.1.8
+HELM_VERSION = 3.7.1
 
-KIND := $(dir $(shell pwd))/bin/kind
-KUBECTL := $(dir $(shell pwd))/bin/kubectl
-KUBECONFIG := $(shell pwd)/.kubeconfig
+BIN_DIR := $(dir $(shell pwd))/bin
+KIND := $(BIN_DIR)/kind
+KUBECTL := $(BIN_DIR)/kubectl
+HELM := $(BIN_DIR)/helm
+ARGOCD = $(BIN_DIR)/argocd
 KIND_CONFIG = kind-config.yaml
 export KUBECTL KUBECONFIG
 
@@ -18,14 +22,25 @@ help:
 	@echo "stop       Stop the kind cluster"
 
 .PHONY: start
-start: $(KIND) $(KUBECTL)
+start: $(KIND) $(KUBECTL) $(HELM)
 	$(KIND) create cluster --name=neco-tenant-controller --config=$(KIND_CONFIG) --image=kindest/node:v$(KUBERNETES_VERSION) --wait 1m
 	cd ..; docker build --no-cache -t neco-tenant-controller:dev .
 	$(KIND) load docker-image neco-tenant-controller:dev --name=neco-tenant-controller
-	$(KUBECTL) apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
-	$(KUBECTL) -n cert-manager wait --for=condition=available --timeout=180s --all deployments
+	$(MAKE) prepare
 	$(KUBECTL) apply -k ../config/default
 	$(KUBECTL) -n tenant-system wait --for=condition=available --timeout=180s --all deployments
+
+.PHONY: prepare
+prepare:
+	$(KUBECTL) apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+	$(KUBECTL) -n cert-manager wait --for=condition=available --timeout=180s --all deployments
+	$(KUBECTL) create ns argocd
+	curl -sSLf https://raw.githubusercontent.com/argoproj/argo-cd/v$(ARGOCD_VERSION)/manifests/install.yaml | $(KUBECTL) -n argocd apply -f -
+	$(KUBECTL) -n argocd wait --for=condition=available --timeout=180s --all deployments
+	$(HELM) repo add accurate https://cybozu-go.github.io/accurate/
+	$(HELM) repo update
+	$(HELM) install --create-namespace --namespace accurate accurate -f accurate-values.yaml accurate/accurate
+	$(KUBECTL) -n accurate wait --for=condition=available --timeout=180s --all deployments
 
 .PHONY: test
 test:
@@ -46,11 +61,23 @@ stop: $(KIND)
 	-docker image prune -f
 
 $(KIND):
-	mkdir -p ../bin
+	mkdir -p $(BIN_DIR)
 	curl -sfL -o $@ https://github.com/kubernetes-sigs/kind/releases/download/v$(KIND_VERSION)/kind-linux-amd64
 	chmod a+x $@
 
 $(KUBECTL):
-	mkdir -p ../bin
+	mkdir -p $(BIN_DIR)
 	curl -sfL -o $@ https://dl.k8s.io/release/v$(KUBERNETES_VERSION)/bin/linux/amd64/kubectl
 	chmod a+x $@
+
+$(HELM):
+	mkdir -p $(BIN_DIR)
+	curl -L -sS https://get.helm.sh/helm-v$(HELM_VERSION)-linux-amd64.tar.gz \
+	  | tar xz -C $(BIN_DIR) --strip-components 1 linux-amd64/helm
+
+.PHONY: argocd
+argocd: $(ARGOCD)
+$(ARGOCD):
+	mkdir -p $(BIN_DIR)
+	curl -sSLf https://github.com/argoproj/argo-cd/releases/download/v$(ARGOCD_VERSION)/argocd-linux-amd64 -o $(ARGOCD)
+	chmod 755 $(ARGOCD)
