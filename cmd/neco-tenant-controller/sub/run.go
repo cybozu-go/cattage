@@ -60,7 +60,7 @@ func subMain(ns, addr string, port int) error {
 		return fmt.Errorf("unable to start manager: %w", err)
 	}
 
-	if err := cfg.Validate(mgr.GetRESTMapper()); err != nil {
+	if err := cfg.Validate(); err != nil {
 		return fmt.Errorf("invalid configurations: %w", err)
 	}
 	ctx := ctrl.SetupSignalHandler()

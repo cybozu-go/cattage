@@ -1,7 +1,10 @@
 package config
 
 import (
-	"k8s.io/apimachinery/pkg/api/meta"
+	"errors"
+	v1labelvalidation "k8s.io/apimachinery/pkg/apis/meta/v1/validation"
+	"k8s.io/apimachinery/pkg/util/validation"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/yaml"
 )
 
@@ -30,7 +33,28 @@ type ArgoCDConfig struct {
 }
 
 // Validate validates the configurations.
-func (c *Config) Validate(mapper meta.RESTMapper) error {
+func (c *Config) Validate() error {
+
+	var allErrs field.ErrorList
+	allErrs = append(allErrs, v1labelvalidation.ValidateLabels(c.Namespace.CommonLabels, field.NewPath("namespace", "commonLabels"))...)
+
+	allErrs = append(allErrs, v1labelvalidation.ValidateLabelName(c.Namespace.GroupKey, field.NewPath("namespace", "groupKey"))...)
+
+	if len(c.Namespace.RoleBindingTemplate) == 0 {
+		allErrs = append(allErrs, field.Invalid(field.NewPath("namespace", "rolebindingTemplate"), c.Namespace.RoleBindingTemplate, "should not be empty"))
+	}
+
+	for _, msg := range validation.IsDNS1123Subdomain(c.ArgoCD.Namespace) {
+		allErrs = append(allErrs, field.Invalid(field.NewPath("argocd", "namespace"), c.ArgoCD.Namespace, msg))
+	}
+	if len(c.ArgoCD.AppProjectTemplate) == 0 {
+		allErrs = append(allErrs, field.Invalid(field.NewPath("argocd", "appProjectTemplate"), c.ArgoCD.AppProjectTemplate, "should not be empty"))
+	}
+
+	if len(allErrs) != 0 {
+		return errors.New(allErrs.ToAggregate().Error())
+	}
+
 	return nil
 }
 
