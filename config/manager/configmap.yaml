@@ -9,14 +9,39 @@ data:
       commonLabels:
         accurate.cybozu.com/template: init-template
       groupKey: team
+      rolebindingTemplate: |
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: admin
+        subjects:
+          - apiGroup: rbac.authorization.k8s.io
+            kind: Group
+            name: {{ .Name }}
+          - kind: ServiceAccount
+            name: node-{{ .Name }}
+            namespace: teleport
+          {{ range .ExtraAdmins }}
+          - apiGroup: rbac.authorization.k8s.io
+            kind: Group
+            name: {{ . }}
+          - kind: ServiceAccount
+            name: node-{{ . }}
+            namespace: teleport
+          {{ end }}
     argocd:
       namespace: argocd
-      permissiveValidation: true
-      organization: cybozu-go
       appProjectTemplate: |
         apiVersion: argoproj.io/v1alpha1
         kind: AppProject
         spec:
+          destinations:
+          {{ range .Namespaces }}
+            - namespace: {{ . }}
+              server: '*'
+          {{ end }}
           namespaceResourceBlacklist:
             - group: ""
               kind: ResourceQuota
@@ -26,5 +51,14 @@ data:
               kind: NetworkPolicy
           orphanedResources:
             warn: false
+          roles:
+            - groups:
+                - cybozu-private:{{ .Name }}
+                {{ range .ExtraAdmins }}
+                - cybozu-private:{{ . }}
+                {{ end }}
+              name: admin
+              policies:
+                - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
           sourceRepos:
             - '*'

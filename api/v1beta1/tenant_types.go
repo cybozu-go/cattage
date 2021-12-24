@@ -26,8 +26,7 @@ import (
 // TenantSpec defines the desired state of Tenant
 type TenantSpec struct {
 	Namespaces []NamespaceSpec `json:"namespaces,omitempty"`
-	ArgoCD     *ArgoCDSpec     `json:"argocd,omitempty"`
-	Teleport   *TeleportSpec   `json:"teleport,omitempty"`
+	ArgoCD     ArgoCDSpec      `json:"argocd,omitempty"`
 }
 
 // NamespaceSpec defines the desired state of Namespace
@@ -52,75 +51,10 @@ type NamespaceSpec struct {
 
 // ArgoCDSpec defines the desired state of the settings for Argo CD
 type ArgoCDSpec struct {
-	// Applications are the list of Application resources managed by the tenant team.
-	// +optional
-	Applications []ArgoCDApplicationSpec `json:"applications,omitempty"`
-
-	// Repositories are the list of repositories used by the tenant team.
-	// +optional
-	Repositories []string `json:"repositories,omitempty"`
-
 	// ExtraAdmins are the names of the team to add to the AppProject user.
 	// Specify this if you want other tenant teams to be able to use your AppProject.
 	// +optional
 	ExtraAdmins []string `json:"extraAdmins,omitempty"`
-}
-
-// ArgoCDApplicationSpec defines the desired state of Application
-type ArgoCDApplicationSpec struct {
-	// Name is the name of Application resource.
-	// +kubebuilder:validation:Required
-	Name string `json:"name"`
-
-	// Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
-	// +kubebuilder:validation:Required
-	Path string `json:"path"`
-
-	// RepoURL is the URL to the repository (Git or Helm) that contains the application manifests.
-	// +kubebuilder:validation:Required
-	RepoURL string `json:"repoURL"`
-
-	// TargetRevision defines the revision of the source to sync the application to.
-	// In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.
-	// In case of Helm, this is a semver tag for the Chart's version.
-	// +kubebuilder:validation:Required
-	TargetRevision string `json:"targetRevision"`
-}
-
-// TeleportSpec defines the desired state of the settings for Teleport
-type TeleportSpec struct {
-	// Node is the settings of Teleport Node for the tenant team.
-	// +optional
-	Node *TeleportNodeSpec `json:"node,omitempty"`
-
-	// Applications are the list of applications to be used by the tenant team.
-	// +optional
-	Applications []TeleportApplicationSpec `json:"applications,omitempty"`
-}
-
-type TeleportNodeSpec struct {
-	// Replicas is the number of Teleport Node Pods.
-	// +kubebuilder:validation:Required
-	Replicas int `json:"replicas"`
-
-	// ExtraArgs are the list of additional arguments to be specified for Teleport Node Pod.
-	// +optional
-	ExtraArgs []string `json:"extraArgs,omitempty"`
-}
-
-// TeleportApplicationSpec defines the desired state of Teleport Application.
-type TeleportApplicationSpec struct {
-	// Name is the name of the application to proxy.
-	// +kubebuilder:validation:Required
-	Name string `json:"name"`
-
-	// URL is the internal address of the application to proxy.
-	// +kubebuilder:validation:Required
-	URL string `json:"url"`
-
-	// ExtraArgs are the list of additional arguments to be specified for Teleport Application Pod.
-	// +optional
-	ExtraArgs []string `json:"extraArgs,omitempty"`
 }
 
 // TenantStatus defines the observed state of Tenant

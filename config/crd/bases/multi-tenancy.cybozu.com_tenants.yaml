@@ -40,48 +40,10 @@ spec:
                 description: ArgoCDSpec defines the desired state of the settings
                   for Argo CD
                 properties:
-                  applications:
-                    description: Applications are the list of Application resources
-                      managed by the tenant team.
-                    items:
-                      description: ArgoCDApplicationSpec defines the desired state
-                        of Application
-                      properties:
-                        name:
-                          description: Name is the name of Application resource.
-                          type: string
-                        path:
-                          description: Path is a directory path within the Git repository,
-                            and is only valid for applications sourced from Git.
-                          type: string
-                        repoURL:
-                          description: RepoURL is the URL to the repository (Git or
-                            Helm) that contains the application manifests.
-                          type: string
-                        targetRevision:
-                          description: TargetRevision defines the revision of the
-                            source to sync the application to. In case of Git, this
-                            can be commit, tag, or branch. If omitted, will equal
-                            to HEAD. In case of Helm, this is a semver tag for the
-                            Chart's version.
-                          type: string
-                      required:
-                      - name
-                      - path
-                      - repoURL
-                      - targetRevision
-                      type: object
-                    type: array
                   extraAdmins:
                     description: ExtraAdmins are the names of the team to add to the
                       AppProject user. Specify this if you want other tenant teams
                       to be able to use your AppProject.
-                    items:
-                      type: string
-                    type: array
-                  repositories:
-                    description: Repositories are the list of repositories used by
-                      the tenant team.
                     items:
                       type: string
                     type: array
@@ -114,52 +76,6 @@ spec:
                   - name
                   type: object
                 type: array
-              teleport:
-                description: TeleportSpec defines the desired state of the settings
-                  for Teleport
-                properties:
-                  applications:
-                    description: Applications are the list of applications to be used
-                      by the tenant team.
-                    items:
-                      description: TeleportApplicationSpec defines the desired state
-                        of Teleport Application.
-                      properties:
-                        extraArgs:
-                          description: ExtraArgs are the list of additional arguments
-                            to be specified for Teleport Application Pod.
-                          items:
-                            type: string
-                          type: array
-                        name:
-                          description: Name is the name of the application to proxy.
-                          type: string
-                        url:
-                          description: URL is the internal address of the application
-                            to proxy.
-                          type: string
-                      required:
-                      - name
-                      - url
-                      type: object
-                    type: array
-                  node:
-                    description: Node is the settings of Teleport Node for the tenant
-                      team.
-                    properties:
-                      extraArgs:
-                        description: ExtraArgs are the list of additional arguments
-                          to be specified for Teleport Node Pod.
-                        items:
-                          type: string
-                        type: array
-                      replicas:
-                        description: Replicas is the number of Teleport Node Pods.
-                        type: integer
-                    required:
-                    - replicas
-                    type: object
-                type: object
             type: object
           status:
             description: TenantStatus defines the observed state of Tenant

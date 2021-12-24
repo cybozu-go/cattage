@@ -17,8 +17,10 @@ limitations under the License.
 package controllers
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"text/template"
 
 	multitenancyv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
@@ -31,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
+	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -215,11 +218,32 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 			return err
 		}
 
+		tpl, err := template.New("RoleBinding Template").Parse(r.Config.Namespace.RoleBindingTemplate)
+		if err != nil {
+			return err
+		}
+
+		var buf bytes.Buffer
+		err = tpl.Execute(&buf, struct {
+			Name        string
+			ExtraAdmins []string
+		}{
+			Name:        tenant.Name,
+			ExtraAdmins: ns.ExtraAdmins,
+		})
+		if err != nil {
+			return err
+		}
+
 		rb := &rbacv1.RoleBinding{}
 		rb.SetNamespace(ns.Name)
 		rb.SetName(tenant.Name + "-admin")
 
 		op, err = ctrl.CreateOrUpdate(ctx, r.Client, rb, func() error {
+			err = k8syaml.Unmarshal(buf.Bytes(), rb)
+			if err != nil {
+				return err
+			}
 			if rb.Labels == nil {
 				rb.Labels = map[string]string{}
 			}
@@ -229,34 +253,6 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 				rb.Annotations = map[string]string{}
 			}
 			rb.Annotations["accurate.cybozu.com/propagate"] = "update"
-			rb.RoleRef.Name = "admin"
-			rb.RoleRef.Kind = "ClusterRole"
-			rb.RoleRef.APIGroup = "rbac.authorization.k8s.io"
-
-			rb.Subjects = []rbacv1.Subject{}
-			rb.Subjects = append(rb.Subjects, rbacv1.Subject{
-				Kind:     "Group",
-				APIGroup: "rbac.authorization.k8s.io",
-				Name:     tenant.Name,
-			})
-			rb.Subjects = append(rb.Subjects, rbacv1.Subject{ //TODO:
-				Kind:      "ServiceAccount",
-				Namespace: r.Config.Teleport.Namespace,
-				Name:      "node-" + tenant.Name,
-			})
-
-			for _, admin := range ns.ExtraAdmins {
-				rb.Subjects = append(rb.Subjects, rbacv1.Subject{
-					Kind:     "Group",
-					APIGroup: "rbac.authorization.k8s.io",
-					Name:     admin,
-				})
-				rb.Subjects = append(rb.Subjects, rbacv1.Subject{
-					Kind:      "ServiceAccount",
-					Namespace: r.Config.Teleport.Namespace,
-					Name:      "node-" + admin,
-				})
-			}
 			return nil
 		})
 		if err != nil {
@@ -284,15 +280,38 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 		return err
 	}
 
-	dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
-	_, _, err = dec.Decode([]byte(r.Config.ArgoCD.AppProjectTemplate), nil, proj)
+	nss := &corev1.NamespaceList{}
+	if err := r.List(ctx, nss, client.MatchingLabels{r.Config.Namespace.GroupKey: tenant.Name}); err != nil {
+		return fmt.Errorf("failed to list namespaces: %w", err)
+	}
+	namespaces := make([]string, len(nss.Items))
+	for i, ns := range nss.Items {
+		namespaces[i] = ns.Name
+	}
+
+	tpl, err := template.New("AppProject Template").Parse(r.Config.ArgoCD.AppProjectTemplate)
 	if err != nil {
 		return err
 	}
 
-	nss := &corev1.NamespaceList{}
-	if err := r.List(ctx, nss, client.MatchingLabels{r.Config.Namespace.GroupKey: tenant.Name}); err != nil {
-		return fmt.Errorf("failed to list namespaces: %w", err)
+	var buf bytes.Buffer
+	err = tpl.Execute(&buf, struct {
+		Name        string
+		Namespaces  []string
+		ExtraAdmins []string
+	}{
+		Name:        tenant.Name,
+		Namespaces:  namespaces,
+		ExtraAdmins: tenant.Spec.ArgoCD.ExtraAdmins,
+	})
+	if err != nil {
+		return err
+	}
+
+	dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+	_, _, err = dec.Decode([]byte(buf.String()), nil, proj)
+	if err != nil {
+		return err
 	}
 
 	proj.SetNamespace(r.Config.ArgoCD.Namespace)
@@ -300,43 +319,6 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 	proj.SetLabels(map[string]string{
 		constants.OwnerTenant: tenant.Name,
 	})
-
-	spec := proj.UnstructuredContent()["spec"].(map[string]interface{})
-
-	logger.Info("nss", "count", len(nss.Items))
-	destinations, ok := spec["destinations"].([]map[string]interface{})
-	if !ok {
-		destinations = []map[string]interface{}{}
-	}
-	for _, ns := range nss.Items {
-		destinations = append(destinations, map[string]interface{}{
-			"namespace": ns.Name,
-			"server":    "*",
-		})
-	}
-
-	groups := []string{
-		fmt.Sprintf("%s:%s", r.Config.ArgoCD.Organization, tenant.Name),
-	}
-	if tenant.Spec.ArgoCD != nil {
-		for _, extra := range tenant.Spec.ArgoCD.ExtraAdmins {
-			groups = append(groups, fmt.Sprintf("%s:%s", r.Config.ArgoCD.Organization, extra))
-		}
-	}
-
-	roles := []map[string]interface{}{
-		{
-			"groups": groups,
-			"name":   "admin",
-			"policies": []string{
-				fmt.Sprintf("p, proj:%s:admin, applications, *, %s/*, allow", tenant.Name, tenant.Name),
-			},
-		},
-	}
-
-	spec["destinations"] = destinations
-	spec["roles"] = roles
-	proj.UnstructuredContent()["spec"] = spec
 
 	err = r.Patch(ctx, proj, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
