@@ -11,13 +11,11 @@ import (
 	multitenancyv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
 	"github.com/cybozu-go/neco-tenant-controller/controllers"
 	"github.com/cybozu-go/neco-tenant-controller/hooks"
+	cacheclient "github.com/cybozu-go/neco-tenant-controller/pkg/client"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -46,7 +44,7 @@ func subMain(ns, addr string, port int) error {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                  scheme,
-		NewClient:               NewCachingClient,
+		NewClient:               cacheclient.NewCachingClient,
 		MetricsBindAddress:      options.metricsAddr,
 		HealthProbeBindAddress:  options.probeAddr,
 		LeaderElection:          true,
@@ -67,19 +65,17 @@ func subMain(ns, addr string, port int) error {
 	if err := controllers.SetupIndexForNamespace(ctx, mgr, cfg.Namespace.GroupKey); err != nil {
 		return fmt.Errorf("failed to setup indexer for namespaces: %w", err)
 	}
-	if err := (&controllers.TenantReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		Config: cfg,
-	}).SetupWithManager(mgr); err != nil {
+	if err := controllers.NewTenantReconciler(
+		mgr.GetClient(),
+		cfg,
+	).SetupWithManager(mgr); err != nil {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)
 	}
 
-	if err := (&controllers.ApplicationReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		Config: cfg,
-	}).SetupWithManager(ctx, mgr); err != nil {
+	if err := controllers.NewApplicationReconciler(
+		mgr.GetClient(),
+		cfg,
+	).SetupWithManager(ctx, mgr); err != nil {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)
 	}
 
@@ -103,24 +99,4 @@ func subMain(ns, addr string, port int) error {
 		return fmt.Errorf("problem running manager: %s", err)
 	}
 	return nil
-}
-
-// NewCachingClient is an alternative implementation of controller-runtime's
-// default client for manager.Manager.
-// https://pkg.go.dev/sigs.k8s.io/controller-runtime/pkg/cluster#DefaultNewClient
-//
-// The only difference is that this implementation sets `CacheUnstructured` to `true` to
-// cache unstructured objects.
-func NewCachingClient(cache cache.Cache, config *rest.Config, options client.Options, uncachedObjects ...client.Object) (client.Client, error) {
-	c, err := client.New(config, options)
-	if err != nil {
-		return nil, err
-	}
-
-	return client.NewDelegatingClient(client.NewDelegatingClientInput{
-		CacheReader:       cache,
-		Client:            c,
-		UncachedObjects:   uncachedObjects,
-		CacheUnstructured: true,
-	})
 }

@@ -30,7 +30,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -47,11 +46,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
+func NewTenantReconciler(client client.Client, config *config.Config) *TenantReconciler {
+	return &TenantReconciler{
+		client: client,
+		config: config,
+	}
+}
+
 // TenantReconciler reconciles a Tenant object
 type TenantReconciler struct {
-	client.Client
-	Scheme *runtime.Scheme
-	Config *config.Config
+	client client.Client
+	config *config.Config
 }
 
 //+kubebuilder:rbac:groups=multi-tenancy.cybozu.com,resources=tenants,verbs=get;list;watch;create;update;patch;delete
@@ -75,7 +80,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	logger := log.FromContext(ctx)
 
 	tenant := &multitenancyv1beta1.Tenant{}
-	if err := r.Get(ctx, req.NamespacedName, tenant); err != nil {
+	if err := r.client.Get(ctx, req.NamespacedName, tenant); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -113,7 +118,7 @@ func containNamespace(roots []multitenancyv1beta1.NamespaceSpec, ns corev1.Names
 func (r *TenantReconciler) removeManagedLabels(ctx context.Context, tenant *multitenancyv1beta1.Tenant, orphan bool) error {
 	logger := log.FromContext(ctx)
 	nss := &corev1.NamespaceList{}
-	if err := r.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	for _, ns := range nss.Items {
@@ -123,9 +128,9 @@ func (r *TenantReconciler) removeManagedLabels(ctx context.Context, tenant *mult
 		logger.Info("Remove labels", "ns", ns)
 		newNs := ns.DeepCopy()
 		delete(newNs.Labels, constants.OwnerTenant)
-		delete(newNs.Labels, r.Config.Namespace.GroupKey)
+		delete(newNs.Labels, r.config.Namespace.GroupKey)
 		patch := client.MergeFrom(&ns)
-		err := r.Patch(ctx, newNs, patch)
+		err := r.client.Patch(ctx, newNs, patch)
 		if err != nil {
 			return err
 		}
@@ -135,20 +140,20 @@ func (r *TenantReconciler) removeManagedLabels(ctx context.Context, tenant *mult
 
 func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
 	nss := &corev1.NamespaceList{}
-	if err := r.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 
 	for _, ns := range nss.Items {
 		rb := &rbacv1.RoleBinding{}
-		err := r.Client.Get(ctx, client.ObjectKey{Namespace: ns.Name, Name: tenant.Name + "-admin"}, rb)
+		err := r.client.Get(ctx, client.ObjectKey{Namespace: ns.Name, Name: tenant.Name + "-admin"}, rb)
 		if apierrors.IsNotFound(err) {
 			continue
 		}
 		if err != nil {
 			return err
 		}
-		err = r.Client.Delete(ctx, rb)
+		err = r.client.Delete(ctx, rb)
 		if err != nil {
 			return err
 		}
@@ -158,14 +163,14 @@ func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *multitenancyv
 
 func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
 	proj := argocd.AppProject()
-	err := r.Get(ctx, client.ObjectKey{Namespace: r.Config.ArgoCD.Namespace, Name: tenant.Name}, proj)
+	err := r.client.Get(ctx, client.ObjectKey{Namespace: r.config.ArgoCD.Namespace, Name: tenant.Name}, proj)
 	if apierrors.IsNotFound(err) {
 		return nil
 	}
 	if err != nil {
 		return err
 	}
-	return r.Client.Delete(ctx, proj)
+	return r.client.Delete(ctx, proj)
 }
 
 func (r *TenantReconciler) finalize(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
@@ -187,7 +192,7 @@ func (r *TenantReconciler) finalize(ctx context.Context, tenant *multitenancyv1b
 	}
 
 	controllerutil.RemoveFinalizer(tenant, constants.Finalizer)
-	return r.Update(ctx, tenant)
+	return r.client.Update(ctx, tenant)
 }
 
 func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
@@ -195,11 +200,11 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 	for _, ns := range tenant.Spec.Namespaces {
 		obj := &corev1.Namespace{}
 		obj.Name = ns.Name
-		op, err := ctrl.CreateOrUpdate(ctx, r.Client, obj, func() error {
+		op, err := ctrl.CreateOrUpdate(ctx, r.client, obj, func() error {
 			if len(obj.Labels) == 0 {
 				obj.Labels = map[string]string{}
 			}
-			for k, v := range r.Config.Namespace.CommonLabels {
+			for k, v := range r.config.Namespace.CommonLabels {
 				obj.Labels[k] = v
 			}
 			for k, v := range ns.Labels {
@@ -209,7 +214,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 				obj.Annotations[k] = v
 			}
 			obj.Labels["accurate.cybozu.com/type"] = "root"
-			obj.Labels[r.Config.Namespace.GroupKey] = tenant.Name
+			obj.Labels[r.config.Namespace.GroupKey] = tenant.Name
 			obj.Labels[constants.OwnerTenant] = tenant.Name
 
 			return nil
@@ -218,7 +223,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 			return err
 		}
 
-		tpl, err := template.New("RoleBinding Template").Parse(r.Config.Namespace.RoleBindingTemplate)
+		tpl, err := template.New("RoleBinding Template").Parse(r.config.Namespace.RoleBindingTemplate)
 		if err != nil {
 			return err
 		}
@@ -239,7 +244,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 		rb.SetNamespace(ns.Name)
 		rb.SetName(tenant.Name + "-admin")
 
-		op, err = ctrl.CreateOrUpdate(ctx, r.Client, rb, func() error {
+		op, err = ctrl.CreateOrUpdate(ctx, r.client, rb, func() error {
 			err = k8syaml.Unmarshal(buf.Bytes(), rb)
 			if err != nil {
 				return err
@@ -275,13 +280,13 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 
 	proj := argocd.AppProject()
 
-	err := r.Get(ctx, client.ObjectKey{Namespace: r.Config.ArgoCD.Namespace, Name: tenant.Name}, proj)
+	err := r.client.Get(ctx, client.ObjectKey{Namespace: r.config.ArgoCD.Namespace, Name: tenant.Name}, proj)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return err
 	}
 
 	nss := &corev1.NamespaceList{}
-	if err := r.List(ctx, nss, client.MatchingLabels{r.Config.Namespace.GroupKey: tenant.Name}); err != nil {
+	if err := r.client.List(ctx, nss, client.MatchingLabels{r.config.Namespace.GroupKey: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	namespaces := make([]string, len(nss.Items))
@@ -289,7 +294,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 		namespaces[i] = ns.Name
 	}
 
-	tpl, err := template.New("AppProject Template").Parse(r.Config.ArgoCD.AppProjectTemplate)
+	tpl, err := template.New("AppProject Template").Parse(r.config.ArgoCD.AppProjectTemplate)
 	if err != nil {
 		return err
 	}
@@ -314,13 +319,13 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 		return err
 	}
 
-	proj.SetNamespace(r.Config.ArgoCD.Namespace)
+	proj.SetNamespace(r.config.ArgoCD.Namespace)
 	proj.SetName(tenant.Name)
 	proj.SetLabels(map[string]string{
 		constants.OwnerTenant: tenant.Name,
 	})
 
-	err = r.Patch(ctx, proj, client.Apply, &client.PatchOptions{
+	err = r.client.Patch(ctx, proj, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
 		FieldManager: constants.FieldManager,
 	})

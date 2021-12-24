@@ -7,51 +7,53 @@ import (
 	"fmt"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	"k8s.io/client-go/util/workqueue"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/source"
-
-	corev1 "k8s.io/api/core/v1"
-
 	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 	"sigs.k8s.io/structured-merge-diff/v4/fieldpath"
 	"sigs.k8s.io/structured-merge-diff/v4/typed"
 )
 
+func NewApplicationReconciler(client client.Client, config *config.Config) *ApplicationReconciler {
+	return &ApplicationReconciler{
+		client: client,
+		config: config,
+	}
+}
+
 // ApplicationReconciler reconciles an Application object
 type ApplicationReconciler struct {
-	client.Client
-	Scheme *runtime.Scheme
-	Config *config.Config
+	client client.Client
+	config *config.Config
 }
 
 //+kubebuilder:rbac:groups=argoproj.io,resources=applications,verbs=get;list;watch;create;update;patch;delete
 
 func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	app := argocd.Application()
-	if err := r.Get(ctx, req.NamespacedName, app); err != nil {
+	if err := r.client.Get(ctx, req.NamespacedName, app); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	var argocdApp *unstructured.Unstructured
 	var tenantApp *unstructured.Unstructured
-	if req.Namespace == r.Config.ArgoCD.Namespace {
+	if req.Namespace == r.config.ArgoCD.Namespace {
 		if app.GetDeletionTimestamp() != nil {
 			return ctrl.Result{}, nil
 		}
@@ -61,14 +63,14 @@ func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{}, nil
 		}
 		tenantApp = argocd.Application()
-		err := r.Get(ctx, client.ObjectKey{Namespace: ownerNs, Name: argocdApp.GetName()}, tenantApp)
+		err := r.client.Get(ctx, client.ObjectKey{Namespace: ownerNs, Name: argocdApp.GetName()}, tenantApp)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 	} else {
 		tenantApp = app
 		argocdApp = argocd.Application()
-		err := r.Get(ctx, client.ObjectKey{Namespace: r.Config.ArgoCD.Namespace, Name: tenantApp.GetName()}, argocdApp)
+		err := r.client.Get(ctx, client.ObjectKey{Namespace: r.config.ArgoCD.Namespace, Name: tenantApp.GetName()}, argocdApp)
 		if err != nil && !apierrors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
@@ -102,7 +104,7 @@ func (r *ApplicationReconciler) finalize(ctx context.Context, argocdApp *unstruc
 	if argocdApp == nil {
 		controllerutil.RemoveFinalizer(tenantApp, constants.Finalizer)
 		controllerutil.RemoveFinalizer(tenantApp, argocd.ResourcesFinalizer)
-		err := r.Update(ctx, tenantApp)
+		err := r.client.Update(ctx, tenantApp)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -114,7 +116,7 @@ func (r *ApplicationReconciler) finalize(ctx context.Context, argocdApp *unstruc
 	}
 
 	logger.Info("starting finalization")
-	err := r.Delete(ctx, argocdApp)
+	err := r.client.Delete(ctx, argocdApp)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -147,14 +149,14 @@ func (r *ApplicationReconciler) validateProject(ctx context.Context, tenantApp *
 	logger := log.FromContext(ctx)
 
 	ns := &corev1.Namespace{}
-	err := r.Get(ctx, client.ObjectKey{Name: tenantApp.GetNamespace()}, ns)
+	err := r.client.Get(ctx, client.ObjectKey{Name: tenantApp.GetNamespace()}, ns)
 	if err != nil {
 		return err
 	}
-	group := ns.Labels[r.Config.Namespace.GroupKey]
+	group := ns.Labels[r.config.Namespace.GroupKey]
 	if group == "" {
 		logger.Info("Remove unmanaged application")
-		return r.Delete(ctx, tenantApp)
+		return r.client.Delete(ctx, tenantApp)
 	}
 	project, found, err := unstructured.NestedString(tenantApp.UnstructuredContent(), "spec", "project")
 	if err != nil {
@@ -202,7 +204,7 @@ func (r *ApplicationReconciler) extractManagedFields(u *unstructured.Unstructure
 	m["apiVersion"] = "argoproj.io/" + argocd.ApplicationVersion
 	m["kind"] = "Application"
 	m["metadata"].(map[string]interface{})["name"] = u.GetName()
-	m["metadata"].(map[string]interface{})["namespace"] = r.Config.ArgoCD.Namespace
+	m["metadata"].(map[string]interface{})["namespace"] = r.config.ArgoCD.Namespace
 	return m, nil
 }
 
@@ -235,7 +237,7 @@ func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdA
 	newApp := argocd.Application()
 	newApp.UnstructuredContent()["spec"] = tenantApp.DeepCopy().UnstructuredContent()["spec"]
 	newApp.SetName(tenantApp.GetName())
-	newApp.SetNamespace(r.Config.ArgoCD.Namespace)
+	newApp.SetNamespace(r.config.ArgoCD.Namespace)
 	if len(labels) != 0 {
 		newApp.SetLabels(labels)
 	}
@@ -257,7 +259,7 @@ func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdA
 		}
 	}
 
-	return r.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
+	return r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
 		FieldManager: constants.FieldManager,
 	})
@@ -277,7 +279,7 @@ func (r *ApplicationReconciler) syncApplicationStatus(ctx context.Context, argoc
 	newApp.UnstructuredContent()["status"] = argocdApp.DeepCopy().UnstructuredContent()["status"]
 
 	// MEMO: Use `r.Patch` instead of `r.Status().Patch()`, because the status of application is not a sub-resource.
-	return r.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
+	return r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
 		FieldManager: constants.FieldManager,
 	})
