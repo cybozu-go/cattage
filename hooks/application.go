@@ -116,7 +116,7 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 	}
 
 	if group != project {
-		return admission.Denied("cannot specify projects for other tenants")
+		return admission.Denied("cannot specify a project for other tenants")
 	}
 
 	return admission.Allowed("ok")

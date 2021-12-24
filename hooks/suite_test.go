@@ -30,7 +30,9 @@ import (
 
 	//+kubebuilder:scaffold:imports
 	tenantv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
+	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -62,7 +64,10 @@ var _ = BeforeSuite(func() {
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "config", "crd", "bases"),
+			filepath.Join("..", "test", "crd"),
+		},
 		ErrorIfCRDPathMissing: false,
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
 			Paths: []string{filepath.Join("..", "config", "webhook")},
@@ -103,8 +108,16 @@ var _ = BeforeSuite(func() {
 	dec, err := admission.NewDecoder(scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = SetupTenantWebhook(mgr, dec)
-	Expect(err).NotTo(HaveOccurred())
+	config := &config.Config{
+		Namespace: config.NamespaceConfig{
+			GroupKey: "team",
+		},
+		ArgoCD: config.ArgoCDConfig{
+			Namespace: "argocd",
+		},
+	}
+	SetupTenantWebhook(mgr, dec)
+	SetupApplicationWebhook(mgr, dec, config)
 
 	//+kubebuilder:scaffold:webhook
 
@@ -113,6 +126,19 @@ var _ = BeforeSuite(func() {
 		err = mgr.Start(ctx)
 		Expect(err).NotTo(HaveOccurred())
 	}()
+
+	ns := &corev1.Namespace{}
+	ns.Name = "argocd"
+	err = k8sClient.Create(ctx, ns)
+	Expect(err).NotTo(HaveOccurred())
+
+	ns = &corev1.Namespace{}
+	ns.Name = "sub-1"
+	ns.Labels = map[string]string{
+		"team": "a-team",
+	}
+	err = k8sClient.Create(ctx, ns)
+	Expect(err).NotTo(HaveOccurred())
 
 	// wait for the webhook server to get ready
 	dialer := &net.Dialer{Timeout: time.Second}

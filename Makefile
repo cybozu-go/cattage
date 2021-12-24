@@ -5,6 +5,7 @@ KUSTOMIZE_VERSION = 4.4.1
 CRD_TO_MARKDOWN_VERSION = 0.0.3
 TILT_VERSION = 0.23.4
 CTLPTL_VERSION = 0.6.2
+ARGOCD_VERSION = 2.1.8
 
 # Test tools
 BIN_DIR := $(shell pwd)/bin
@@ -62,10 +63,18 @@ check-generate:
 	$(MAKE) manifests generate apidoc
 	git diff --exit-code --name-only
 
+.PHONY: crds
+crds:
+	mkdir -p test/crd/
+	curl -fsL -o test/crd/application.yaml https://raw.githubusercontent.com/argoproj/argo-cd/v$(ARGOCD_VERSION)/manifests/crds/application-crd.yaml
+	curl -fsL -o test/crd/appproject.yaml https://raw.githubusercontent.com/argoproj/argo-cd/v$(ARGOCD_VERSION)/manifests/crds/appproject-crd.yaml
+
 .PHONY: envtest
-envtest: setup-envtest
+envtest: setup-envtest crds
 	source <($(SETUP_ENVTEST) use -p env); \
 		go test -v -count 1 -race ./controllers -ginkgo.progress -ginkgo.v -ginkgo.failFast
+	source <($(SETUP_ENVTEST) use -p env); \
+		go test -v -count 1 -race ./hooks -ginkgo.progress -ginkgo.v -ginkgo.failFast
 
 .PHONY: test
 test: test-tools
