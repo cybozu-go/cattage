@@ -85,6 +85,25 @@ build:
 docker-build:
 	docker build -t neco-tenant-controller:latest .
 
+##@ Development
+KIND_CLUSTER_NAME = tenant-dev
+KIND := $(shell pwd)/bin/kind
+
+.PHONY: dev
+dev: $(KIND)
+	KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) KIND_PATH=$(KIND) ./scripts/kind-with-registry.sh
+	$(MAKE) -C ./e2e/ prepare
+
+.PHONY: stop-dev
+stop-dev:
+	KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) KIND_PATH=$(KIND) ./scripts/teardown-kind-with-registry.sh
+
+.PHONY: kind
+kind: $(KIND)
+
+$(KIND):
+	$(MAKE) -C ./e2e/ kind
+
 ##@ Tools
 
 CONTROLLER_GEN := $(shell pwd)/bin/controller-gen

@@ -3,14 +3,13 @@ KUBERNETES_VERSION = 1.22.2
 ARGOCD_VERSION = 2.1.8
 HELM_VERSION = 3.7.1
 
-BIN_DIR := $(dir $(shell pwd))/bin
+BIN_DIR := $(dir $(shell pwd))bin
 KIND := $(BIN_DIR)/kind
 KUBECTL := $(BIN_DIR)/kubectl
 HELM := $(BIN_DIR)/helm
 ARGOCD = $(BIN_DIR)/argocd
 KIND_CONFIG = kind-config.yaml
 export KUBECTL KUBECONFIG
-
 
 .PHONY: help
 help:
@@ -22,7 +21,7 @@ help:
 	@echo "stop       Stop the kind cluster"
 
 .PHONY: start
-start: $(KIND) $(KUBECTL) $(HELM)
+start: $(KIND) $(KUBECTL)
 	$(KIND) create cluster --name=neco-tenant-controller --config=$(KIND_CONFIG) --image=kindest/node:v$(KUBERNETES_VERSION) --wait 1m
 	cd ..; docker build --no-cache -t neco-tenant-controller:dev .
 	$(KIND) load docker-image neco-tenant-controller:dev --name=neco-tenant-controller
@@ -31,7 +30,7 @@ start: $(KIND) $(KUBECTL) $(HELM)
 	$(KUBECTL) -n tenant-system wait --for=condition=available --timeout=180s --all deployments
 
 .PHONY: prepare
-prepare:
+prepare: $(KUBECTL) $(HELM)
 	$(KUBECTL) apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
 	$(KUBECTL) -n cert-manager wait --for=condition=available --timeout=180s --all deployments
 	$(KUBECTL) create ns argocd
@@ -60,6 +59,8 @@ stop: $(KIND)
 	-docker image rm neco-tenant-controller:dev
 	-docker image prune -f
 
+.PHONY: kind
+kind: $(KIND)
 $(KIND):
 	mkdir -p $(BIN_DIR)
 	curl -sfL -o $@ https://github.com/kubernetes-sigs/kind/releases/download/v$(KIND_VERSION)/kind-linux-amd64

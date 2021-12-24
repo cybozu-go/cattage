@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -ex
 #
 # Adapted from:
 # https://github.com/tilt-dev/kind-local/blob/master/kind-with-registry.sh
@@ -20,6 +20,7 @@
 
 set -o errexit
 
+KIND_PATH="${KIND_PATH:-kind}"
 # desired cluster name; default is "kind"
 KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME:-kind}"
 KIND_CLUSTER_OPTS="--name ${KIND_CLUSTER_NAME} --wait 3m"
@@ -28,7 +29,7 @@ if [ -n "${KIND_CLUSTER_IMAGE}" ]; then
   KIND_CLUSTER_OPTS="${KIND_CLUSTER_OPTS} --image ${KIND_CLUSTER_IMAGE}"
 fi
 
-kind_version=$(kind version)
+kind_version=$(${KIND_PATH} version)
 kind_network='kind'
 reg_name='kind-registry'
 reg_port='5000'
@@ -53,9 +54,13 @@ fi
 echo "Registry Host: ${reg_host}"
 
 # create a cluster with the local registry enabled in containerd
-cat <<EOF | kind create cluster ${KIND_CLUSTER_OPTS} --config=-
+cat <<EOF | ${KIND_PATH} create cluster ${KIND_CLUSTER_OPTS} --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+- role: worker
+- role: worker
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -ex
 #
 # Adapted from:
 # https://github.com/tilt-dev/kind-local/blob/master/kind-with-registry.sh
@@ -20,6 +20,7 @@
 
 set -o errexit
 
+KIND_PATH="${KIND_PATH:-kind}"
 # desired cluster name; default is "kind"
 KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME:-kind}"
 
@@ -38,4 +39,4 @@ if [ "${running}" == 'true' ]; then
 fi
 
 echo "> Deleting Kind cluster..."
-kind delete cluster --name=$KIND_CLUSTER_NAME
+${KIND_PATH} delete cluster --name=$KIND_CLUSTER_NAME
