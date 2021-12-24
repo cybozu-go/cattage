@@ -3,6 +3,8 @@ CTRL_TOOLS_VERSION=0.7.0
 CTRL_RUNTIME_VERSION := $(shell awk '/sigs.k8s.io\/controller-runtime/ {print substr($$2, 2)}' go.mod)
 KUSTOMIZE_VERSION = 4.4.1
 CRD_TO_MARKDOWN_VERSION = 0.0.3
+TILT_VERSION = 0.23.4
+CTLPTL_VERSION = 0.6.2
 
 # Test tools
 BIN_DIR := $(shell pwd)/bin
@@ -86,23 +88,31 @@ docker-build:
 	docker build -t neco-tenant-controller:latest .
 
 ##@ Development
-KIND_CLUSTER_NAME = tenant-dev
-KIND := $(shell pwd)/bin/kind
+TILT := $(shell pwd)/bin/tilt
+CTLPTL := $(shell pwd)/bin/ctlptl
 
 .PHONY: dev
-dev: $(KIND)
-	KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) KIND_PATH=$(KIND) ./scripts/kind-with-registry.sh
+dev: $(CTLPTL)
+	$(CTLPTL) apply -f ./cluster.yaml
 	$(MAKE) -C ./e2e/ prepare
 
 .PHONY: stop-dev
-stop-dev:
-	KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) KIND_PATH=$(KIND) ./scripts/teardown-kind-with-registry.sh
+stop-dev: $(CTLPTL)
+	$(CTLPTL) delete -f ./cluster.yaml
 
-.PHONY: kind
-kind: $(KIND)
+.PHONY: ctlptl
+ctlptl: $(CTLPTL)
+$(CTLPTL):
+	mkdir -p bin
+	curl -fsL https://github.com/tilt-dev/ctlptl/releases/download/v$(CTLPTL_VERSION)/ctlptl.$(CTLPTL_VERSION).linux.x86_64.tar.gz | \
+	tar -C bin -xzf -
 
-$(KIND):
-	$(MAKE) -C ./e2e/ kind
+.PHONY: tilt
+tilt: $(TILT)
+$(TILT):
+	mkdir -p bin
+	curl -fsL https://github.com/tilt-dev/tilt/releases/download/v$(TILT_VERSION)/tilt.$(TILT_VERSION).linux.x86_64.tar.gz | \
+	tar -C bin -xzf -
 
 ##@ Tools
 

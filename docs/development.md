@@ -2,7 +2,8 @@
 
 ```
 $ make dev
-$ tilt up
+$ make tilt
+$ ./bin/tilt up
 ```
 
 ```
