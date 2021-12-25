@@ -28,11 +28,15 @@ import (
 	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+	accorev1 "k8s.io/client-go/applyconfigurations/core/v1"
+	acrbacv1 "k8s.io/client-go/applyconfigurations/rbac/v1"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -195,30 +199,86 @@ func (r *TenantReconciler) finalize(ctx context.Context, tenant *multitenancyv1b
 	return r.client.Update(ctx, tenant)
 }
 
-func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
-	logger := log.FromContext(ctx)
-	for _, ns := range tenant.Spec.Namespaces {
-		obj := &corev1.Namespace{}
-		obj.Name = ns.Name
-		op, err := ctrl.CreateOrUpdate(ctx, r.client, obj, func() error {
-			if len(obj.Labels) == 0 {
-				obj.Labels = map[string]string{}
-			}
-			for k, v := range r.config.Namespace.CommonLabels {
-				obj.Labels[k] = v
-			}
-			for k, v := range ns.Labels {
-				obj.Labels[k] = v
-			}
-			for k, v := range ns.Annotations {
-				obj.Annotations[k] = v
-			}
-			obj.Labels["accurate.cybozu.com/type"] = "root"
-			obj.Labels[r.config.Namespace.GroupKey] = tenant.Name
-			obj.Labels[constants.OwnerTenant] = tenant.Name
+func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.NamespaceApplyConfiguration) error {
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(ns)
+	if err != nil {
+		return err
+	}
+	patch := &unstructured.Unstructured{
+		Object: obj,
+	}
 
-			return nil
-		})
+	var orig corev1.Namespace
+	err = r.client.Get(ctx, client.ObjectKey{Name: *ns.Name}, &orig)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return err
+	}
+
+	managed, err := accorev1.ExtractNamespace(&orig, constants.FieldManager)
+	if err != nil {
+		return err
+	}
+
+	if equality.Semantic.DeepEqual(ns, managed) {
+		return nil
+	}
+
+	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
+		FieldManager: constants.FieldManager,
+		Force:        pointer.Bool(true),
+	})
+}
+
+func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.RoleBindingApplyConfiguration) error {
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(rb)
+	if err != nil {
+		return err
+	}
+	patch := &unstructured.Unstructured{
+		Object: obj,
+	}
+
+	var orig rbacv1.RoleBinding
+	err = r.client.Get(ctx, client.ObjectKey{Namespace: *rb.Namespace, Name: *rb.Name}, &orig)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return err
+	}
+
+	managed, err := acrbacv1.ExtractRoleBinding(&orig, constants.FieldManager)
+	if err != nil {
+		return err
+	}
+
+	if equality.Semantic.DeepEqual(rb, managed) {
+		return nil
+	}
+
+	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
+		FieldManager: constants.FieldManager,
+		Force:        pointer.Bool(true),
+	})
+}
+
+func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
+	for _, ns := range tenant.Spec.Namespaces {
+		namespace := accorev1.Namespace(ns.Name)
+		labels := make(map[string]string)
+		for k, v := range r.config.Namespace.CommonLabels {
+			labels[k] = v
+		}
+		for k, v := range ns.Labels {
+			labels[k] = v
+		}
+		labels["accurate.cybozu.com/type"] = "root"
+		labels[r.config.Namespace.GroupKey] = tenant.Name
+		labels[constants.OwnerTenant] = tenant.Name
+		namespace.WithLabels(labels)
+		annotations := make(map[string]string)
+		for k, v := range ns.Annotations {
+			annotations[k] = v
+		}
+		namespace.WithAnnotations(annotations)
+		err := r.patchNamespace(ctx, namespace)
 		if err != nil {
 			return err
 		}
@@ -227,7 +287,6 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 		if err != nil {
 			return err
 		}
-
 		var buf bytes.Buffer
 		err = tpl.Execute(&buf, struct {
 			Name        string
@@ -240,31 +299,22 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 			return err
 		}
 
-		rb := &rbacv1.RoleBinding{}
-		rb.SetNamespace(ns.Name)
-		rb.SetName(tenant.Name + "-admin")
-
-		op, err = ctrl.CreateOrUpdate(ctx, r.client, rb, func() error {
-			err = k8syaml.Unmarshal(buf.Bytes(), rb)
-			if err != nil {
-				return err
-			}
-			if rb.Labels == nil {
-				rb.Labels = map[string]string{}
-			}
-			rb.Labels[constants.OwnerTenant] = tenant.Name
-
-			if rb.Annotations == nil {
-				rb.Annotations = map[string]string{}
-			}
-			rb.Annotations["accurate.cybozu.com/propagate"] = "update"
-			return nil
-		})
+		rb := acrbacv1.RoleBinding(tenant.Name+"-admin", ns.Name)
+		err = k8syaml.Unmarshal(buf.Bytes(), rb)
 		if err != nil {
-			logger.Error(err, "failed to upsert RoleBinding")
 			return err
 		}
-		logger.Info("updated rolebinding", "op", op)
+		rb.WithLabels(map[string]string{
+			constants.OwnerTenant: tenant.Name,
+		})
+		rb.WithAnnotations(map[string]string{
+			"accurate.cybozu.com/propagate": "update",
+		})
+
+		err = r.patchRoleBinding(ctx, rb)
+		if err != nil {
+			return err
+		}
 	}
 	// Remove orphan labels
 	err := r.removeManagedLabels(ctx, tenant, true)
@@ -279,7 +329,6 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 	logger := log.FromContext(ctx)
 
 	proj := argocd.AppProject()
-
 	err := r.client.Get(ctx, client.ObjectKey{Namespace: r.config.ArgoCD.Namespace, Name: tenant.Name}, proj)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return err
@@ -329,7 +378,6 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 		Force:        pointer.BoolPtr(true),
 		FieldManager: constants.FieldManager,
 	})
-
 	if err != nil {
 		return err
 	}
