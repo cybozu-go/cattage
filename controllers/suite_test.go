@@ -17,9 +17,12 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 	"time"
+
+	corev1 "k8s.io/api/core/v1"
 
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 
@@ -84,6 +87,35 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
 
+	ctx := context.Background()
+	ns := &corev1.Namespace{}
+	ns.Name = "argocd"
+	err = k8sClient.Create(ctx, ns)
+	Expect(err).NotTo(HaveOccurred())
+
+	ns = &corev1.Namespace{}
+	ns.Name = "sub-1"
+	ns.Labels = map[string]string{
+		"team": "a-team",
+	}
+	err = k8sClient.Create(ctx, ns)
+	Expect(err).NotTo(HaveOccurred())
+
+	ns = &corev1.Namespace{}
+	ns.Name = "sub-2"
+	ns.Labels = map[string]string{
+		"team": "a-team",
+	}
+	err = k8sClient.Create(ctx, ns)
+	Expect(err).NotTo(HaveOccurred())
+
+	ns = &corev1.Namespace{}
+	ns.Name = "sub-3"
+	ns.Labels = map[string]string{
+		"team": "a-team",
+	}
+	err = k8sClient.Create(ctx, ns)
+	Expect(err).NotTo(HaveOccurred())
 }, 60)
 
 var _ = AfterSuite(func() {

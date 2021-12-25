@@ -28,6 +28,8 @@ var _ = Describe("Tenant controller", func() {
 		tr := NewTenantReconciler(mgr.GetClient(), config)
 		err = tr.SetupWithManager(mgr)
 		Expect(err).ToNot(HaveOccurred())
+		err = SetupIndexForNamespace(ctx, mgr, config.Namespace.GroupKey)
+		Expect(err).ToNot(HaveOccurred())
 
 		ctx, cancel := context.WithCancel(ctx)
 		stopFunc = cancel

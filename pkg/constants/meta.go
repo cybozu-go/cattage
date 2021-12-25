@@ -11,3 +11,6 @@ const OwnerTenant = MetaPrefix + "owner-tenant"
 const OwnerAppNamespace = MetaPrefix + "owner-app-namespace"
 
 const FieldManager = MetaPrefix + "neco-tenant-controller"
+const StatusFieldManager = FieldManager + "/status"
+const SpecFieldManager = FieldManager + "/spec"
+const ProjectFieldManager = FieldManager + "/project"

@@ -126,10 +126,13 @@ func (r *ApplicationReconciler) finalize(ctx context.Context, argocdApp *unstruc
 func (r *ApplicationReconciler) reconcileApplication(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) error {
 	logger := log.FromContext(ctx)
 
-	err := r.validateProject(ctx, tenantApp)
+	removed, err := r.fixProject(ctx, argocdApp, tenantApp)
 	if err != nil {
 		logger.Error(err, "failed to validate application project")
 		return err
+	}
+	if removed {
+		return nil
 	}
 
 	err = r.syncApplicationSpec(ctx, argocdApp, tenantApp)
@@ -145,34 +148,47 @@ func (r *ApplicationReconciler) reconcileApplication(ctx context.Context, argocd
 	return nil
 }
 
-func (r *ApplicationReconciler) validateProject(ctx context.Context, tenantApp *unstructured.Unstructured) error {
+func (r *ApplicationReconciler) fixProject(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) (removed bool, err error) {
 	logger := log.FromContext(ctx)
 
 	ns := &corev1.Namespace{}
-	err := r.client.Get(ctx, client.ObjectKey{Name: tenantApp.GetNamespace()}, ns)
+	err = r.client.Get(ctx, client.ObjectKey{Name: tenantApp.GetNamespace()}, ns)
 	if err != nil {
-		return err
+		return
 	}
 	group := ns.Labels[r.config.Namespace.GroupKey]
 	if group == "" {
-		logger.Info("Remove unmanaged application")
-		return r.client.Delete(ctx, tenantApp)
+		if argocdApp != nil {
+			logger.Info("Remove unmanaged application")
+			err = r.client.Delete(ctx, argocdApp)
+		}
+		removed = true
+		return
 	}
 	project, found, err := unstructured.NestedString(tenantApp.UnstructuredContent(), "spec", "project")
 	if err != nil {
-		return err
+		return
 	}
 	if !found {
-		return errors.New("spec.project not found")
+		err = errors.New("spec.project not found")
+		return
 	}
 	if project != group {
 		logger.Info("Overwrite project", "before", project, "after", group)
-		err := unstructured.SetNestedField(tenantApp.UnstructuredContent(), group, "spec", "project")
+		newApp := argocd.Application()
+		newApp.SetNamespace(tenantApp.GetNamespace())
+		newApp.SetName(tenantApp.GetName())
+		err = unstructured.SetNestedField(newApp.UnstructuredContent(), group, "spec", "project")
 		if err != nil {
-			return err
+			return
 		}
+		err = r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
+			Force:        pointer.BoolPtr(true),
+			FieldManager: constants.ProjectFieldManager,
+		})
+		return
 	}
-	return nil
+	return
 }
 
 func (r *ApplicationReconciler) extractManagedFields(u *unstructured.Unstructured, manager string) (map[string]interface{}, error) {
@@ -196,16 +212,21 @@ func (r *ApplicationReconciler) extractManagedFields(u *unstructured.Unstructure
 	}
 
 	x := d.ExtractItems(fieldset.Leaves()).AsValue().Unstructured()
-	m, ok := x.(map[string]interface{})
+	managed, ok := x.(map[string]interface{})
 	if !ok {
-		return nil, errors.New("cannot cast")
+		managed = make(map[string]interface{})
 	}
 
-	m["apiVersion"] = "argoproj.io/" + argocd.ApplicationVersion
-	m["kind"] = "Application"
-	m["metadata"].(map[string]interface{})["name"] = u.GetName()
-	m["metadata"].(map[string]interface{})["namespace"] = r.config.ArgoCD.Namespace
-	return m, nil
+	managed["apiVersion"] = "argoproj.io/" + argocd.ApplicationVersion
+	managed["kind"] = "Application"
+	metadata, ok := managed["metadata"].(map[string]interface{})
+	if !ok {
+		metadata = make(map[string]interface{})
+	}
+	metadata["name"] = u.GetName()
+	metadata["namespace"] = r.config.ArgoCD.Namespace
+	managed["metadata"] = metadata
+	return managed, nil
 }
 
 func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) error {
@@ -249,7 +270,7 @@ func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdA
 	}
 
 	if argocdApp != nil {
-		managed, err := r.extractManagedFields(argocdApp, constants.FieldManager)
+		managed, err := r.extractManagedFields(argocdApp, constants.SpecFieldManager)
 		if err != nil {
 			logger.Error(err, "failed to extract managed fields")
 			return err
@@ -261,27 +282,33 @@ func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdA
 
 	return r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
-		FieldManager: constants.FieldManager,
+		FieldManager: constants.SpecFieldManager,
 	})
 }
 
 func (r *ApplicationReconciler) syncApplicationStatus(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) error {
-	if argocdApp == nil ||
-		argocdApp.UnstructuredContent()["status"] == nil ||
-		equality.Semantic.DeepEqual(argocdApp.UnstructuredContent()["status"], tenantApp.UnstructuredContent()["status"]) {
-		return nil
-	}
+	logger := log.FromContext(ctx)
 
 	newApp := argocd.Application()
 	newApp.SetNamespace(tenantApp.GetNamespace())
 	newApp.SetName(tenantApp.GetName())
-	newApp.UnstructuredContent()["spec"] = tenantApp.DeepCopy().UnstructuredContent()["spec"]
-	newApp.UnstructuredContent()["status"] = argocdApp.DeepCopy().UnstructuredContent()["status"]
+	if argocdApp != nil && argocdApp.UnstructuredContent()["status"] != nil {
+		newApp.UnstructuredContent()["status"] = argocdApp.DeepCopy().UnstructuredContent()["status"]
+	}
+
+	managed, err := r.extractManagedFields(tenantApp, constants.StatusFieldManager)
+	if err != nil {
+		logger.Error(err, "failed to extract managed fields")
+		return err
+	}
+	if equality.Semantic.DeepEqual(managed, newApp.UnstructuredContent()) {
+		return nil
+	}
 
 	// MEMO: Use `r.Patch` instead of `r.Status().Patch()`, because the status of application is not a sub-resource.
 	return r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
-		FieldManager: constants.FieldManager,
+		FieldManager: constants.StatusFieldManager,
 	})
 }
 
