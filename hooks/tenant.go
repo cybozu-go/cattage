@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	multitenancyv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
+	tenantv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
 	admissionv1 "k8s.io/api/admission/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -43,7 +43,7 @@ func (m *tenantMutator) Handle(ctx context.Context, req admission.Request) admis
 		return admission.Allowed("")
 	}
 
-	sn := &multitenancyv1beta1.Tenant{}
+	sn := &tenantv1beta1.Tenant{}
 	if err := m.dec.Decode(req, sn); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
@@ -71,7 +71,7 @@ func (v *tenantValidator) Handle(ctx context.Context, req admission.Request) adm
 		return admission.Allowed("")
 	}
 
-	sn := &multitenancyv1beta1.Tenant{}
+	sn := &tenantv1beta1.Tenant{}
 	if err := v.dec.Decode(req, sn); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}

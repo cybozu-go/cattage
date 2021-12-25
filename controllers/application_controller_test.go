@@ -11,6 +11,7 @@ import (
 	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -110,10 +111,14 @@ var _ = Describe("Application controller", func() {
 			return nil
 		}).Should(Succeed())
 
-		Expect(argocdApp.GetLabels()[constants.OwnerAppNamespace]).Should(Equal("sub-1"))
-		Expect(argocdApp.GetLabels()["foo"]).Should(Equal("bar"))
+		Expect(argocdApp.GetLabels()).Should(MatchAllKeys(Keys{
+			constants.OwnerAppNamespace: Equal("sub-1"),
+			"foo":                       Equal("bar"),
+		}))
 		Expect(argocdApp.GetLabels()).ShouldNot(HaveKey("kubernetes.io/name"))
-		Expect(argocdApp.GetAnnotations()["abc"]).Should(Equal("def"))
+		Expect(argocdApp.GetAnnotations()).Should(MatchAllKeys(Keys{
+			"abc": Equal("def"),
+		}))
 		Expect(argocdApp.GetAnnotations()).ShouldNot(HaveKey("kubernetes.io/name"))
 		Expect(argocdApp.GetFinalizers()).Should(ContainElement("resources-finalizer.argocd.argoproj.io"))
 		Expect(argocdApp.GetFinalizers()).ShouldNot(ContainElement("my.finalizer"))
@@ -143,7 +148,6 @@ var _ = Describe("Application controller", func() {
 			return nil
 		}).Should(Succeed())
 		Expect(tenantApp.UnstructuredContent()["status"]).Should(Equal(argocdApp.UnstructuredContent()["status"]))
-
 	})
 
 	It("should remove an application on unmanaged namespace", func() {
@@ -260,6 +264,17 @@ var _ = Describe("Application controller", func() {
 
 		Eventually(func() error {
 			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: tenantApp.GetName()}, argocdApp)
+			if apierrors.IsNotFound(err) {
+				return nil
+			}
+			if err != nil {
+				return err
+			}
+			return errors.New("application still exists")
+		}).Should(Succeed())
+
+		Eventually(func() error {
+			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantApp.GetNamespace(), Name: tenantApp.GetName()}, tenantApp)
 			if apierrors.IsNotFound(err) {
 				return nil
 			}

@@ -22,8 +22,9 @@ import (
 	"fmt"
 	"text/template"
 
-	multitenancyv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
+	tenantv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
+	extract "github.com/cybozu-go/neco-tenant-controller/pkg/client"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
 	corev1 "k8s.io/api/core/v1"
@@ -81,19 +82,15 @@ type TenantReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
-	tenant := &multitenancyv1beta1.Tenant{}
+	tenant := &tenantv1beta1.Tenant{}
 	if err := r.client.Get(ctx, req.NamespacedName, tenant); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	if tenant.DeletionTimestamp != nil {
-		logger.Info("starting finalization")
 		if err := r.finalize(ctx, tenant); err != nil {
 			return ctrl.Result{}, fmt.Errorf("failed to finalize: %w", err)
 		}
-		logger.Info("finished finalization")
 		return ctrl.Result{}, nil
 	}
 
@@ -110,7 +107,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	return ctrl.Result{}, nil
 }
 
-func containNamespace(roots []multitenancyv1beta1.NamespaceSpec, ns corev1.Namespace) bool {
+func containNamespace(roots []tenantv1beta1.NamespaceSpec, ns corev1.Namespace) bool {
 	for _, root := range roots {
 		if root.Name == ns.Name {
 			return true
@@ -119,56 +116,49 @@ func containNamespace(roots []multitenancyv1beta1.NamespaceSpec, ns corev1.Names
 	return false
 }
 
-func (r *TenantReconciler) removeManagedLabels(ctx context.Context, tenant *multitenancyv1beta1.Tenant, orphan bool) error {
-	logger := log.FromContext(ctx)
-	nss := &corev1.NamespaceList{}
-	if err := r.client.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
-		return fmt.Errorf("failed to list namespaces: %w", err)
+func (r *TenantReconciler) banishNamespace(ctx context.Context, ns *corev1.Namespace) error {
+	managed, err := accorev1.ExtractNamespace(ns, constants.FieldManager)
+	if err != nil {
+		return err
 	}
-	for _, ns := range nss.Items {
-		if orphan && containNamespace(tenant.Spec.Namespaces, ns) {
-			continue
-		}
-		logger.Info("Remove labels", "ns", ns)
-		newNs := ns.DeepCopy()
-		delete(newNs.Labels, constants.OwnerTenant)
-		delete(newNs.Labels, r.config.Namespace.GroupKey)
-		patch := client.MergeFrom(&ns)
-		err := r.client.Patch(ctx, newNs, patch)
-		if err != nil {
-			return err
-		}
+	delete(managed.Labels, constants.OwnerTenant)
+	delete(managed.Labels, r.config.Namespace.GroupKey)
+	for k := range r.config.Namespace.CommonLabels {
+		delete(managed.Labels, k)
+	}
+	err = r.patchNamespace(ctx, managed)
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
-	nss := &corev1.NamespaceList{}
-	if err := r.client.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
-		return fmt.Errorf("failed to list namespaces: %w", err)
+func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *tenantv1beta1.Tenant, ns *corev1.Namespace) error {
+	rb := &rbacv1.RoleBinding{}
+	err := r.client.Get(ctx, client.ObjectKey{Namespace: ns.Name, Name: tenant.Name + "-admin"}, rb)
+	if apierrors.IsNotFound(err) {
+		return nil
 	}
-
-	for _, ns := range nss.Items {
-		rb := &rbacv1.RoleBinding{}
-		err := r.client.Get(ctx, client.ObjectKey{Namespace: ns.Name, Name: tenant.Name + "-admin"}, rb)
-		if apierrors.IsNotFound(err) {
-			continue
-		}
-		if err != nil {
-			return err
-		}
-		err = r.client.Delete(ctx, rb)
-		if err != nil {
-			return err
-		}
+	if rb.DeletionTimestamp != nil {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	err = r.client.Delete(ctx, rb)
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
+func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *tenantv1beta1.Tenant) error {
 	proj := argocd.AppProject()
 	err := r.client.Get(ctx, client.ObjectKey{Namespace: r.config.ArgoCD.Namespace, Name: tenant.Name}, proj)
 	if apierrors.IsNotFound(err) {
+		return nil
+	}
+	if proj.GetDeletionTimestamp() != nil {
 		return nil
 	}
 	if err != nil {
@@ -177,26 +167,39 @@ func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *multite
 	return r.client.Delete(ctx, proj)
 }
 
-func (r *TenantReconciler) finalize(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
+func (r *TenantReconciler) finalize(ctx context.Context, tenant *tenantv1beta1.Tenant) error {
+	logger := log.FromContext(ctx)
 	if !controllerutil.ContainsFinalizer(tenant, constants.Finalizer) {
 		return nil
 	}
-
-	err := r.removeManagedLabels(ctx, tenant, false)
-	if err != nil {
-		return err
+	logger.Info("starting finalization")
+	nss := &corev1.NamespaceList{}
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
+		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
-	err = r.removeRBAC(ctx, tenant)
-	if err != nil {
-		return err
+	for _, ns := range nss.Items {
+		err := r.banishNamespace(ctx, &ns)
+		if err != nil {
+			return err
+		}
+		err = r.removeRBAC(ctx, tenant, &ns)
+		if err != nil {
+			return err
+		}
 	}
-	err = r.removeAppProject(ctx, tenant)
+	err := r.removeAppProject(ctx, tenant)
 	if err != nil {
 		return err
 	}
 
 	controllerutil.RemoveFinalizer(tenant, constants.Finalizer)
-	return r.client.Update(ctx, tenant)
+	err = r.client.Update(ctx, tenant)
+	if err != nil {
+		logger.Error(err, "failed to remove finalizer")
+		return err
+	}
+	logger.Info("finished finalization")
+	return nil
 }
 
 func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.NamespaceApplyConfiguration) error {
@@ -259,7 +262,7 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 	})
 }
 
-func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
+func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *tenantv1beta1.Tenant) error {
 	for _, ns := range tenant.Spec.Namespaces {
 		namespace := accorev1.Namespace(ns.Name)
 		labels := make(map[string]string)
@@ -316,22 +319,46 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *mult
 			return err
 		}
 	}
-	// Remove orphan labels
-	err := r.removeManagedLabels(ctx, tenant, true)
-	if err != nil {
-		return err
+	nss := &corev1.NamespaceList{}
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
+		return fmt.Errorf("failed to list namespaces: %w", err)
+	}
+	for _, ns := range nss.Items {
+		if containNamespace(tenant.Spec.Namespaces, ns) {
+			continue
+		}
+		err := r.banishNamespace(ctx, &ns)
+		if err != nil {
+			return err
+		}
+		err = r.removeRBAC(ctx, tenant, &ns)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multitenancyv1beta1.Tenant) error {
+func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *tenantv1beta1.Tenant) error {
 	logger := log.FromContext(ctx)
 
-	proj := argocd.AppProject()
-	err := r.client.Get(ctx, client.ObjectKey{Namespace: r.config.ArgoCD.Namespace, Name: tenant.Name}, proj)
+	orig := argocd.AppProject()
+	err := r.client.Get(ctx, client.ObjectKey{Namespace: r.config.ArgoCD.Namespace, Name: tenant.Name}, orig)
 	if err != nil && !apierrors.IsNotFound(err) {
+		logger.Error(err, "failed to get AppProject")
 		return err
+	}
+
+	if len(tenant.Spec.Namespaces) == 0 {
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+		if orig.GetDeletionTimestamp() != nil {
+			return nil
+		}
+		logger.Info("remove AppProject", "proj", orig, "deletion", orig.GetDeletionTimestamp())
+		return r.client.Delete(ctx, orig)
 	}
 
 	nss := &corev1.NamespaceList{}
@@ -362,6 +389,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 		return err
 	}
 
+	proj := argocd.AppProject()
 	dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 	_, _, err = dec.Decode([]byte(buf.String()), nil, proj)
 	if err != nil {
@@ -374,14 +402,22 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *multiten
 		constants.OwnerTenant: tenant.Name,
 	})
 
+	managed, err := extract.ExtractManagedFields(orig, constants.FieldManager)
+	if err != nil {
+		return err
+	}
+	if equality.Semantic.DeepEqual(proj, managed) {
+		return nil
+	}
+
 	err = r.client.Patch(ctx, proj, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
 		FieldManager: constants.FieldManager,
 	})
 	if err != nil {
+		logger.Error(err, "failed to patch AppProject")
 		return err
 	}
-
 	logger.Info("AppProject successfully reconciled")
 
 	return nil
@@ -415,7 +451,7 @@ func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&multitenancyv1beta1.Tenant{}).
+		For(&tenantv1beta1.Tenant{}).
 		Watches(&source.Kind{Type: &corev1.Namespace{}}, funcs).
 		Watches(&source.Kind{Type: &rbacv1.RoleBinding{}}, funcs).
 		Watches(&source.Kind{Type: argocd.AppProject()}, funcs).

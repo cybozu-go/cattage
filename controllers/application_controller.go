@@ -1,19 +1,18 @@
 package controllers
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
+	extract "github.com/cybozu-go/neco-tenant-controller/pkg/client"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
 	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
@@ -26,8 +25,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/structured-merge-diff/v4/fieldpath"
-	"sigs.k8s.io/structured-merge-diff/v4/typed"
 )
 
 func NewApplicationReconciler(client client.Client, config *config.Config) *ApplicationReconciler {
@@ -158,7 +155,7 @@ func (r *ApplicationReconciler) fixProject(ctx context.Context, argocdApp *unstr
 	}
 	group := ns.Labels[r.config.Namespace.GroupKey]
 	if group == "" {
-		if argocdApp != nil {
+		if argocdApp != nil && argocdApp.GetDeletionTimestamp() == nil {
 			logger.Info("Remove unmanaged application")
 			err = r.client.Delete(ctx, argocdApp)
 		}
@@ -189,44 +186,6 @@ func (r *ApplicationReconciler) fixProject(ctx context.Context, argocdApp *unstr
 		return
 	}
 	return
-}
-
-func (r *ApplicationReconciler) extractManagedFields(u *unstructured.Unstructured, manager string) (map[string]interface{}, error) {
-	fieldset := &fieldpath.Set{}
-	objManagedFields := u.GetManagedFields()
-	for _, mf := range objManagedFields {
-		if mf.Manager != manager || mf.Operation != metav1.ManagedFieldsOperationApply {
-			continue
-		}
-		fs := &fieldpath.Set{}
-		err := fs.FromJSON(bytes.NewReader(mf.FieldsV1.Raw))
-		if err != nil {
-			return nil, err
-		}
-		fieldset = fieldset.Union(fs)
-	}
-
-	d, err := typed.DeducedParseableType.FromUnstructured(u.Object)
-	if err != nil {
-		return nil, err
-	}
-
-	x := d.ExtractItems(fieldset.Leaves()).AsValue().Unstructured()
-	managed, ok := x.(map[string]interface{})
-	if !ok {
-		managed = make(map[string]interface{})
-	}
-
-	managed["apiVersion"] = "argoproj.io/" + argocd.ApplicationVersion
-	managed["kind"] = "Application"
-	metadata, ok := managed["metadata"].(map[string]interface{})
-	if !ok {
-		metadata = make(map[string]interface{})
-	}
-	metadata["name"] = u.GetName()
-	metadata["namespace"] = r.config.ArgoCD.Namespace
-	managed["metadata"] = metadata
-	return managed, nil
 }
 
 func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) error {
@@ -270,7 +229,7 @@ func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdA
 	}
 
 	if argocdApp != nil {
-		managed, err := r.extractManagedFields(argocdApp, constants.SpecFieldManager)
+		managed, err := extract.ExtractManagedFields(argocdApp, constants.SpecFieldManager)
 		if err != nil {
 			logger.Error(err, "failed to extract managed fields")
 			return err
@@ -296,7 +255,7 @@ func (r *ApplicationReconciler) syncApplicationStatus(ctx context.Context, argoc
 		newApp.UnstructuredContent()["status"] = argocdApp.DeepCopy().UnstructuredContent()["status"]
 	}
 
-	managed, err := r.extractManagedFields(tenantApp, constants.StatusFieldManager)
+	managed, err := extract.ExtractManagedFields(tenantApp, constants.StatusFieldManager)
 	if err != nil {
 		logger.Error(err, "failed to extract managed fields")
 		return err

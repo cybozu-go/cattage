@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+spec:
+  destinations:
+  {{ range .Namespaces }}
+  - namespace: {{ . }}
+    server: '*'
+  {{ end }}
+  namespaceResourceBlacklist:
+    - group: ""
+      kind: ResourceQuota
+    - group: ""
+      kind: LimitRange
+  orphanedResources:
+    warn: false
+  roles:
+    - groups:
+        - cybozu-go:{{ .Name }}
+        {{ range .ExtraAdmins }}
+        - cybozu-go:{{ . }}
+        {{ end }}
+      name: admin
+      policies:
+        - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
+  sourceRepos:
+    - '*'

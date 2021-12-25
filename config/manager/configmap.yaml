@@ -47,15 +47,13 @@ data:
               kind: ResourceQuota
             - group: ""
               kind: LimitRange
-            - group: networking.k8s.io
-              kind: NetworkPolicy
           orphanedResources:
             warn: false
           roles:
             - groups:
-                - cybozu-private:{{ .Name }}
+                - cybozu-go:{{ .Name }}
                 {{ range .ExtraAdmins }}
-                - cybozu-private:{{ . }}
+                - cybozu-go:{{ . }}
                 {{ end }}
               name: admin
               policies:

@@ -116,6 +116,14 @@ var _ = BeforeSuite(func() {
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())
+
+	ns = &corev1.Namespace{}
+	ns.Name = "sub-4"
+	ns.Labels = map[string]string{
+		"team": "x-team",
+	}
+	err = k8sClient.Create(ctx, ns)
+	Expect(err).NotTo(HaveOccurred())
 }, 60)
 
 var _ = AfterSuite(func() {

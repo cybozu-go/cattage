@@ -3,6 +3,7 @@ module github.com/cybozu-go/neco-tenant-controller
 go 1.16
 
 require (
+	github.com/google/go-cmp v0.5.5
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.15.0
 	github.com/spf13/cobra v1.1.3
