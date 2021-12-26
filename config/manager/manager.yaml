@@ -28,10 +28,9 @@ spec:
         runAsNonRoot: true
       containers:
       - command:
-        - /manager
-        args:
-        - --leader-elect
-        image: controller:latest
+        - /neco-tenant-controller
+        image: neco-tenant-controller:dev
+        imagePullPolicy: IfNotPresent
         env:
           - name: POD_NAMESPACE
             valueFrom:

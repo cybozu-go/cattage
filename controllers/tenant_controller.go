@@ -397,7 +397,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *tenantv1
 
 	proj := argocd.AppProject()
 	dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
-	_, _, err = dec.Decode([]byte(buf.String()), nil, proj)
+	_, _, err = dec.Decode(buf.Bytes(), nil, proj)
 	if err != nil {
 		return err
 	}

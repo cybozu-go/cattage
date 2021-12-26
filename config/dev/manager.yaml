@@ -9,6 +9,6 @@ spec:
       securityContext: null
       containers:
         - command:
-            - /manager
+            - /mneco-tenant-controller
           args: null
           name: manager

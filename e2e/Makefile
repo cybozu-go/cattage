@@ -27,7 +27,7 @@ start: $(KIND) $(KUBECTL)
 	$(KIND) load docker-image neco-tenant-controller:dev --name=neco-tenant-controller
 	$(MAKE) prepare
 	$(KUBECTL) apply -k ../config/default
-	$(KUBECTL) -n tenant-system wait --for=condition=available --timeout=180s --all deployments
+	$(KUBECTL) -n neco-tenant-controller-system wait --for=condition=available --timeout=180s --all deployments
 
 .PHONY: prepare
 prepare: $(KUBECTL) $(HELM)

@@ -4,10 +4,3 @@ metadata:
   name: init-template
   labels:
     accurate.cybozu.com/type: template
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: sub-1
-  labels:
-    accurate.cybozu.com/parent: app-a
