@@ -64,7 +64,7 @@ var _ = Describe("Application controller", func() {
 				AppProjectTemplate: "",
 			},
 		}
-		ar := NewApplicationReconciler(mgr.GetClient(), config)
+		ar := NewApplicationReconciler(mgr.GetClient(), mgr.GetEventRecorderFor("neco-tenant-controller"), config)
 		err = ar.SetupWithManager(ctx, mgr)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -149,6 +149,18 @@ var _ = Describe("Application controller", func() {
 			return nil
 		}).Should(Succeed())
 		Expect(tenantApp.UnstructuredContent()["status"]).Should(Equal(argocdApp.UnstructuredContent()["status"]))
+
+		events := &corev1.EventList{}
+		err = k8sClient.List(ctx, events, client.InNamespace("sub-1"))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(events.Items).Should(ConsistOf(
+			MatchFields(IgnoreExtras, Fields{
+				"Reason": Equal("ApplicationSynced"),
+			}),
+			MatchFields(IgnoreExtras, Fields{
+				"Reason": Equal("StatusSynced"),
+			}),
+		))
 	})
 
 	It("should remove an application on unmanaged namespace", func() {
@@ -182,6 +194,18 @@ var _ = Describe("Application controller", func() {
 			}
 			return errors.New("application still exists")
 		}).Should(Succeed())
+
+		events := &corev1.EventList{}
+		err = k8sClient.List(ctx, events, client.InNamespace("sub-2"))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(events.Items).Should(ConsistOf(
+			MatchFields(IgnoreExtras, Fields{
+				"Reason": Equal("ApplicationSynced"),
+			}),
+			MatchFields(IgnoreExtras, Fields{
+				"Reason": Equal("ApplicationRemoved"),
+			}),
+		))
 	})
 
 	It("should fix project", func() {
@@ -240,6 +264,18 @@ var _ = Describe("Application controller", func() {
 			}
 			return nil
 		}).Should(Succeed())
+
+		events := &corev1.EventList{}
+		err = k8sClient.List(ctx, events, client.InNamespace("sub-3"))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(events.Items).Should(ConsistOf(
+			MatchFields(IgnoreExtras, Fields{
+				"Reason": Equal("ApplicationSynced"),
+			}),
+			MatchFields(IgnoreExtras, Fields{
+				"Reason": Equal("ProjectFixed"),
+			}),
+		))
 	})
 
 	It("should remove application", func() {
@@ -285,5 +321,4 @@ var _ = Describe("Application controller", func() {
 			return errors.New("application still exists")
 		}).Should(Succeed())
 	})
-
 })

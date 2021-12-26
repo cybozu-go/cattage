@@ -15,6 +15,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -27,20 +28,23 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-func NewApplicationReconciler(client client.Client, config *config.Config) *ApplicationReconciler {
+func NewApplicationReconciler(client client.Client, recorder record.EventRecorder, config *config.Config) *ApplicationReconciler {
 	return &ApplicationReconciler{
-		client: client,
-		config: config,
+		client:   client,
+		recorder: recorder,
+		config:   config,
 	}
 }
 
 // ApplicationReconciler reconciles an Application object
 type ApplicationReconciler struct {
-	client client.Client
-	config *config.Config
+	client   client.Client
+	recorder record.EventRecorder
+	config   *config.Config
 }
 
 //+kubebuilder:rbac:groups=argoproj.io,resources=applications,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=events,verbs=create;update;patch
 
 func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	app := argocd.Application()
@@ -158,6 +162,11 @@ func (r *ApplicationReconciler) fixProject(ctx context.Context, argocdApp *unstr
 		if argocdApp != nil && argocdApp.GetDeletionTimestamp() == nil {
 			logger.Info("Remove unmanaged application")
 			err = r.client.Delete(ctx, argocdApp)
+			if err != nil {
+				r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "RemoveApplicationFailed", "Failed to remove unmanaged application", err)
+				return
+			}
+			r.recorder.Eventf(tenantApp, corev1.EventTypeNormal, "ApplicationRemoved", "Remove unmanaged application succeeded")
 		}
 		removed = true
 		return
@@ -183,6 +192,11 @@ func (r *ApplicationReconciler) fixProject(ctx context.Context, argocdApp *unstr
 			Force:        pointer.BoolPtr(true),
 			FieldManager: constants.ProjectFieldManager,
 		})
+		if err != nil {
+			r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "FixProjectFailed", "Failed to fix application project", err)
+			return
+		}
+		r.recorder.Eventf(tenantApp, corev1.EventTypeNormal, "ProjectFixed", "Fix application project succeeded")
 		return
 	}
 	return
@@ -239,10 +253,16 @@ func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdA
 		}
 	}
 
-	return r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
+	err := r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
 		FieldManager: constants.SpecFieldManager,
 	})
+	if err != nil {
+		r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "SyncSpecFailed", "Failed to sync application spec", err)
+		return err
+	}
+	r.recorder.Eventf(tenantApp, corev1.EventTypeNormal, "ApplicationSynced", "Sync application spec succeeded")
+	return nil
 }
 
 func (r *ApplicationReconciler) syncApplicationStatus(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) error {
@@ -265,10 +285,16 @@ func (r *ApplicationReconciler) syncApplicationStatus(ctx context.Context, argoc
 	}
 
 	// MEMO: Use `r.Patch` instead of `r.Status().Patch()`, because the status of application is not a sub-resource.
-	return r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
+	err = r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
 		FieldManager: constants.StatusFieldManager,
 	})
+	if err != nil {
+		r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "SyncStatusFailed", "Failed to sync application status", err)
+		return err
+	}
+	r.recorder.Eventf(tenantApp, corev1.EventTypeNormal, "StatusSynced", "Sync application status succeeded")
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

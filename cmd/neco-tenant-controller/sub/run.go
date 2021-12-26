@@ -74,6 +74,7 @@ func subMain(ns, addr string, port int) error {
 
 	if err := controllers.NewApplicationReconciler(
 		mgr.GetClient(),
+		mgr.GetEventRecorderFor("neco-tenant-controller"),
 		cfg,
 	).SetupWithManager(ctx, mgr); err != nil {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)
