@@ -61,11 +61,20 @@ type ArgoCDSpec struct {
 type TenantStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Conditions is an array of conditions.
+	// +optional
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
+
+const (
+	ConditionReady string = "Ready"
+)
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:scope=Cluster
+//+kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 
 // Tenant is the Schema for the tenants API
 type Tenant struct {

@@ -31,6 +31,8 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
@@ -81,7 +83,9 @@ type TenantReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
-func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	logger := log.FromContext(ctx)
+
 	tenant := &tenantv1beta1.Tenant{}
 	if err := r.client.Get(ctx, req.NamespacedName, tenant); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -94,15 +98,44 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, nil
 	}
 
-	err := r.reconcileNamespaces(ctx, tenant)
+	defer func(before []metav1.Condition) {
+		if !equality.Semantic.DeepEqual(tenant.Status.Conditions, before) {
+			logger.Info("update conditions", "conditions", tenant.Status.Conditions, "before", before)
+			if err2 := r.client.Status().Update(ctx, tenant); err2 != nil {
+				logger.Error(err2, "failed to update status")
+				err = err2
+			}
+		}
+	}(tenant.Status.Conditions)
+
+	err = r.reconcileNamespaces(ctx, tenant)
 	if err != nil {
+		meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
+			Type:    tenantv1beta1.ConditionReady,
+			Status:  metav1.ConditionFalse,
+			Reason:  "Failed",
+			Message: err.Error(),
+		})
 		return ctrl.Result{}, err
 	}
 
 	err = r.reconcileArgoCD(ctx, tenant)
 	if err != nil {
+		meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
+			Type:    tenantv1beta1.ConditionReady,
+			Status:  metav1.ConditionFalse,
+			Reason:  "Failed",
+			Message: err.Error(),
+		})
 		return ctrl.Result{}, err
 	}
+
+	meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
+		Type:   tenantv1beta1.ConditionReady,
+		Status: metav1.ConditionTrue,
+		Reason: "OK",
+	})
+	logger.Info("Tenant successfully reconciled")
 
 	return ctrl.Result{}, nil
 }
