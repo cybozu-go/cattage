@@ -98,18 +98,19 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 		return ctrl.Result{}, nil
 	}
 
-	defer func(before []metav1.Condition) {
-		if !equality.Semantic.DeepEqual(tenant.Status.Conditions, before) {
-			logger.Info("update conditions", "conditions", tenant.Status.Conditions, "before", before)
+	defer func(before tenantv1beta1.TenantStatus) {
+		if !equality.Semantic.DeepEqual(tenant.Status, before) {
+			logger.Info("update status", "status", tenant.Status, "before", before)
 			if err2 := r.client.Status().Update(ctx, tenant); err2 != nil {
 				logger.Error(err2, "failed to update status")
 				err = err2
 			}
 		}
-	}(tenant.Status.Conditions)
+	}(tenant.Status)
 
 	err = r.reconcileNamespaces(ctx, tenant)
 	if err != nil {
+		tenant.Status.Health = tenantv1beta1.TenantUnhealthy
 		meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
 			Type:    tenantv1beta1.ConditionReady,
 			Status:  metav1.ConditionFalse,
@@ -121,6 +122,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 
 	err = r.reconcileArgoCD(ctx, tenant)
 	if err != nil {
+		tenant.Status.Health = tenantv1beta1.TenantUnhealthy
 		meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
 			Type:    tenantv1beta1.ConditionReady,
 			Status:  metav1.ConditionFalse,
@@ -130,6 +132,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 		return ctrl.Result{}, err
 	}
 
+	tenant.Status.Health = tenantv1beta1.TenantHealthy
 	meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
 		Type:   tenantv1beta1.ConditionReady,
 		Status: metav1.ConditionTrue,

@@ -60,8 +60,21 @@ type ArgoCDSpec struct {
 	ExtraAdmins []string `json:"extraAdmins,omitempty"`
 }
 
+// TenantHealth defines the observed state of Tenant
+// +kubebuilder:validation:Enum=Healthy;Unhealthy
+type TenantHealth string
+
+const (
+	TenantHealthy   = TenantHealth("Healthy")
+	TenantUnhealthy = TenantHealth("Unhealthy")
+)
+
 // TenantStatus defines the observed state of Tenant
 type TenantStatus struct {
+	// Health is the health of Tenant.
+	// +optional
+	Health TenantHealth `json:"health,omitempty"`
+
 	// Conditions is an array of conditions.
 	// +optional
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
@@ -74,7 +87,7 @@ const (
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:scope=Cluster
-//+kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
+//+kubebuilder:printcolumn:name="STATUS",type="string",JSONPath=".status.health"
 
 // Tenant is the Schema for the tenants API
 type Tenant struct {
