@@ -56,7 +56,6 @@ var _ = Describe("Application controller", func() {
 			Namespace: tenantconfig.NamespaceConfig{
 				CommonLabels:        nil,
 				CommonAnnotations:   nil,
-				GroupKey:            "team",
 				RoleBindingTemplate: "",
 			},
 			ArgoCD: tenantconfig.ArgoCDConfig{
@@ -226,7 +225,7 @@ var _ = Describe("Application controller", func() {
 		ns := &corev1.Namespace{}
 		ns.Name = "sub-3"
 		ns.Labels = map[string]string{
-			"team": "b-team",
+			constants.OwnerTenant: "b-team",
 		}
 		err = k8sClient.Update(ctx, ns)
 		Expect(err).NotTo(HaveOccurred())

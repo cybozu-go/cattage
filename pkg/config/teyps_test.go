@@ -26,9 +26,6 @@ func TestLoad(t *testing.T) {
 	if !cmp.Equal(c.Namespace.CommonAnnotations, map[string]string{"hoge": "fuga", "c": "d"}) {
 		t.Error("wrong common annotations:", cmp.Diff(c.Namespace.CommonAnnotations, map[string]string{"hoge": "fuga", "c": "d"}))
 	}
-	if c.Namespace.GroupKey != "abc" {
-		t.Error("wrong group key:", cmp.Diff(c.Namespace.GroupKey, "abc"))
-	}
 	if c.Namespace.RoleBindingTemplate != `apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 ` {
@@ -74,7 +71,6 @@ func TestValidate(t *testing.T) {
 						"hoge": "fuga",
 						"c":    "d",
 					},
-					GroupKey:            "abc",
 					RoleBindingTemplate: "kind: RoleBinding",
 				},
 				ArgoCD: ArgoCDConfig{
@@ -96,7 +92,6 @@ func TestValidate(t *testing.T) {
 						"hoge": "fuga",
 						"c":    "d",
 					},
-					GroupKey:            "abc",
 					RoleBindingTemplate: "kind: RoleBinding",
 				},
 				ArgoCD: ArgoCDConfig{
@@ -118,51 +113,6 @@ func TestValidate(t *testing.T) {
 						"!-hoge": "fuga",
 						"c":      "d",
 					},
-					GroupKey:            "abc",
-					RoleBindingTemplate: "kind: RoleBinding",
-				},
-				ArgoCD: ArgoCDConfig{
-					Namespace:          "argo",
-					AppProjectTemplate: "kind: AppProject",
-				},
-			},
-			isValid: false,
-		},
-		{
-			name: "invalid group key",
-			config: &Config{
-				Namespace: NamespaceConfig{
-					CommonLabels: map[string]string{
-						"foo": "bar",
-						"a":   "b",
-					},
-					CommonAnnotations: map[string]string{
-						"hoge": "fuga",
-						"c":    "d",
-					},
-					GroupKey:            "abc@",
-					RoleBindingTemplate: "kind: RoleBinding",
-				},
-				ArgoCD: ArgoCDConfig{
-					Namespace:          "argo",
-					AppProjectTemplate: "kind: AppProject",
-				},
-			},
-			isValid: false,
-		},
-		{
-			name: "empty group key",
-			config: &Config{
-				Namespace: NamespaceConfig{
-					CommonLabels: map[string]string{
-						"foo": "bar",
-						"a":   "b",
-					},
-					CommonAnnotations: map[string]string{
-						"hoge": "fuga",
-						"c":    "d",
-					},
-					GroupKey:            "",
 					RoleBindingTemplate: "kind: RoleBinding",
 				},
 				ArgoCD: ArgoCDConfig{
@@ -184,7 +134,6 @@ func TestValidate(t *testing.T) {
 						"hoge": "fuga",
 						"c":    "d",
 					},
-					GroupKey:            "abc",
 					RoleBindingTemplate: "",
 				},
 				ArgoCD: ArgoCDConfig{
@@ -206,7 +155,6 @@ func TestValidate(t *testing.T) {
 						"hoge": "fuga",
 						"c":    "d",
 					},
-					GroupKey:            "abc",
 					RoleBindingTemplate: "kind: RoleBinding",
 				},
 				ArgoCD: ArgoCDConfig{
@@ -228,7 +176,6 @@ func TestValidate(t *testing.T) {
 						"hoge": "fuga",
 						"c":    "d",
 					},
-					GroupKey:            "abc",
 					RoleBindingTemplate: "kind: RoleBinding",
 				},
 				ArgoCD: ArgoCDConfig{

@@ -6,9 +6,9 @@ const MetaPrefix = "multi-tenancy.cybozu.com/"
 // Finalizer is the finalizer ID of Accurate.
 const Finalizer = MetaPrefix + "finalizer"
 
-const OwnerTenant = MetaPrefix + "owner-tenant"
+const OwnerTenant = MetaPrefix + "tenant"
 
-const OwnerAppNamespace = MetaPrefix + "owner-app-namespace"
+const OwnerAppNamespace = MetaPrefix + "owner-namespace"
 
 const FieldManager = MetaPrefix + "neco-tenant-controller"
 const StatusFieldManager = FieldManager + "/status"

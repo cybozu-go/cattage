@@ -22,15 +22,13 @@ import (
 	"testing"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-
-	"k8s.io/apimachinery/pkg/runtime"
-
 	multitenancyv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
+	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -96,7 +94,7 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "sub-1"
 	ns.Labels = map[string]string{
-		"team": "a-team",
+		constants.OwnerTenant: "a-team",
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())
@@ -104,7 +102,7 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "sub-2"
 	ns.Labels = map[string]string{
-		"team": "a-team",
+		constants.OwnerTenant: "a-team",
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())
@@ -112,7 +110,7 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "sub-3"
 	ns.Labels = map[string]string{
-		"team": "a-team",
+		constants.OwnerTenant: "a-team",
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())
@@ -120,7 +118,7 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "sub-4"
 	ns.Labels = map[string]string{
-		"team": "x-team",
+		constants.OwnerTenant: "x-team",
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())

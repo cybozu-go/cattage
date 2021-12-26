@@ -84,7 +84,7 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
 
-	group, ok := ns.Labels[v.config.Namespace.GroupKey]
+	tenantName, ok := ns.Labels[constants.OwnerTenant]
 	if !ok {
 		return admission.Denied("an application cannot be created on unmanaged namespaces")
 	}
@@ -115,7 +115,7 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 		return admission.Errored(http.StatusBadRequest, errors.New("spec.project not found"))
 	}
 
-	if group != project {
+	if tenantName != project {
 		return admission.Denied("cannot specify a project for other tenants")
 	}
 

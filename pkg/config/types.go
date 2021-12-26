@@ -21,9 +21,8 @@ type NamespaceConfig struct {
 	// CommonLabels are labels to add to all namespaces to be deployed by neco-tenant-controller
 	CommonLabels map[string]string `json:"commonLabels,omitempty"`
 
+	// CommonLabels are labels to add to all namespaces to be deployed by neco-tenant-controller
 	CommonAnnotations map[string]string `json:"commonAnnotations,omitempty"`
-
-	GroupKey string `json:"groupKey"`
 
 	RoleBindingTemplate string `json:"rolebindingTemplate"`
 }
@@ -42,8 +41,6 @@ func (c *Config) Validate() error {
 	var allErrs field.ErrorList
 	allErrs = append(allErrs, v1labelvalidation.ValidateLabels(c.Namespace.CommonLabels, field.NewPath("namespace", "commonLabels"))...)
 	allErrs = append(allErrs, v1annotationvalidation.ValidateAnnotations(c.Namespace.CommonAnnotations, field.NewPath("namespace", "commonAnnotations"))...)
-
-	allErrs = append(allErrs, v1labelvalidation.ValidateLabelName(c.Namespace.GroupKey, field.NewPath("namespace", "groupKey"))...)
 
 	if len(c.Namespace.RoleBindingTemplate) == 0 {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("namespace", "rolebindingTemplate"), c.Namespace.RoleBindingTemplate, "should not be empty"))

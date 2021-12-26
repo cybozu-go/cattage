@@ -155,7 +155,6 @@ func (r *TenantReconciler) banishNamespace(ctx context.Context, ns *corev1.Names
 		return err
 	}
 	delete(managed.Labels, constants.OwnerTenant)
-	delete(managed.Labels, r.config.Namespace.GroupKey)
 	for k := range r.config.Namespace.CommonLabels {
 		delete(managed.Labels, k)
 	}
@@ -210,7 +209,7 @@ func (r *TenantReconciler) finalize(ctx context.Context, tenant *tenantv1beta1.T
 	}
 	logger.Info("starting finalization")
 	nss := &corev1.NamespaceList{}
-	if err := r.client.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.RootNamespaces: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	for _, ns := range nss.Items {
@@ -309,7 +308,6 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *tena
 			labels[k] = v
 		}
 		labels["accurate.cybozu.com/type"] = "root"
-		labels[r.config.Namespace.GroupKey] = tenant.Name
 		labels[constants.OwnerTenant] = tenant.Name
 		namespace.WithLabels(labels)
 		annotations := make(map[string]string)
@@ -359,7 +357,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *tena
 		}
 	}
 	nss := &corev1.NamespaceList{}
-	if err := r.client.List(ctx, nss, client.MatchingFields{constants.NamespaceGroupKey: tenant.Name}); err != nil {
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.RootNamespaces: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	for _, ns := range nss.Items {
@@ -401,7 +399,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *tenantv1
 	}
 
 	nss := &corev1.NamespaceList{}
-	if err := r.client.List(ctx, nss, client.MatchingLabels{r.config.Namespace.GroupKey: tenant.Name}); err != nil {
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaces: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	namespaces := make([]string, len(nss.Items))
@@ -497,17 +495,28 @@ func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func SetupIndexForNamespace(ctx context.Context, mgr manager.Manager, groupKey string) error {
+func SetupIndexForNamespace(ctx context.Context, mgr manager.Manager) error {
 	ns := &corev1.Namespace{}
-	return mgr.GetFieldIndexer().IndexField(ctx, ns, constants.NamespaceGroupKey, func(rawObj client.Object) []string {
+	err := mgr.GetFieldIndexer().IndexField(ctx, ns, constants.RootNamespaces, func(rawObj client.Object) []string {
 		nsType := rawObj.GetLabels()["accurate.cybozu.com/type"]
 		if nsType != "root" {
 			return nil
 		}
-		group := rawObj.GetLabels()[groupKey]
-		if group == "" {
+		tenantName := rawObj.GetLabels()[constants.OwnerTenant]
+		if tenantName == "" {
 			return nil
 		}
-		return []string{group}
+		return []string{tenantName}
+	})
+	if err != nil {
+		return err
+	}
+
+	return mgr.GetFieldIndexer().IndexField(ctx, ns, constants.TenantNamespaces, func(rawObj client.Object) []string {
+		tenantName := rawObj.GetLabels()[constants.OwnerTenant]
+		if tenantName == "" {
+			return nil
+		}
+		return []string{tenantName}
 	})
 }

@@ -62,7 +62,7 @@ func subMain(ns, addr string, port int) error {
 		return fmt.Errorf("invalid configurations: %w", err)
 	}
 	ctx := ctrl.SetupSignalHandler()
-	if err := controllers.SetupIndexForNamespace(ctx, mgr, cfg.Namespace.GroupKey); err != nil {
+	if err := controllers.SetupIndexForNamespace(ctx, mgr); err != nil {
 		return fmt.Errorf("failed to setup indexer for namespaces: %w", err)
 	}
 	if err := controllers.NewTenantReconciler(

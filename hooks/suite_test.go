@@ -109,9 +109,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	config := &config.Config{
-		Namespace: config.NamespaceConfig{
-			GroupKey: "team",
-		},
+		Namespace: config.NamespaceConfig{},
 		ArgoCD: config.ArgoCDConfig{
 			Namespace: "argocd",
 		},
@@ -135,7 +133,7 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "sub-1"
 	ns.Labels = map[string]string{
-		"team":                       "a-team",
+		constants.OwnerTenant:        "a-team",
 		"accurate.cybozu.com/parent": "app-a-team",
 	}
 	err = k8sClient.Create(ctx, ns)
@@ -144,7 +142,7 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "sub-2"
 	ns.Labels = map[string]string{
-		"team":                       "e-team",
+		constants.OwnerTenant:        "e-team",
 		"accurate.cybozu.com/parent": "app-e-team",
 	}
 	err = k8sClient.Create(ctx, ns)
@@ -154,7 +152,6 @@ var _ = BeforeSuite(func() {
 	ns.Name = "app-a-team"
 	ns.Labels = map[string]string{
 		constants.OwnerTenant:      "a-team",
-		"team":                     "a-team",
 		"accurate.cybozu.com/type": "root",
 	}
 	err = k8sClient.Create(ctx, ns)
@@ -165,14 +162,6 @@ var _ = BeforeSuite(func() {
 	ns.Labels = map[string]string{
 		constants.OwnerTenant:      "y-team",
 		"accurate.cybozu.com/type": "root",
-	}
-	err = k8sClient.Create(ctx, ns)
-	Expect(err).NotTo(HaveOccurred())
-
-	ns = &corev1.Namespace{}
-	ns.Name = "app-z-team"
-	ns.Labels = map[string]string{
-		"team": "z-team",
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())

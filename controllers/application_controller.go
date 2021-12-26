@@ -157,8 +157,8 @@ func (r *ApplicationReconciler) fixProject(ctx context.Context, argocdApp *unstr
 	if err != nil {
 		return
 	}
-	group := ns.Labels[r.config.Namespace.GroupKey]
-	if group == "" {
+	tenantName := ns.Labels[constants.OwnerTenant]
+	if tenantName == "" {
 		if argocdApp != nil && argocdApp.GetDeletionTimestamp() == nil {
 			logger.Info("Remove unmanaged application")
 			err = r.client.Delete(ctx, argocdApp)
@@ -179,12 +179,12 @@ func (r *ApplicationReconciler) fixProject(ctx context.Context, argocdApp *unstr
 		err = errors.New("spec.project not found")
 		return
 	}
-	if project != group {
-		logger.Info("Overwrite project", "before", project, "after", group)
+	if project != tenantName {
+		logger.Info("Overwrite project", "before", project, "after", tenantName)
 		newApp := argocd.Application()
 		newApp.SetNamespace(tenantApp.GetNamespace())
 		newApp.SetName(tenantApp.GetName())
-		err = unstructured.SetNestedField(newApp.UnstructuredContent(), group, "spec", "project")
+		err = unstructured.SetNestedField(newApp.UnstructuredContent(), tenantName, "spec", "project")
 		if err != nil {
 			return
 		}

@@ -54,24 +54,6 @@ var _ = Describe("Tenant webhook", func() {
 		Expect(err.Error()).Should(ContainSubstring("deny to specify other owner's namespace"))
 	})
 
-	It("should deny creating a tenant with other group's namespace", func() {
-		tenant := &tenantv1beta1.Tenant{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "c-team",
-			},
-			Spec: tenantv1beta1.TenantSpec{
-				Namespaces: []tenantv1beta1.NamespaceSpec{
-					{
-						Name: "app-z-team",
-					},
-				},
-			},
-		}
-		err := k8sClient.Create(ctx, tenant)
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).Should(ContainSubstring("deny to specify other group's namespace"))
-	})
-
 	It("should deny creating a tenant with template namespace", func() {
 		tenant := &tenantv1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{

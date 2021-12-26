@@ -1,3 +1,4 @@
 package constants
 
-const NamespaceGroupKey = "namespace.group"
+const RootNamespaces = "neco-tenant-controller.namespaces.root"
+const TenantNamespaces = "neco-tenant-controller.namespaces.tenant"

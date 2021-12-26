@@ -51,7 +51,6 @@ var _ = Describe("Tenant controller", func() {
 				CommonAnnotations: map[string]string{
 					"hoge": "fuga",
 				},
-				GroupKey:            "team",
 				RoleBindingTemplate: rolebindingTemplate,
 			},
 			ArgoCD: tenantconfig.ArgoCDConfig{
@@ -62,7 +61,7 @@ var _ = Describe("Tenant controller", func() {
 		tr := NewTenantReconciler(mgr.GetClient(), config)
 		err = tr.SetupWithManager(mgr)
 		Expect(err).ToNot(HaveOccurred())
-		err = SetupIndexForNamespace(ctx, mgr, config.Namespace.GroupKey)
+		err = SetupIndexForNamespace(ctx, mgr)
 		Expect(err).ToNot(HaveOccurred())
 
 		ctx, cancel := context.WithCancel(ctx)
@@ -122,7 +121,6 @@ var _ = Describe("Tenant controller", func() {
 		Expect(ns.Labels).Should(MatchAllKeys(Keys{
 			"kubernetes.io/metadata.name":  Equal("app-x"),
 			"accurate.cybozu.com/type":     Equal("root"),
-			config.Namespace.GroupKey:      Equal("x-team"),
 			constants.OwnerTenant:          Equal("x-team"),
 			"foo":                          Equal("bar"),
 			"accurate.cybozu.com/template": Equal("init-template"),
@@ -221,7 +219,6 @@ var _ = Describe("Tenant controller", func() {
 		Expect(nsy1.Labels).Should(MatchAllKeys(Keys{
 			"kubernetes.io/metadata.name":  Equal("app-y1"),
 			"accurate.cybozu.com/type":     Equal("root"),
-			config.Namespace.GroupKey:      Equal("y-team"),
 			constants.OwnerTenant:          Equal("y-team"),
 			"accurate.cybozu.com/template": Equal("init-template"),
 		}))
@@ -236,7 +233,6 @@ var _ = Describe("Tenant controller", func() {
 		Expect(nsy2.Labels).Should(MatchAllKeys(Keys{
 			"kubernetes.io/metadata.name":  Equal("app-y2"),
 			"accurate.cybozu.com/type":     Equal("root"),
-			config.Namespace.GroupKey:      Equal("y-team"),
 			constants.OwnerTenant:          Equal("y-team"),
 			"accurate.cybozu.com/template": Equal("init-template"),
 		}))
@@ -314,6 +310,8 @@ var _ = Describe("Tenant controller", func() {
 		}))
 
 		By("removing app-y2")
+		err = k8sClient.Get(ctx, client.ObjectKey{Name: tenant.Name}, tenant)
+		Expect(err).ToNot(HaveOccurred())
 		tenant.Spec.Namespaces = []tenantv1beta1.NamespaceSpec{
 			{Name: "app-y1"},
 		}
@@ -366,6 +364,8 @@ var _ = Describe("Tenant controller", func() {
 		}).Should(Succeed())
 
 		By("removing app-y1")
+		err = k8sClient.Get(ctx, client.ObjectKey{Name: tenant.Name}, tenant)
+		Expect(err).ToNot(HaveOccurred())
 		tenant.Spec.Namespaces = []tenantv1beta1.NamespaceSpec{}
 		err = k8sClient.Update(ctx, tenant)
 		Expect(err).ToNot(HaveOccurred())
@@ -433,7 +433,6 @@ var _ = Describe("Tenant controller", func() {
 		Expect(ns.Labels).Should(MatchAllKeys(Keys{
 			"kubernetes.io/metadata.name":  Equal("app-z"),
 			"accurate.cybozu.com/type":     Equal("root"),
-			config.Namespace.GroupKey:      Equal("z-team"),
 			constants.OwnerTenant:          Equal("z-team"),
 			"accurate.cybozu.com/template": Equal("init-template"),
 		}))

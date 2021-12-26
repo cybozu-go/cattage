@@ -93,10 +93,6 @@ func (v *tenantValidator) Handle(ctx context.Context, req admission.Request) adm
 		if owner != "" && owner != tenant.Name {
 			return admission.Denied("deny to specify other owner's namespace")
 		}
-		group := namespace.Labels[v.config.Namespace.GroupKey]
-		if group != "" && group != tenant.Name {
-			return admission.Denied("deny to specify other group's namespace")
-		}
 		nsType := namespace.Labels["accurate.cybozu.com/type"]
 		if nsType != "" && nsType != "root" {
 			return admission.Denied("deny to specify a namespace other than root")
