@@ -1,0 +1,10 @@
+[book]
+language = "en"
+multilingual = false
+src = "."
+title = "Cattage Documentation"
+
+[output.html]
+git-repository-url = "https://github.com/cybozu-go/cattage"
+edit-url-template = "https://github.com/cybozu-go/cattage/edit/main/docs/{path}"
+site-url = "/cattage/"
