@@ -193,7 +193,7 @@ var _ = Describe("Tenant controller", func() {
 		}))
 	})
 
-	It("should banish root namespace", func() {
+	It("should disown root namespace", func() {
 		tenant := &tenantv1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "y-team",
@@ -368,43 +368,8 @@ var _ = Describe("Tenant controller", func() {
 		Expect(err).ToNot(HaveOccurred())
 		tenant.Spec.Namespaces = []tenantv1beta1.NamespaceSpec{}
 		err = k8sClient.Update(ctx, tenant)
-		Expect(err).ToNot(HaveOccurred())
-
-		Eventually(func() error {
-			err := k8sClient.Get(ctx, client.ObjectKey{Name: "app-y1"}, nsy1)
-			if err != nil {
-				return err
-			}
-			if nsy1.Labels[constants.OwnerTenant] != "" {
-				return errors.New("owner label still exists")
-			}
-			return nil
-		}).Should(Succeed())
-		Expect(nsy1.Labels).Should(MatchAllKeys(Keys{
-			"kubernetes.io/metadata.name": Equal("app-y1"),
-			"accurate.cybozu.com/type":    Equal("root"),
-		}))
-		Eventually(func() error {
-			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "app-y1", Name: "y-team-admin"}, rby1)
-			if apierrors.IsNotFound(err) {
-				return nil
-			}
-			if err != nil {
-				return err
-			}
-			return errors.New("rolebinding still exists")
-		}).Should(Succeed())
-
-		Eventually(func() error {
-			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: "y-team"}, proj)
-			if apierrors.IsNotFound(err) {
-				return nil
-			}
-			if err != nil {
-				return err
-			}
-			return errors.New("appproject still exists")
-		}).Should(Succeed())
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).Should(ContainSubstring("\"y-team\" is invalid: spec.namespaces: Invalid value: 0: spec.namespaces in body should have at least 1 items"))
 	})
 
 	It("should remove tenant", func() {

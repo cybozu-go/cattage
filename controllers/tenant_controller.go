@@ -149,7 +149,7 @@ func containNamespace(roots []tenantv1beta1.NamespaceSpec, ns corev1.Namespace) 
 	return false
 }
 
-func (r *TenantReconciler) banishNamespace(ctx context.Context, ns *corev1.Namespace) error {
+func (r *TenantReconciler) disownNamespace(ctx context.Context, ns *corev1.Namespace) error {
 	managed, err := accorev1.ExtractNamespace(ns, constants.FieldManager)
 	if err != nil {
 		return err
@@ -213,7 +213,7 @@ func (r *TenantReconciler) finalize(ctx context.Context, tenant *tenantv1beta1.T
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	for _, ns := range nss.Items {
-		err := r.banishNamespace(ctx, &ns)
+		err := r.disownNamespace(ctx, &ns)
 		if err != nil {
 			return err
 		}
@@ -364,7 +364,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *tena
 		if containNamespace(tenant.Spec.Namespaces, ns) {
 			continue
 		}
-		err := r.banishNamespace(ctx, &ns)
+		err := r.disownNamespace(ctx, &ns)
 		if err != nil {
 			return err
 		}
@@ -385,17 +385,6 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *tenantv1
 	if err != nil && !apierrors.IsNotFound(err) {
 		logger.Error(err, "failed to get AppProject")
 		return err
-	}
-
-	if len(tenant.Spec.Namespaces) == 0 {
-		if apierrors.IsNotFound(err) {
-			return nil
-		}
-		if orig.GetDeletionTimestamp() != nil {
-			return nil
-		}
-		logger.Info("remove AppProject", "proj", orig, "deletion", orig.GetDeletionTimestamp())
-		return r.client.Delete(ctx, orig)
 	}
 
 	nss := &corev1.NamespaceList{}

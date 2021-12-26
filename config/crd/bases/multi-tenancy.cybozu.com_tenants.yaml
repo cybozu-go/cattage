@@ -41,8 +41,7 @@ spec:
             description: TenantSpec defines the desired state of Tenant
             properties:
               argocd:
-                description: ArgoCDSpec defines the desired state of the settings
-                  for Argo CD
+                description: ArgoCD is the settings of Argo CD for this tenant
                 properties:
                   extraAdmins:
                     description: ExtraAdmins are the names of the team to add to the
@@ -53,6 +52,8 @@ spec:
                     type: array
                 type: object
               namespaces:
+                description: Namespaces are the list of root namespaces that belong
+                  to this tenant
                 items:
                   description: NamespaceSpec defines the desired state of Namespace
                   properties:
@@ -79,7 +80,10 @@ spec:
                   required:
                   - name
                   type: object
+                minItems: 1
                 type: array
+            required:
+            - namespaces
             type: object
           status:
             description: TenantStatus defines the observed state of Tenant

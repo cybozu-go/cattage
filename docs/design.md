@@ -35,7 +35,7 @@ We are hoping for a better solution.
 ### Adding a tenant
 
 An administrator only need to create one custom resource to add a tenant to a Kubernetes cluster.
-No more manual operations to add Namespaces and Applications.
+No more manual operations to add Applications AppProjects and Namespaces.
 
 Tenant users can create sub-namespaces within their tenant.
 

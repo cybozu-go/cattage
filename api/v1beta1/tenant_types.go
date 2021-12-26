@@ -22,8 +22,14 @@ import (
 
 // TenantSpec defines the desired state of Tenant
 type TenantSpec struct {
-	Namespaces []NamespaceSpec `json:"namespaces,omitempty"`
-	ArgoCD     ArgoCDSpec      `json:"argocd,omitempty"`
+	// Namespaces are the list of root namespaces that belong to this tenant
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinItems=1
+	Namespaces []NamespaceSpec `json:"namespaces"`
+
+	// ArgoCD is the settings of Argo CD for this tenant
+	// +optional
+	ArgoCD ArgoCDSpec `json:"argocd,omitempty"`
 }
 
 // NamespaceSpec defines the desired state of Namespace

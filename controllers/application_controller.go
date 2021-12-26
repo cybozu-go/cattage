@@ -136,11 +136,13 @@ func (r *ApplicationReconciler) reconcileApplication(ctx context.Context, argocd
 		return nil
 	}
 
+	// Sync application spec from tenant to argocd.
 	err = r.syncApplicationSpec(ctx, argocdApp, tenantApp)
 	if err != nil {
 		logger.Error(err, "failed to sync application spec")
 		return err
 	}
+	// Sync application status from argocd to tenant.
 	err = r.syncApplicationStatus(ctx, argocdApp, tenantApp)
 	if err != nil {
 		logger.Error(err, "failed to sync application status")
