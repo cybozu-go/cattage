@@ -2,8 +2,9 @@ package config
 
 import (
 	_ "embed"
-	"github.com/google/go-cmp/cmp"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 //go:embed testdata/config.yaml
@@ -21,6 +22,9 @@ func TestLoad(t *testing.T) {
 
 	if !cmp.Equal(c.Namespace.CommonLabels, map[string]string{"foo": "bar", "a": "b"}) {
 		t.Error("wrong common labels:", cmp.Diff(c.Namespace.CommonLabels, map[string]string{"foo": "bar", "a": "b"}))
+	}
+	if !cmp.Equal(c.Namespace.CommonAnnotations, map[string]string{"hoge": "fuga", "c": "d"}) {
+		t.Error("wrong common annotations:", cmp.Diff(c.Namespace.CommonAnnotations, map[string]string{"hoge": "fuga", "c": "d"}))
 	}
 	if c.Namespace.GroupKey != "abc" {
 		t.Error("wrong group key:", cmp.Diff(c.Namespace.GroupKey, "abc"))
@@ -66,6 +70,10 @@ func TestValidate(t *testing.T) {
 						"foo": "bar",
 						"a":   "b",
 					},
+					CommonAnnotations: map[string]string{
+						"hoge": "fuga",
+						"c":    "d",
+					},
 					GroupKey:            "abc",
 					RoleBindingTemplate: "kind: RoleBinding",
 				},
@@ -83,6 +91,32 @@ func TestValidate(t *testing.T) {
 					CommonLabels: map[string]string{
 						"foo!": "bar",
 						"a":    "b/c",
+					},
+					CommonAnnotations: map[string]string{
+						"hoge": "fuga",
+						"c":    "d",
+					},
+					GroupKey:            "abc",
+					RoleBindingTemplate: "kind: RoleBinding",
+				},
+				ArgoCD: ArgoCDConfig{
+					Namespace:          "argo",
+					AppProjectTemplate: "kind: AppProject",
+				},
+			},
+			isValid: false,
+		},
+		{
+			name: "invalid common annotations",
+			config: &Config{
+				Namespace: NamespaceConfig{
+					CommonLabels: map[string]string{
+						"foo": "bar",
+						"a":   "b",
+					},
+					CommonAnnotations: map[string]string{
+						"!-hoge": "fuga",
+						"c":      "d",
 					},
 					GroupKey:            "abc",
 					RoleBindingTemplate: "kind: RoleBinding",
@@ -102,6 +136,10 @@ func TestValidate(t *testing.T) {
 						"foo": "bar",
 						"a":   "b",
 					},
+					CommonAnnotations: map[string]string{
+						"hoge": "fuga",
+						"c":    "d",
+					},
 					GroupKey:            "abc@",
 					RoleBindingTemplate: "kind: RoleBinding",
 				},
@@ -119,6 +157,10 @@ func TestValidate(t *testing.T) {
 					CommonLabels: map[string]string{
 						"foo": "bar",
 						"a":   "b",
+					},
+					CommonAnnotations: map[string]string{
+						"hoge": "fuga",
+						"c":    "d",
 					},
 					GroupKey:            "",
 					RoleBindingTemplate: "kind: RoleBinding",
@@ -138,6 +180,10 @@ func TestValidate(t *testing.T) {
 						"foo": "bar",
 						"a":   "b",
 					},
+					CommonAnnotations: map[string]string{
+						"hoge": "fuga",
+						"c":    "d",
+					},
 					GroupKey:            "abc",
 					RoleBindingTemplate: "",
 				},
@@ -156,6 +202,10 @@ func TestValidate(t *testing.T) {
 						"foo": "bar",
 						"a":   "b",
 					},
+					CommonAnnotations: map[string]string{
+						"hoge": "fuga",
+						"c":    "d",
+					},
 					GroupKey:            "abc",
 					RoleBindingTemplate: "kind: RoleBinding",
 				},
@@ -173,6 +223,10 @@ func TestValidate(t *testing.T) {
 					CommonLabels: map[string]string{
 						"foo": "bar",
 						"a":   "b",
+					},
+					CommonAnnotations: map[string]string{
+						"hoge": "fuga",
+						"c":    "d",
 					},
 					GroupKey:            "abc",
 					RoleBindingTemplate: "kind: RoleBinding",

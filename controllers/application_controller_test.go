@@ -55,6 +55,7 @@ var _ = Describe("Application controller", func() {
 		config = &tenantconfig.Config{
 			Namespace: tenantconfig.NamespaceConfig{
 				CommonLabels:        nil,
+				CommonAnnotations:   nil,
 				GroupKey:            "team",
 				RoleBindingTemplate: "",
 			},

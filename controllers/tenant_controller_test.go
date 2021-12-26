@@ -48,6 +48,9 @@ var _ = Describe("Tenant controller", func() {
 				CommonLabels: map[string]string{
 					"accurate.cybozu.com/template": "init-template",
 				},
+				CommonAnnotations: map[string]string{
+					"hoge": "fuga",
+				},
 				GroupKey:            "team",
 				RoleBindingTemplate: rolebindingTemplate,
 			},
@@ -125,7 +128,8 @@ var _ = Describe("Tenant controller", func() {
 			"accurate.cybozu.com/template": Equal("init-template"),
 		}))
 		Expect(ns.Annotations).Should(MatchAllKeys(Keys{
-			"abc": Equal("def"),
+			"abc":  Equal("def"),
+			"hoge": Equal("fuga"),
 		}))
 
 		rb := &rbacv1.RoleBinding{}

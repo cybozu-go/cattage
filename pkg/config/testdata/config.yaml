@@ -2,6 +2,9 @@ namespace:
   commonLabels:
     foo: bar
     a: b
+  commonAnnotations:
+    hoge: fuga
+    c: d
   groupKey: abc
   rolebindingTemplate: |
     apiVersion: rbac.authorization.k8s.io/v1

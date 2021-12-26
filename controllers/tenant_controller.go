@@ -126,6 +126,9 @@ func (r *TenantReconciler) banishNamespace(ctx context.Context, ns *corev1.Names
 	for k := range r.config.Namespace.CommonLabels {
 		delete(managed.Labels, k)
 	}
+	for k := range r.config.Namespace.CommonAnnotations {
+		delete(managed.Annotations, k)
+	}
 	err = r.patchNamespace(ctx, managed)
 	if err != nil {
 		return err
@@ -277,6 +280,9 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *tena
 		labels[constants.OwnerTenant] = tenant.Name
 		namespace.WithLabels(labels)
 		annotations := make(map[string]string)
+		for k, v := range r.config.Namespace.CommonAnnotations {
+			annotations[k] = v
+		}
 		for k, v := range ns.Annotations {
 			annotations[k] = v
 		}

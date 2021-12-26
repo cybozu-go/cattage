@@ -2,6 +2,8 @@ package config
 
 import (
 	"errors"
+
+	v1annotationvalidation "k8s.io/apimachinery/pkg/api/validation"
 	v1labelvalidation "k8s.io/apimachinery/pkg/apis/meta/v1/validation"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -18,6 +20,8 @@ type Config struct {
 type NamespaceConfig struct {
 	// CommonLabels are labels to add to all namespaces to be deployed by neco-tenant-controller
 	CommonLabels map[string]string `json:"commonLabels,omitempty"`
+
+	CommonAnnotations map[string]string `json:"commonAnnotations,omitempty"`
 
 	GroupKey string `json:"groupKey"`
 
@@ -37,6 +41,7 @@ func (c *Config) Validate() error {
 
 	var allErrs field.ErrorList
 	allErrs = append(allErrs, v1labelvalidation.ValidateLabels(c.Namespace.CommonLabels, field.NewPath("namespace", "commonLabels"))...)
+	allErrs = append(allErrs, v1annotationvalidation.ValidateAnnotations(c.Namespace.CommonAnnotations, field.NewPath("namespace", "commonAnnotations"))...)
 
 	allErrs = append(allErrs, v1labelvalidation.ValidateLabelName(c.Namespace.GroupKey, field.NewPath("namespace", "groupKey"))...)
 
