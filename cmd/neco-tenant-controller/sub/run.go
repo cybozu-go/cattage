@@ -83,7 +83,7 @@ func subMain(ns, addr string, port int) error {
 	if err != nil {
 		return fmt.Errorf("unable to create admission decoder: %w", err)
 	}
-	hooks.SetupTenantWebhook(mgr, dec)
+	hooks.SetupTenantWebhook(mgr, dec, cfg)
 	hooks.SetupApplicationWebhook(mgr, dec, cfg)
 	//+kubebuilder:scaffold:builder
 
