@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
+	"github.com/cybozu-go/cattage/pkg/argocd"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-var _ = Describe("neco-tenant-controller", func() {
+var _ = Describe("Cattage", func() {
 	It("should prepare", func() {
 		Eventually(func() error {
 			_, err := kubectl(nil, "apply", "-f", "../config/samples/00_template.yaml")

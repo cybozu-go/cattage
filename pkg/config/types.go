@@ -10,7 +10,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// Config represents the configuration file of neco-tenant-controller.
+// Config represents the configuration file of cattage.
 type Config struct {
 	Namespace NamespaceConfig `json:"namespace,omitempty"`
 	ArgoCD    ArgoCDConfig    `json:"argocd,omitempty"`

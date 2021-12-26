@@ -18,17 +18,17 @@ jobs:
       - name: Check chart version
         run: |
           tag_version=${GITHUB_REF##*/chart-v}
-          chart_version=$(cat charts/neco-tenant-controller/Chart.yaml | grep 'version:' | sed 's/version:\s//')
+          chart_version=$(cat charts/cattage/Chart.yaml | grep 'version:' | sed 's/version:\s//')
           if [ "$tag_version" != "$chart_version" ]; then
             echo "Different versions: tag \"$tag_version\", chart \"$chart_version\""
             exit 1
           fi
       - name: Packaging the chart
-        run: helm package ./charts/neco-tenant-controller/
+        run: helm package ./charts/cattage/
       - uses: actions/upload-artifact@v2
         with:
           name: helm-charts
-          path: ./neco-tenant-controller-*.tgz
+          path: ./cattage-*.tgz
           retention-days: 1
   publish:
     name: Publish charts on GitHub Pages
@@ -46,7 +46,7 @@ jobs:
         with:
           name: helm-charts
       - name: Update charts index
-        run: helm repo index --url https://cybozu-go.github.io/neco-tenant-controller/ --merge index.yaml .
+        run: helm repo index --url https://cybozu-go.github.io/cattage/ --merge index.yaml .
       - run: git add .
       - name: Check diffs
         run: |

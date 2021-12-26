@@ -51,8 +51,8 @@ help: ## Display this help.
 .PHONY: manifests
 manifests: kustomize controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-	$(KUSTOMIZE) build config/helm/crds > charts/neco-tenant-controller/crds/tenant.yaml
-	$(KUSTOMIZE) build config/helm/templates > charts/neco-tenant-controller/templates/generated.yaml
+	$(KUSTOMIZE) build config/helm/crds > charts/cattage/crds/tenant.yaml
+	$(KUSTOMIZE) build config/helm/templates > charts/cattage/templates/generated.yaml
 
 
 .PHONY: generate
@@ -104,7 +104,7 @@ build:
 
 .PHONY: docker-build
 docker-build:
-	docker build -t neco-tenant-controller:latest .
+	docker build -t cattage:latest .
 
 ##@ Development
 TILT := $(shell pwd)/bin/tilt

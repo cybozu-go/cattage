@@ -1,4 +1,4 @@
-package tenant
+package cattage
 
-// Version represents the version of neco-tenant-controller.
+// Version represents the version of cattage.
 const Version = "0.1.0"

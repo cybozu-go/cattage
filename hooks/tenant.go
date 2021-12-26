@@ -21,9 +21,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	tenantv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
+	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/pkg/config"
+	"github.com/cybozu-go/cattage/pkg/constants"
 	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -33,7 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-//+kubebuilder:webhook:path=/mutate-multi-tenancy-cybozu-com-v1beta1-tenant,mutating=true,failurePolicy=fail,sideEffects=None,groups=multi-tenancy.cybozu.com,resources=tenants,verbs=create;update,versions=v1beta1,name=mtenant.kb.io,admissionReviewVersions={v1}
+//+kubebuilder:webhook:path=/mutate-multi-tenancy-cybozu-com-v1beta1-tenant,mutating=true,failurePolicy=fail,sideEffects=None,groups=cattage.cybozu.io,resources=tenants,verbs=create;update,versions=v1beta1,name=mtenant.kb.io,admissionReviewVersions={v1}
 
 type tenantMutator struct {
 	dec *admission.Decoder
@@ -46,7 +46,7 @@ func (m *tenantMutator) Handle(ctx context.Context, req admission.Request) admis
 		return admission.Allowed("")
 	}
 
-	tenant := &tenantv1beta1.Tenant{}
+	tenant := &cattagev1beta1.Tenant{}
 	if err := m.dec.Decode(req, tenant); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
@@ -60,7 +60,7 @@ func (m *tenantMutator) Handle(ctx context.Context, req admission.Request) admis
 	return admission.PatchResponseFromRaw(req.Object.Raw, data)
 }
 
-//+kubebuilder:webhook:path=/validate-multi-tenancy-cybozu-com-v1beta1-tenant,mutating=false,failurePolicy=fail,sideEffects=None,groups=multi-tenancy.cybozu.com,resources=tenants,verbs=create;update,versions=v1beta1,name=vtenant.kb.io,admissionReviewVersions={v1}
+//+kubebuilder:webhook:path=/validate-multi-tenancy-cybozu-com-v1beta1-tenant,mutating=false,failurePolicy=fail,sideEffects=None,groups=cattage.cybozu.io,resources=tenants,verbs=create;update,versions=v1beta1,name=vtenant.kb.io,admissionReviewVersions={v1}
 
 type tenantValidator struct {
 	client client.Client
@@ -75,7 +75,7 @@ func (v *tenantValidator) Handle(ctx context.Context, req admission.Request) adm
 		return admission.Allowed("")
 	}
 
-	tenant := &tenantv1beta1.Tenant{}
+	tenant := &cattagev1beta1.Tenant{}
 	if err := v.dec.Decode(req, tenant); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}

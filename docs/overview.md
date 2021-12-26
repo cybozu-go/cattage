@@ -1,6 +1,6 @@
 # Overview
 
-neco-tenant-controller is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][] with [Accurate][].
+Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][] with [Accurate][].
 
 ## Features
 
@@ -21,14 +21,14 @@ neco-tenant-controller is a Kubernetes controller that enhances the multi-tenanc
 - The ownership of sub-namespaces can be changed between tenants
 
     Sometimes users may want to move the ownership of an application to another tenant.
-    When the parent of a sub-namespace is changed, neco-tenant-controller will automatically update the permissions.
+    When the parent of a sub-namespace is changed, Cattage will automatically update the permissions.
 
 ### For Tenant Users
 
 - Sync Argo CD Application resources
 
     Tenant users can create Application resources in their sub-namespaces without `argocd` command.
-    neco-tenant-controller will synchronize Application resource between the tenant namespace and argocd namespace.
+    Cattage will synchronize Application resource between the tenant namespace and argocd namespace.
     It allows for [App Of Apps Pattern][] in multi-tenancy environments.
 
 - Validate Argo CD Application resources

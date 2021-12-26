@@ -22,11 +22,11 @@ import (
 	"fmt"
 	"text/template"
 
-	tenantv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
-	extract "github.com/cybozu-go/neco-tenant-controller/pkg/client"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
+	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/pkg/argocd"
+	extract "github.com/cybozu-go/cattage/pkg/client"
+	"github.com/cybozu-go/cattage/pkg/config"
+	"github.com/cybozu-go/cattage/pkg/constants"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -66,9 +66,9 @@ type TenantReconciler struct {
 	config *config.Config
 }
 
-//+kubebuilder:rbac:groups=multi-tenancy.cybozu.com,resources=tenants,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=multi-tenancy.cybozu.com,resources=tenants/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=multi-tenancy.cybozu.com,resources=tenants/finalizers,verbs=update
+//+kubebuilder:rbac:groups=cattage.cybozu.io,resources=tenants,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=cattage.cybozu.io,resources=tenants/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=cattage.cybozu.io,resources=tenants/finalizers,verbs=update
 //+kubebuilder:rbac:groups=argoproj.io,resources=appprojects,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
@@ -86,7 +86,7 @@ type TenantReconciler struct {
 func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	logger := log.FromContext(ctx)
 
-	tenant := &tenantv1beta1.Tenant{}
+	tenant := &cattagev1beta1.Tenant{}
 	if err := r.client.Get(ctx, req.NamespacedName, tenant); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -98,7 +98,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 		return ctrl.Result{}, nil
 	}
 
-	defer func(before tenantv1beta1.TenantStatus) {
+	defer func(before cattagev1beta1.TenantStatus) {
 		if !equality.Semantic.DeepEqual(tenant.Status, before) {
 			logger.Info("update status", "status", tenant.Status, "before", before)
 			if err2 := r.client.Status().Update(ctx, tenant); err2 != nil {
@@ -110,9 +110,9 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 
 	err = r.reconcileNamespaces(ctx, tenant)
 	if err != nil {
-		tenant.Status.Health = tenantv1beta1.TenantUnhealthy
+		tenant.Status.Health = cattagev1beta1.TenantUnhealthy
 		meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
-			Type:    tenantv1beta1.ConditionReady,
+			Type:    cattagev1beta1.ConditionReady,
 			Status:  metav1.ConditionFalse,
 			Reason:  "Failed",
 			Message: err.Error(),
@@ -122,9 +122,9 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 
 	err = r.reconcileArgoCD(ctx, tenant)
 	if err != nil {
-		tenant.Status.Health = tenantv1beta1.TenantUnhealthy
+		tenant.Status.Health = cattagev1beta1.TenantUnhealthy
 		meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
-			Type:    tenantv1beta1.ConditionReady,
+			Type:    cattagev1beta1.ConditionReady,
 			Status:  metav1.ConditionFalse,
 			Reason:  "Failed",
 			Message: err.Error(),
@@ -132,9 +132,9 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 		return ctrl.Result{}, err
 	}
 
-	tenant.Status.Health = tenantv1beta1.TenantHealthy
+	tenant.Status.Health = cattagev1beta1.TenantHealthy
 	meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
-		Type:   tenantv1beta1.ConditionReady,
+		Type:   cattagev1beta1.ConditionReady,
 		Status: metav1.ConditionTrue,
 		Reason: "OK",
 	})
@@ -143,7 +143,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 	return ctrl.Result{}, nil
 }
 
-func containNamespace(roots []tenantv1beta1.NamespaceSpec, ns corev1.Namespace) bool {
+func containNamespace(roots []cattagev1beta1.NamespaceSpec, ns corev1.Namespace) bool {
 	for _, root := range roots {
 		if root.Name == ns.Name {
 			return true
@@ -171,7 +171,7 @@ func (r *TenantReconciler) disownNamespace(ctx context.Context, ns *corev1.Names
 	return nil
 }
 
-func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *tenantv1beta1.Tenant, ns *corev1.Namespace) error {
+func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *cattagev1beta1.Tenant, ns *corev1.Namespace) error {
 	rb := &rbacv1.RoleBinding{}
 	err := r.client.Get(ctx, client.ObjectKey{Namespace: ns.Name, Name: tenant.Name + "-admin"}, rb)
 	if apierrors.IsNotFound(err) {
@@ -190,7 +190,7 @@ func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *tenantv1beta1
 	return nil
 }
 
-func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *tenantv1beta1.Tenant) error {
+func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
 	proj := argocd.AppProject()
 	err := r.client.Get(ctx, client.ObjectKey{Namespace: r.config.ArgoCD.Namespace, Name: tenant.Name}, proj)
 	if apierrors.IsNotFound(err) {
@@ -205,7 +205,7 @@ func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *tenantv
 	return r.client.Delete(ctx, proj)
 }
 
-func (r *TenantReconciler) finalize(ctx context.Context, tenant *tenantv1beta1.Tenant) error {
+func (r *TenantReconciler) finalize(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
 	logger := log.FromContext(ctx)
 	if !controllerutil.ContainsFinalizer(tenant, constants.Finalizer) {
 		return nil
@@ -300,7 +300,7 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 	})
 }
 
-func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *tenantv1beta1.Tenant) error {
+func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
 	for _, ns := range tenant.Spec.Namespaces {
 		namespace := accorev1.Namespace(ns.Name)
 		labels := make(map[string]string)
@@ -380,7 +380,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *tena
 	return nil
 }
 
-func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *tenantv1beta1.Tenant) error {
+func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
 	logger := log.FromContext(ctx)
 
 	orig := argocd.AppProject()
@@ -480,7 +480,7 @@ func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&tenantv1beta1.Tenant{}).
+		For(&cattagev1beta1.Tenant{}).
 		Watches(&source.Kind{Type: &corev1.Namespace{}}, funcs).
 		Watches(&source.Kind{Type: &rbacv1.RoleBinding{}}, funcs).
 		Watches(&source.Kind{Type: argocd.AppProject()}, funcs).

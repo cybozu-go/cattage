@@ -9,7 +9,7 @@ spec:
       securityContext: null
       containers:
         - command:
-            - /mneco-tenant-controller
+            - /cattage-controller
           args: null
           name: manager
           securityContext: null

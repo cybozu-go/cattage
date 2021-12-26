@@ -1,7 +1,7 @@
 controller:
   config:
     labelKeys:
-      - multi-tenancy.cybozu.com/tenant
+      - cattage.cybozu.io/tenant
     watches:
       - group: rbac.authorization.k8s.io
         version: v1

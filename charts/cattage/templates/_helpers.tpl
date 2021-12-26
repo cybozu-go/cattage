@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "neco-tenant-controller.name" -}}
+{{- define "cattage.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "neco-tenant-controller.fullname" -}}
+{{- define "cattage.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "neco-tenant-controller.chart" -}}
+{{- define "cattage.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "neco-tenant-controller.labels" -}}
-helm.sh/chart: {{ include "neco-tenant-controller.chart" . }}
-{{ include "neco-tenant-controller.selectorLabels" . }}
+{{- define "cattage.labels" -}}
+helm.sh/chart: {{ include "cattage.chart" . }}
+{{ include "cattage.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "neco-tenant-controller.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "neco-tenant-controller.name" . }}
+{{- define "cattage.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "cattage.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "neco-tenant-controller.serviceAccountName" -}}
+{{- define "cattage.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "neco-tenant-controller.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "cattage.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

@@ -1,11 +1,11 @@
-[![GitHub release](https://img.shields.io/github/release/cybozu-go/neco-tenant-controller.svg?maxAge=60)](https://github.com/cybozu-go/neco-tenant-controller/releases)
-[![CI](https://github.com/cybozu-go/neco-tenant-controller/actions/workflows/ci.yaml/badge.svg)](https://github.com/cybozu-go/neco-tenant-controller/actions/workflows/ci.yaml)
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/cybozu-go/neco-tenant-controller?tab=overview)](https://pkg.go.dev/github.com/cybozu-go/neco-tenant-controller?tab=overview)
-[![Go Report Card](https://goreportcard.com/badge/github.com/cybozu-go/neco-tenant-controller)](https://goreportcard.com/report/github.com/cybozu-go/neco-tenant-controller)
+[![GitHub release](https://img.shields.io/github/release/cybozu-go/cattage.svg?maxAge=60)](https://github.com/cybozu-go/cattage/releases)
+[![CI](https://github.com/cybozu-go/cattage/actions/workflows/ci.yaml/badge.svg)](https://github.com/cybozu-go/cattage/actions/workflows/ci.yaml)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/cybozu-go/cattage?tab=overview)](https://pkg.go.dev/github.com/cybozu-go/cattage?tab=overview)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cybozu-go/cattage)](https://goreportcard.com/report/github.com/cybozu-go/cattage)
 
-# Tenant Controller for Neco
+# Cattage
 
-neco-tenant-controller is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][] with [Accurate][].
+Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][] with [Accurate][].
 
 **Project Status**: Initial development
 

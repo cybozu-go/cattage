@@ -22,12 +22,12 @@ help:
 
 .PHONY: start
 start: $(KIND) $(KUBECTL)
-	$(KIND) create cluster --name=neco-tenant-controller --config=$(KIND_CONFIG) --image=kindest/node:v$(KUBERNETES_VERSION) --wait 1m
-	cd ..; docker build --no-cache -t neco-tenant-controller:dev .
-	$(KIND) load docker-image neco-tenant-controller:dev --name=neco-tenant-controller
+	$(KIND) create cluster --name=cattage --config=$(KIND_CONFIG) --image=kindest/node:v$(KUBERNETES_VERSION) --wait 1m
+	cd ..; docker build --no-cache -t cattage:dev .
+	$(KIND) load docker-image cattage:dev --name=cattage
 	$(MAKE) prepare
 	$(KUBECTL) apply -k ../config/default
-	$(KUBECTL) -n neco-tenant-controller-system wait --for=condition=available --timeout=180s --all deployments
+	$(KUBECTL) -n cattage wait --for=condition=available --timeout=180s --all deployments
 
 .PHONY: prepare
 prepare: $(KUBECTL) $(HELM)
@@ -49,14 +49,14 @@ test:
 .PHONY: logs
 logs:
 	rm -rf logs.tar.gz logs
-	$(KIND) export logs --name=neco-tenant-controller ./logs
+	$(KIND) export logs --name=cattage ./logs
 	tar czf logs.tar.gz logs
 	rm -rf logs
 
 .PHONY: stop
 stop: $(KIND)
-	$(KIND) delete cluster --name=neco-tenant-controller
-	-docker image rm neco-tenant-controller:dev
+	$(KIND) delete cluster --name=cattage
+	-docker image rm cattage:dev
 	-docker image prune -f
 
 .PHONY: kind

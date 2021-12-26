@@ -2,7 +2,7 @@
 
 ## Kubernetes cluster
 
-neco-tenant-controller is a controller that runs in a soft multi-tenancy Kubernetes cluster.
+Cattage is a controller that runs in a soft multi-tenancy Kubernetes cluster.
 Namespaces must be isolated for each tenant.
 
 There are many ways to achieve Namespace isolation.
@@ -15,14 +15,14 @@ Install Argo CD as shown in the following page:
 
 https://argo-cd.readthedocs.io/en/stable/getting_started/
 
-neco-tenant-controller isolates AppProject resource for each tenant.
+Cattage isolates AppProject resource for each tenant.
 
 So, please refer to the following page to enable user management.
 Argo CD supports a lot of authentication methods.
 
 https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/
 
-neco-tenant-controller expects tenant users to be able to create Application resources.
+Cattage expects tenant users to be able to create Application resources.
 Apply the following manifest:
 
 ```yaml
@@ -50,7 +50,7 @@ rules:
 
 ## cert-manager
 
-neco-tenant-controller and Accurate depend on [cert-manager][] to issue TLS certificate for admission webhooks.
+Cattage and Accurate depend on [cert-manager][] to issue TLS certificate for admission webhooks.
 If cert-manager is not installed on your cluster, install it as follows:
 
 ```console
@@ -60,8 +60,8 @@ $ kubectl apply -f cert-manager.yaml
 
 ## Accurate
 
-neco-tenant-controller depends on Accurate.
-It expects `multi-tenancy.cybozu.com/tenant` labels and RoleBinding resources to be propagated.
+Cattage depends on Accurate.
+It expects `cattage.cybozu.io/tenant` labels and RoleBinding resources to be propagated.
 
 Include the following settings in your values.yaml:
 
@@ -69,7 +69,7 @@ Include the following settings in your values.yaml:
 controller:
   config:
     labelKeys:
-      - multi-tenancy.cybozu.com/tenant
+      - cattage.cybozu.io/tenant
     watches:
       - group: rbac.authorization.k8s.io
         version: v1
@@ -86,7 +86,7 @@ For more information, see the following page:
 
 https://cybozu-go.github.io/accurate/helm.html
 
-## neco-tenant-controller
+## Cattage
 
 Prepare values.yaml as follows:
 
@@ -140,12 +140,12 @@ Read [Configurations](config.md) for details.
 Setup Helm repository:
 
  ```console
- $ helm repo add neco-tenant-controller https://cybozu-go.github.io/neco-tenant-controller/
+ $ helm repo add cattage https://cybozu-go.github.io/cattage/
  $ helm repo update
    ```
 
 Install the Helm chart with your values.yaml:
 
 ```console
-$ helm install --create-namespace --namespace neco-tenant-controller neco-tenant-controller neco-tenant-controller/neco-tenant-controller -f values.yaml
+$ helm install --create-namespace --namespace cattage cattage cattage/cattage -f values.yaml
 ```

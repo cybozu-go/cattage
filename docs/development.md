@@ -1,18 +1,18 @@
 # Development
 
-neco-tenant-controller can be developed in Tilt.
+Cattage can be developed in Tilt.
 
 1. Prepare a Linux box running Docker.
 2. Checkout this repository. 
 
     ```console
-    $ git clone https://github.com/cybozu-go/neco-tenant-controller
+    $ git clone https://github.com/cybozu-go/cattage
     ```
 
 3. Launch local Kubernetes cluster.
 
     ```console
-    $ cd neco-tenant-controller
+    $ cd cattage
     $ make dev
     ```
 

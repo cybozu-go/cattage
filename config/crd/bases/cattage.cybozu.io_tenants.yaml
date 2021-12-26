@@ -1,13 +1,14 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.7.0
-  labels:
-    app.kubernetes.io/name: neco-tenant-controller
-  name: tenants.multi-tenancy.cybozu.com
+  creationTimestamp: null
+  name: tenants.cattage.cybozu.io
 spec:
-  group: multi-tenancy.cybozu.com
+  group: cattage.cybozu.io
   names:
     kind: Tenant
     listKind: TenantList
@@ -160,8 +161,8 @@ spec:
               health:
                 description: Health is the health of Tenant.
                 enum:
-                - healthy
-                - unhealthy
+                - Healthy
+                - Unhealthy
                 type: string
             type: object
         type: object
@@ -169,3 +170,9 @@ spec:
     storage: true
     subresources:
       status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

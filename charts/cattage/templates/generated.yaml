@@ -3,10 +3,10 @@ kind: ServiceAccount
 metadata:
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-controller-manager'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-controller-manager'
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -14,10 +14,10 @@ kind: Role
 metadata:
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-leader-election-role'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-leader-election-role'
   namespace: '{{ .Release.Namespace }}'
 rules:
 - apiGroups:
@@ -58,10 +58,10 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-manager-role'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-manager-role'
 rules:
 - apiGroups:
   - ""
@@ -96,19 +96,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - multi-tenancy.cybozu.com
+  - cattage.cybozu.io
   resources:
   - tenants
   verbs:
@@ -120,19 +108,31 @@ rules:
   - update
   - watch
 - apiGroups:
-  - multi-tenancy.cybozu.com
+  - cattage.cybozu.io
   resources:
   - tenants/finalizers
   verbs:
   - update
 - apiGroups:
-  - multi-tenancy.cybozu.com
+  - cattage.cybozu.io
   resources:
   - tenants/status
   verbs:
   - get
   - patch
   - update
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -161,10 +161,10 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-metrics-reader'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-metrics-reader'
 rules:
 - nonResourceURLs:
   - /metrics
@@ -176,10 +176,10 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-proxy-role'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-proxy-role'
 rules:
 - apiGroups:
   - authentication.k8s.io
@@ -199,18 +199,18 @@ kind: RoleBinding
 metadata:
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-leader-election-rolebinding'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-leader-election-rolebinding'
   namespace: '{{ .Release.Namespace }}'
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: '{{ template "neco-tenant-controller.fullname" . }}-leader-election-role'
+  name: '{{ template "cattage.fullname" . }}-leader-election-role'
 subjects:
 - kind: ServiceAccount
-  name: '{{ template "neco-tenant-controller.fullname" . }}-controller-manager'
+  name: '{{ template "cattage.fullname" . }}-controller-manager'
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -218,17 +218,17 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-manager-rolebinding'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-manager-rolebinding'
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: '{{ template "neco-tenant-controller.fullname" . }}-manager-role'
+  name: '{{ template "cattage.fullname" . }}-manager-role'
 subjects:
 - kind: ServiceAccount
-  name: '{{ template "neco-tenant-controller.fullname" . }}-controller-manager'
+  name: '{{ template "cattage.fullname" . }}-controller-manager'
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -236,17 +236,17 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-proxy-rolebinding'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-proxy-rolebinding'
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: '{{ template "neco-tenant-controller.fullname" . }}-proxy-role'
+  name: '{{ template "cattage.fullname" . }}-proxy-role'
 subjects:
 - kind: ServiceAccount
-  name: '{{ template "neco-tenant-controller.fullname" . }}-controller-manager'
+  name: '{{ template "cattage.fullname" . }}-controller-manager'
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: v1
@@ -254,10 +254,10 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-controller-manager-metrics-service'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-controller-manager-metrics-service'
   namespace: '{{ .Release.Namespace }}'
 spec:
   ports:
@@ -267,17 +267,17 @@ spec:
     targetPort: https
   selector:
     app.kubernetes.io/component: controller
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-webhook-service'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-webhook-service'
   namespace: '{{ .Release.Namespace }}'
 spec:
   ports:
@@ -286,26 +286,26 @@ spec:
     targetPort: 9443
   selector:
     app.kubernetes.io/component: controller
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ template "neco-tenant-controller.fullname"
+    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ template "cattage.fullname"
       . }}-serving-cert'
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-mutating-webhook-configuration'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-mutating-webhook-configuration'
 webhooks:
 - admissionReviewVersions:
   - v1
   clientConfig:
     service:
-      name: '{{ template "neco-tenant-controller.fullname" . }}-webhook-service'
+      name: '{{ template "cattage.fullname" . }}-webhook-service'
       namespace: '{{ .Release.Namespace }}'
       path: /mutate-argoproj-io-application
   failurePolicy: Fail
@@ -325,14 +325,14 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: '{{ template "neco-tenant-controller.fullname" . }}-webhook-service'
+      name: '{{ template "cattage.fullname" . }}-webhook-service'
       namespace: '{{ .Release.Namespace }}'
       path: /mutate-multi-tenancy-cybozu-com-v1beta1-tenant
   failurePolicy: Fail
   name: mtenant.kb.io
   rules:
   - apiGroups:
-    - multi-tenancy.cybozu.com
+    - cattage.cybozu.io
     apiVersions:
     - v1beta1
     operations:
@@ -346,20 +346,20 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ template "neco-tenant-controller.fullname"
+    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ template "cattage.fullname"
       . }}-serving-cert'
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  name: '{{ template "neco-tenant-controller.fullname" . }}-validating-webhook-configuration'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-validating-webhook-configuration'
 webhooks:
 - admissionReviewVersions:
   - v1
   clientConfig:
     service:
-      name: '{{ template "neco-tenant-controller.fullname" . }}-webhook-service'
+      name: '{{ template "cattage.fullname" . }}-webhook-service'
       namespace: '{{ .Release.Namespace }}'
       path: /validate-argoproj-io-application
   failurePolicy: Fail
@@ -379,14 +379,14 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: '{{ template "neco-tenant-controller.fullname" . }}-webhook-service'
+      name: '{{ template "cattage.fullname" . }}-webhook-service'
       namespace: '{{ .Release.Namespace }}'
       path: /validate-multi-tenancy-cybozu-com-v1beta1-tenant
   failurePolicy: Fail
   name: vtenant.kb.io
   rules:
   - apiGroups:
-    - multi-tenancy.cybozu.com
+    - cattage.cybozu.io
     apiVersions:
     - v1beta1
     operations:

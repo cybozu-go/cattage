@@ -1,6 +1,6 @@
 apiVersion: v2
-name: neco-tenant-controller
-description: A Helm chart for neco-tenant-controller
+name: cattage
+description: A Helm chart for cattage
 
 # A chart can be either an 'application' or a 'library' chart.
 #

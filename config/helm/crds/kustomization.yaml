@@ -2,4 +2,4 @@ resources:
   - ../../crd
 
 commonLabels:
-  app.kubernetes.io/name: neco-tenant-controller
+  app.kubernetes.io/name: cattage

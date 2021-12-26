@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	multitenancyv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
+	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/pkg/constants"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -76,7 +76,7 @@ var _ = BeforeSuite(func() {
 	scheme = runtime.NewScheme()
 	err = clientgoscheme.AddToScheme(scheme)
 	Expect(err).NotTo(HaveOccurred())
-	err = multitenancyv1beta1.AddToScheme(scheme)
+	err = cattagev1beta1.AddToScheme(scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	//+kubebuilder:scaffold:scheme

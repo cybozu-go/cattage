@@ -1,12 +1,12 @@
 image:
-  # image.repository -- neco-tenant-controller image repository to use.
-  repository: ghcr.io/cybozu-go/neco-tenant-controller
+  # image.repository -- cattage image repository to use.
+  repository: ghcr.io/cybozu-go/cattage
 
-  # image.tag -- neco-tenant-controller image tag to use.
+  # image.tag -- cattage image tag to use.
   # @default -- `{{ .Chart.AppVersion }}`
   tag:  # 0.1.0
 
-  # image.pullPolicy -- neco-tenant-controller image pullPolicy.
+  # image.pullPolicy -- cattage image pullPolicy.
   pullPolicy:  # Always
 
 controller:

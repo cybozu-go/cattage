@@ -8,13 +8,13 @@ import (
 	"os"
 	"strconv"
 
-	tenant "github.com/cybozu-go/neco-tenant-controller"
+	"github.com/cybozu-go/cattage"
 	"github.com/spf13/cobra"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
-const defaultConfigPath = "/etc/neco-tenant-controller/config.yaml"
+const defaultConfigPath = "/etc/cattage/config.yaml"
 
 var options struct {
 	configFile       string
@@ -27,10 +27,10 @@ var options struct {
 }
 
 var rootCmd = &cobra.Command{
-	Use:     "neco-tenant-controller",
-	Version: tenant.Version,
-	Short:   "neco-tenant controller",
-	Long:    `neco-tenant controller`,
+	Use:     "cattage-controller",
+	Version: cattage.Version,
+	Short:   "cattage controller",
+	Long:    `cattage controller`,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cmd.SilenceUsage = true
@@ -64,7 +64,7 @@ func init() {
 	fs.StringVar(&options.configFile, "config-file", defaultConfigPath, "Configuration file path")
 	fs.StringVar(&options.metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to")
 	fs.StringVar(&options.probeAddr, "health-probe-addr", ":8081", "Listen address for health probes")
-	fs.StringVar(&options.leaderElectionID, "leader-election-id", "neco-tenant-controller", "ID for leader election by controller-runtime")
+	fs.StringVar(&options.leaderElectionID, "leader-election-id", "cattage", "ID for leader election by controller-runtime")
 	fs.StringVar(&options.webhookAddr, "webhook-addr", ":9443", "Listen address for the webhook endpoint")
 	fs.StringVar(&options.certDir, "cert-dir", "", "webhook certificate directory")
 

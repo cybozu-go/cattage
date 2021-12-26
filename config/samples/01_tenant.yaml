@@ -1,4 +1,4 @@
-apiVersion: multi-tenancy.cybozu.com/v1beta1
+apiVersion: cattage.cybozu.io/v1beta1
 kind: Tenant
 metadata:
   name: a-team
@@ -6,7 +6,7 @@ spec:
   namespaces:
     - name: app-a
 ---
-apiVersion: multi-tenancy.cybozu.com/v1beta1
+apiVersion: cattage.cybozu.io/v1beta1
 kind: Tenant
 metadata:
   name: b-team

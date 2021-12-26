@@ -37,7 +37,7 @@ webhooks:
   name: mtenant.kb.io
   rules:
   - apiGroups:
-    - multi-tenancy.cybozu.com
+    - cattage.cybozu.io
     apiVersions:
     - v1beta1
     operations:
@@ -85,7 +85,7 @@ webhooks:
   name: vtenant.kb.io
   rules:
   - apiGroups:
-    - multi-tenancy.cybozu.com
+    - cattage.cybozu.io
     apiVersions:
     - v1beta1
     operations:

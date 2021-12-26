@@ -10,7 +10,7 @@ metadata:
 spec:
   project: a-team
   source:
-    repoURL: https://github.com/cybozu-go/neco-tenant-controller.git
+    repoURL: https://github.com/cybozu-go/cattage.git
     targetRevision: main
     path: samples/argocd-config
   destination:

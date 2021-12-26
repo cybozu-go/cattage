@@ -6,11 +6,11 @@ import (
 	"errors"
 	"time"
 
-	tenantv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
-	cacheclient "github.com/cybozu-go/neco-tenant-controller/pkg/client"
-	tenantconfig "github.com/cybozu-go/neco-tenant-controller/pkg/config"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
+	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/pkg/argocd"
+	cacheclient "github.com/cybozu-go/cattage/pkg/client"
+	tenantconfig "github.com/cybozu-go/cattage/pkg/config"
+	"github.com/cybozu-go/cattage/pkg/constants"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -81,12 +81,12 @@ var _ = Describe("Tenant controller", func() {
 	})
 
 	It("should create root namespaces, rolebindings and an appproject", func() {
-		tenant := &tenantv1beta1.Tenant{
+		tenant := &cattagev1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "x-team",
 			},
-			Spec: tenantv1beta1.TenantSpec{
-				Namespaces: []tenantv1beta1.NamespaceSpec{
+			Spec: cattagev1beta1.TenantSpec{
+				Namespaces: []cattagev1beta1.NamespaceSpec{
 					{
 						Name: "app-x",
 						Labels: map[string]string{
@@ -100,7 +100,7 @@ var _ = Describe("Tenant controller", func() {
 						},
 					},
 				},
-				ArgoCD: tenantv1beta1.ArgoCDSpec{
+				ArgoCD: cattagev1beta1.ArgoCDSpec{
 					ExtraAdmins: []string{
 						"d-team",
 					},
@@ -194,16 +194,16 @@ var _ = Describe("Tenant controller", func() {
 	})
 
 	It("should disown root namespace", func() {
-		tenant := &tenantv1beta1.Tenant{
+		tenant := &cattagev1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "y-team",
 			},
-			Spec: tenantv1beta1.TenantSpec{
-				Namespaces: []tenantv1beta1.NamespaceSpec{
+			Spec: cattagev1beta1.TenantSpec{
+				Namespaces: []cattagev1beta1.NamespaceSpec{
 					{Name: "app-y1"},
 					{Name: "app-y2"},
 				},
-				ArgoCD: tenantv1beta1.ArgoCDSpec{},
+				ArgoCD: cattagev1beta1.ArgoCDSpec{},
 			},
 		}
 		err := k8sClient.Create(ctx, tenant)
@@ -312,7 +312,7 @@ var _ = Describe("Tenant controller", func() {
 		By("removing app-y2")
 		err = k8sClient.Get(ctx, client.ObjectKey{Name: tenant.Name}, tenant)
 		Expect(err).ToNot(HaveOccurred())
-		tenant.Spec.Namespaces = []tenantv1beta1.NamespaceSpec{
+		tenant.Spec.Namespaces = []cattagev1beta1.NamespaceSpec{
 			{Name: "app-y1"},
 		}
 		err = k8sClient.Update(ctx, tenant)
@@ -366,23 +366,23 @@ var _ = Describe("Tenant controller", func() {
 		By("removing app-y1")
 		err = k8sClient.Get(ctx, client.ObjectKey{Name: tenant.Name}, tenant)
 		Expect(err).ToNot(HaveOccurred())
-		tenant.Spec.Namespaces = []tenantv1beta1.NamespaceSpec{}
+		tenant.Spec.Namespaces = []cattagev1beta1.NamespaceSpec{}
 		err = k8sClient.Update(ctx, tenant)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).Should(ContainSubstring("\"y-team\" is invalid: spec.namespaces: Invalid value: 0: spec.namespaces in body should have at least 1 items"))
 	})
 
 	It("should remove tenant", func() {
-		tenant := &tenantv1beta1.Tenant{
+		tenant := &cattagev1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:       "z-team",
 				Finalizers: []string{constants.Finalizer},
 			},
-			Spec: tenantv1beta1.TenantSpec{
-				Namespaces: []tenantv1beta1.NamespaceSpec{
+			Spec: cattagev1beta1.TenantSpec{
+				Namespaces: []cattagev1beta1.NamespaceSpec{
 					{Name: "app-z"},
 				},
-				ArgoCD: tenantv1beta1.ArgoCDSpec{},
+				ArgoCD: cattagev1beta1.ArgoCDSpec{},
 			},
 		}
 		err := k8sClient.Create(ctx, tenant)

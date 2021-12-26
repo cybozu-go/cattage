@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "neco-tenant-controller.fullname" . }}-controller-manager
+  name: {{ template "cattage.fullname" . }}-controller-manager
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/component: controller
-    {{- include "neco-tenant-controller.labels" . | nindent 4 }}
+    {{- include "cattage.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.controller.replicas }}
   selector:
     matchLabels:
       app.kubernetes.io/component: controller
-      app.kubernetes.io/name: {{ include "neco-tenant-controller.name" . }}
+      app.kubernetes.io/name: {{ include "cattage.name" . }}
   template:
     metadata:
       annotations:
@@ -19,7 +19,7 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       labels:
         app.kubernetes.io/component: controller
-        app.kubernetes.io/name: {{ include "neco-tenant-controller.name" . }}
+        app.kubernetes.io/name: {{ include "cattage.name" . }}
     spec:
       containers:
         - name: manager
@@ -28,7 +28,7 @@ spec:
           imagePullPolicy: {{ . }}
           {{- end }}
           command:
-            - /neco-tenant-controller
+            - /cattage-controller
           {{- with .Values.controller.extraArgs }}
           args: {{ . }}
           {{- end }}
@@ -69,11 +69,11 @@ spec:
             - mountPath: /tmp/k8s-webhook-server/serving-certs
               name: cert
               readOnly: true
-            - mountPath: /etc/neco-tenant-controller
+            - mountPath: /etc/cattage
               name: config
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: {{ template "neco-tenant-controller.fullname" . }}-controller-manager
+      serviceAccountName: {{ template "cattage.fullname" . }}-controller-manager
       terminationGracePeriodSeconds: {{ .Values.controller.terminationGracePeriodSeconds }}
       volumes:
         - name: cert
@@ -81,5 +81,5 @@ spec:
             defaultMode: 420
             secretName: webhook-server-cert
         - configMap:
-            name: {{ template "neco-tenant-controller.fullname" . }}-config
+            name: {{ template "cattage.fullname" . }}-config
           name: config

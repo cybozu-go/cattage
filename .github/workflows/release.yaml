@@ -13,11 +13,11 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build images
       run: |
-        docker build -t neco-tenant-controller:dev .
+        docker build -t cattage:dev .
     - name: Login to ghcr.io
       run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
     - name: Push images
       run: |
         TAG=${GITHUB_REF#refs/tags/v}
-        docker tag neco-tenant-controller:dev ghcr.io/cybozu-go/neco-tenant-controller:$TAG
-        docker push ghcr.io/cybozu-go/neco-tenant-controller:$TAG
+        docker tag cattage:dev ghcr.io/cybozu-go/cattage:$TAG
+        docker push ghcr.io/cybozu-go/cattage:$TAG

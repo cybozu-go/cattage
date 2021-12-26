@@ -3,8 +3,8 @@ kind: LabelTransformer
 metadata:
   name: helm-metadata-labels
 labels:
-  helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
-  app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+  helm.sh/chart: '{{ include "cattage.chart" . }}'
+  app.kubernetes.io/name: '{{ include "cattage.name" . }}'
   app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
   app.kubernetes.io/managed-by: '{{ .Release.Service }}'
 fieldSpecs:

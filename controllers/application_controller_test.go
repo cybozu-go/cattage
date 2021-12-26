@@ -5,10 +5,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
-	cacheclient "github.com/cybozu-go/neco-tenant-controller/pkg/client"
-	tenantconfig "github.com/cybozu-go/neco-tenant-controller/pkg/config"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
+	"github.com/cybozu-go/cattage/pkg/argocd"
+	cacheclient "github.com/cybozu-go/cattage/pkg/client"
+	tenantconfig "github.com/cybozu-go/cattage/pkg/config"
+	"github.com/cybozu-go/cattage/pkg/constants"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -63,7 +63,7 @@ var _ = Describe("Application controller", func() {
 				AppProjectTemplate: "",
 			},
 		}
-		ar := NewApplicationReconciler(mgr.GetClient(), mgr.GetEventRecorderFor("neco-tenant-controller"), config)
+		ar := NewApplicationReconciler(mgr.GetClient(), mgr.GetEventRecorderFor("cattage"), config)
 		err = ar.SetupWithManager(ctx, mgr)
 		Expect(err).ToNot(HaveOccurred())
 

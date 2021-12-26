@@ -5,7 +5,7 @@
 Administrators can create the following tenant resource for a tenant team.
 
 ```yaml
-apiVersion: multi-tenancy.cybozu.com/v1beta1
+apiVersion: cattage.cybozu.io/v1beta1
 kind: Tenant
 metadata:
   name: your-team
@@ -60,7 +60,7 @@ metadata:
 spec:
   project: your-team
   source:
-    repoURL: https://github.com/cybozu-go/neco-tenant-controller.git
+    repoURL: https://github.com/cybozu-go/cattage.git
     targetRevision: main
     path: samples/testhttpd
   destination:
@@ -108,7 +108,7 @@ The ownership of sub-namespace can be transferred to other tenant.
 Prepare a new tenant:
 
 ```yaml
-apiVersion: multi-tenancy.cybozu.com/v1beta1
+apiVersion: cattage.cybozu.io/v1beta1
 kind: Tenant
 metadata:
   name: new-team

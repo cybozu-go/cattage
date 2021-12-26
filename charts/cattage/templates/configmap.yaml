@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "neco-tenant-controller.fullname" . }}-config
+  name: {{ template "cattage.fullname" . }}-config
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "neco-tenant-controller.labels" . | nindent 4 }}
+    {{- include "cattage.labels" . | nindent 4 }}
 data:
   config.yaml: |
     namespace:

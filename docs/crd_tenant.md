@@ -63,8 +63,8 @@ TenantSpec defines the desired state of Tenant
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| namespaces |  | [][NamespaceSpec](#namespacespec) | false |
-| argocd |  | [ArgoCDSpec](#argocdspec) | false |
+| namespaces | Namespaces are the list of root namespaces that belong to this tenant | [][NamespaceSpec](#namespacespec) | true |
+| argocd | ArgoCD is the settings of Argo CD for this tenant | [ArgoCDSpec](#argocdspec) | false |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -74,6 +74,7 @@ TenantStatus defines the observed state of Tenant
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
+| health | Health is the health of Tenant. | TenantHealth | false |
 | conditions | Conditions is an array of conditions. | []metav1.Condition | false |
 
 [Back to Custom Resources](#custom-resources)

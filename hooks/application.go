@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cybozu-go/neco-tenant-controller/pkg/argocd"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
+	"github.com/cybozu-go/cattage/pkg/argocd"
+	"github.com/cybozu-go/cattage/pkg/config"
+	"github.com/cybozu-go/cattage/pkg/constants"
 	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

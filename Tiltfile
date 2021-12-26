@@ -5,8 +5,8 @@ def kubebuilder():
 
     DOCKERFILE = '''FROM golang:alpine
     WORKDIR /
-    COPY ./bin/neco-tenant-controller /
-    CMD ["/neco-tenant-controller"]
+    COPY ./bin/cattage-controller /
+    CMD ["/cattage-controller"]
     '''
 
     def manifests():
@@ -16,7 +16,7 @@ def kubebuilder():
         return 'controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
 
     def binary():
-        return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o bin/neco-tenant-controller cmd/neco-tenant-controller/main.go'
+        return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o bin/cattage-controller cmd/cattage-controller/main.go'
 
     installed = local("which kubebuilder")
     print("kubebuilder is present:", installed)
@@ -37,12 +37,12 @@ def kubebuilder():
 
     local_resource('Sample YAML', 'kubectl apply -f ./config/samples', deps=["./config/samples"], resource_deps=[DIRNAME + "-controller-manager"])
 
-    docker_build_with_restart('neco-tenant-controller:dev', '.',
+    docker_build_with_restart('cattage:dev', '.',
      dockerfile_contents=DOCKERFILE,
-     entrypoint=['/neco-tenant-controller', '--zap-devel=true'],
-     only=['./bin/neco-tenant-controller'],
+     entrypoint=['/cattage-controller', '--zap-devel=true'],
+     only=['./bin/cattage-controller'],
      live_update=[
-           sync('./bin/neco-tenant-controller', '/neco-tenant-controller'),
+           sync('./bin/cattage-controller', '/cattage-controller'),
        ]
     )
 

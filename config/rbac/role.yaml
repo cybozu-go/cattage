@@ -39,19 +39,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - multi-tenancy.cybozu.com
+  - cattage.cybozu.io
   resources:
   - tenants
   verbs:
@@ -63,19 +51,31 @@ rules:
   - update
   - watch
 - apiGroups:
-  - multi-tenancy.cybozu.com
+  - cattage.cybozu.io
   resources:
   - tenants/finalizers
   verbs:
   - update
 - apiGroups:
-  - multi-tenancy.cybozu.com
+  - cattage.cybozu.io
   resources:
   - tenants/status
   verbs:
   - get
   - patch
   - update
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:

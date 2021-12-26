@@ -2,7 +2,7 @@
 
 ## Overview
 
-neco-tenant-controller is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][] with [Accurate][].
+Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][] with [Accurate][].
 
 ## Motivation
 

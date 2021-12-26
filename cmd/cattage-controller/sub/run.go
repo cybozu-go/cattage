@@ -8,11 +8,11 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	multitenancyv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
-	"github.com/cybozu-go/neco-tenant-controller/controllers"
-	"github.com/cybozu-go/neco-tenant-controller/hooks"
-	cacheclient "github.com/cybozu-go/neco-tenant-controller/pkg/client"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/config"
+	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/controllers"
+	"github.com/cybozu-go/cattage/hooks"
+	cacheclient "github.com/cybozu-go/cattage/pkg/client"
+	"github.com/cybozu-go/cattage/pkg/config"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -29,8 +29,8 @@ func subMain(ns, addr string, port int) error {
 	if err := clientgoscheme.AddToScheme(scheme); err != nil {
 		return fmt.Errorf("unable to add client-go objects: %w", err)
 	}
-	if err := multitenancyv1beta1.AddToScheme(scheme); err != nil {
-		return fmt.Errorf("unable to add neco-tenant-controller objects: %w", err)
+	if err := cattagev1beta1.AddToScheme(scheme); err != nil {
+		return fmt.Errorf("unable to add cattage objects: %w", err)
 	}
 
 	cfgData, err := os.ReadFile(options.configFile)
@@ -74,7 +74,7 @@ func subMain(ns, addr string, port int) error {
 
 	if err := controllers.NewApplicationReconciler(
 		mgr.GetClient(),
-		mgr.GetEventRecorderFor("neco-tenant-controller"),
+		mgr.GetEventRecorderFor("cattage"),
 		cfg,
 	).SetupWithManager(ctx, mgr); err != nil {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)

@@ -2,9 +2,9 @@
 language = "en"
 multilingual = false
 src = "."
-title = "neco-tenant-controller Documentation"
+title = "Cattage Documentation"
 
 [output.html]
-git-repository-url = "https://github.com/cybozu-go/neco-tenant-controller"
-edit-url-template = "https://github.com/cybozu-go/neco-tenant-controller/edit/main/docs/{path}"
-site-url = "/neco-tenant-controller/"
+git-repository-url = "https://github.com/cybozu-go/cattage"
+edit-url-template = "https://github.com/cybozu-go/cattage/edit/main/docs/{path}"
+site-url = "/cattage/"

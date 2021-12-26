@@ -3,8 +3,8 @@ package hooks
 import (
 	"context"
 
-	tenantv1beta1 "github.com/cybozu-go/neco-tenant-controller/api/v1beta1"
-	"github.com/cybozu-go/neco-tenant-controller/pkg/constants"
+	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/pkg/constants"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,12 +15,12 @@ var _ = Describe("Tenant webhook", func() {
 	ctx := context.Background()
 
 	It("should allow creating a tenant", func() {
-		tenant := &tenantv1beta1.Tenant{
+		tenant := &cattagev1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "a-team",
 			},
-			Spec: tenantv1beta1.TenantSpec{
-				Namespaces: []tenantv1beta1.NamespaceSpec{
+			Spec: cattagev1beta1.TenantSpec{
+				Namespaces: []cattagev1beta1.NamespaceSpec{
 					{
 						Name: "app-new",
 					},
@@ -37,12 +37,12 @@ var _ = Describe("Tenant webhook", func() {
 	})
 
 	It("should deny creating a tenant with other owner's namespace", func() {
-		tenant := &tenantv1beta1.Tenant{
+		tenant := &cattagev1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "b-team",
 			},
-			Spec: tenantv1beta1.TenantSpec{
-				Namespaces: []tenantv1beta1.NamespaceSpec{
+			Spec: cattagev1beta1.TenantSpec{
+				Namespaces: []cattagev1beta1.NamespaceSpec{
 					{
 						Name: "app-y-team",
 					},
@@ -55,12 +55,12 @@ var _ = Describe("Tenant webhook", func() {
 	})
 
 	It("should deny creating a tenant with template namespace", func() {
-		tenant := &tenantv1beta1.Tenant{
+		tenant := &cattagev1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "d-team",
 			},
-			Spec: tenantv1beta1.TenantSpec{
-				Namespaces: []tenantv1beta1.NamespaceSpec{
+			Spec: cattagev1beta1.TenantSpec{
+				Namespaces: []cattagev1beta1.NamespaceSpec{
 					{
 						Name: "template",
 					},
@@ -73,12 +73,12 @@ var _ = Describe("Tenant webhook", func() {
 	})
 
 	It("should deny creating a tenant with other group's namespace", func() {
-		tenant := &tenantv1beta1.Tenant{
+		tenant := &cattagev1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "e-team",
 			},
-			Spec: tenantv1beta1.TenantSpec{
-				Namespaces: []tenantv1beta1.NamespaceSpec{
+			Spec: cattagev1beta1.TenantSpec{
+				Namespaces: []cattagev1beta1.NamespaceSpec{
 					{
 						Name: "sub-2",
 					},

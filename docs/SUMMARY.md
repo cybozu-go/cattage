@@ -1,6 +1,6 @@
 # Summary
 
-[neco-tenant-controller](README.md)
+[Cattage](README.md)
 
 # User manual
 

@@ -1,4 +1,4 @@
-module github.com/cybozu-go/neco-tenant-controller
+module github.com/cybozu-go/cattage
 
 go 1.16
 
