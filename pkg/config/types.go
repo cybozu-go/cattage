@@ -18,20 +18,22 @@ type Config struct {
 
 // NamespaceConfig represents the configuration about Namespaces
 type NamespaceConfig struct {
-	// CommonLabels are labels to add to all namespaces to be deployed by neco-tenant-controller
+	// CommonLabels are labels to be added to all namespaces belonging to a tenant
 	CommonLabels map[string]string `json:"commonLabels,omitempty"`
 
-	// CommonAnnotations are annotations to add to all namespaces to be deployed by neco-tenant-controller
+	// CommonAnnotations are annotations to be added to all namespaces belonging to a tenant
 	CommonAnnotations map[string]string `json:"commonAnnotations,omitempty"`
 
+	// RoleBindingTemplate is a template for RoleBinding resource that is created on all namespaces belonging to a tenant
 	RoleBindingTemplate string `json:"roleBindingTemplate"`
 }
 
 // ArgoCDConfig represents the configuration about Argo CD
 type ArgoCDConfig struct {
-	// Namespace is the name of namespace where Argo CD is deployed
+	// Namespace is the name of namespace where Argo CD is running
 	Namespace string `json:"namespace"`
 
+	// AppProjectTemplate is a template for AppProject resources that is created for each tenant
 	AppProjectTemplate string `json:"appProjectTemplate"`
 }
 

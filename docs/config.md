@@ -2,31 +2,116 @@
 
 ## Configuration file
 
-`neco-tenant-controller` reads its configurations from a configuration file.
+`neco-tenant-controller` reads a configuration file on startup. The default location is `/etc/neco-tenant-controller/config.yaml`.
+The location can be changed with `--config-file` flag.
+
+The configuration file should be a JSON or YAML file having the following keys:
+
+| Key                             | Type                | Description                                                                                |
+|---------------------------------|---------------------|--------------------------------------------------------------------------------------------|
+| `namespace.commonLabels`        | `map[string]string` | Labels to be added to all namespaces belonging to a tenant.                                |
+| `namespace.commonAnnotations`   | `map[string]string` | Annotations to be added to all namespaces belonging to a tenant.                           |
+| `namespace.roleBindingTemplate` | `string`            | Template for RoleBinding resource that is created on all namespaces belonging to a tenant. |
+| `argocd.namepsace`              | `string`            | The name of namespace where Argo CD is running.                                            |
+| `argocd.appProjectTemplate`     | `string`            | Template for AppProject resources that is created for each tenant.                         |
 
 The repository includes an example as follows:
 
 ```yaml
 namespace:
-  # Labels to add to all namespaces to be deployed by neco-tenant-controller
   commonLabels:
     accurate.cybozu.com/template: init-template
-
+  commonAnnotations:
+    foo: bar
+  roleBindingTemplate: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: admin
+    subjects:
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: {{ .Name }}
+      {{ range .ExtraAdmins }}
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: {{ . }}
+      {{ end }}
 argocd:
-  # The name of namespace where Argo CD is deployed
   namespace: argocd
-
   appProjectTemplate: |
     apiVersion: argoproj.io/v1alpha1
     kind: AppProject
     spec:
-      namespaceResourceBlacklist:
-        - group: ""
-          kind: ResourceQuota
-        - group: ""
-          kind: LimitRange
-      orphanedResources:
-        warn: false
+      destinations:
+      {{ range .Namespaces }}
+        - namespace: {{ . }}
+          server: '*'
+      {{ end }}
+      roles:
+        - groups:
+            - {{ .Name }}
+            {{ range .ExtraAdmins }}
+            - {{ . }}
+            {{ end }}
+          name: admin
+          policies:
+            - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
       sourceRepos:
         - '*'
+```
+
+`roleBindingTemplate` and `appProjectTemplate` can be written in go-template format.
+
+`roleBindingTemplate` can use the following variables:
+
+| Key           | Type       | Description                   |
+|---------------|------------|-------------------------------|
+| `Name`        | `string`   | The name of a tenant.         |
+| `ExtraAdmins` | `[]string` | List of extra administrators. |
+
+`appProjectTemplate` can use the following variables:
+
+| Key           | Type       | Description                                                          |
+|---------------|------------|----------------------------------------------------------------------|
+| `Name`        | `string`   | The name of a tenant.                                                |
+| `ExtraAdmins` | `[]string` | List of extra administrators.                                        |
+| `Namespaces`  | `[]string` | List of namespaces belonging to a tenant (including sub-namespaces). |
+
+## Environment variables
+
+| Name            | Required | Description                                                   |
+|-----------------|----------|---------------------------------------------------------------|
+| `POD_NAMESPACE` | Yes      | The namespace name where `neco-tenant-controller` is running. |
+
+## Command-line flags
+
+```
+Flags:
+      --add_dir_header                   If true, adds the file directory to the header
+      --alsologtostderr                  log to standard error as well as files
+      --cert-dir string                  webhook certificate directory
+      --config-file string               Configuration file path (default "/etc/neco-tenant-controller/config.yaml")
+      --health-probe-addr string         Listen address for health probes (default ":8081")
+  -h, --help                             help for neco-tenant-controller
+      --leader-election-id string        ID for leader election by controller-runtime (default "neco-tenant-controller")
+      --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
+      --log_dir string                   If non-empty, write log files in this directory
+      --log_file string                  If non-empty, use this log file
+      --log_file_max_size uint           Defines the maximum size a log file can grow to. Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
+      --logtostderr                      log to standard error instead of files (default true)
+      --metrics-addr string              The address the metric endpoint binds to (default ":8080")
+      --skip_headers                     If true, avoid header prefixes in the log messages
+      --skip_log_headers                 If true, avoid headers when opening log files
+      --stderrthreshold severity         logs at or above this threshold go to stderr (default 2)
+  -v, --v Level                          number for the log level verbosity
+      --version                          version for neco-tenant-controller
+      --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
+      --webhook-addr string              Listen address for the webhook endpoint (default ":9443")
+      --zap-devel                        Development Mode defaults(encoder=consoleEncoder,logLevel=Debug,stackTraceLevel=Warn). Production Mode defaults(encoder=jsonEncoder,logLevel=Info,stackTraceLevel=Error)
+      --zap-encoder encoder              Zap log encoding (one of 'json' or 'console')
+      --zap-log-level level              Zap Level to configure the verbosity of logging. Can be one of 'debug', 'info', 'error', or any integer value > 0 which corresponds to custom debug levels of increasing verbosity
+      --zap-stacktrace-level level       Zap Level at and above which stacktraces are captured (one of 'info', 'error', 'panic').
 ```
