@@ -13,10 +13,22 @@ import (
 
 var _ = Describe("neco-tenant-controller", func() {
 	It("should prepare", func() {
-		kubectlSafe(nil, "apply", "-f", "../config/samples/00_template.yaml")
-		kubectlSafe(nil, "apply", "-f", "../config/samples/01_tenant.yaml")
-		kubectlSafe(nil, "apply", "-f", "../config/samples/02_subnamespace.yaml")
-		kubectlSafe(nil, "apply", "-f", "../config/samples/03_application.yaml")
+		Eventually(func() error {
+			_, err := kubectl(nil, "apply", "-f", "../config/samples/00_template.yaml")
+			return err
+		}).Should(Succeed())
+		Eventually(func() error {
+			_, err := kubectl(nil, "apply", "-f", "../config/samples/01_tenant.yaml")
+			return err
+		}).Should(Succeed())
+		Eventually(func() error {
+			_, err := kubectl(nil, "apply", "-f", "../config/samples/02_subnamespace.yaml")
+			return err
+		}).Should(Succeed())
+		Eventually(func() error {
+			_, err := kubectl(nil, "apply", "-f", "../config/samples/03_application.yaml")
+			return err
+		}).Should(Succeed())
 	})
 
 	It("should sync application", func() {
