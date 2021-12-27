@@ -2,42 +2,58 @@
 
 ## Overview
 
-`neco-tenant-controller` is a custom controller that uses [Accurate][] and [Argo CD][] to provide multi-tenant environment for Kubernetes cluster.
+neco-tenant-controller is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][] with [Accurate][].
 
 ## Motivation
 
-We have developed the following mechanism for multi-tenant [Argo CD][].
+Argo CD has a problem that it is difficult to implement app-of-apps pattern in a multi-tenancy environment.
+
+https://github.com/argoproj/argo-cd/issues/2785
+
+We have developed the following mechanism to resolve the problem.
 
 https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy
 
-However, the above mechanism has the following problems:
+However, the mechanism has the following problems:
 
 - Tenant users cannot create app-of-apps Application resources. They need to ask an administrator for that.
 - Application resources are not strictly validated. Tenant users can specify Project for other tenants, and can also specify duplicate names.
-- When a SubNamespace is created in [HNC][] or [Accurate][], an administrator needs to add it to the destinations of Application resources.
+- When a SubNamespace is created in [HNC][] or [Accurate][], an administrator needs to add it to the destinations of the Application resource.
   (Argo CD supports specifying wildcards in destinations, but that is not enough for us.)
+
+We are hoping for a better solution.
 
 ## Goals
 
-- Develop a custom controller to automate the configuration for multi-tenancy.
-- Automates the creation of root-namespaces and AppProject for administrators.
+- Develop a Kubernetes custom controller to automate the configuration for multi-tenancy of Argo CD with Accurate.
+- Automates the creation of root-namespaces and AppProject for each tenant.
 - Allow tenant users to create Application resources in any namespace.
 - Perform strict validation of Application resources for security.
 
 ## User stories
 
-### Adding a team
+### Adding a tenant
 
-Administrators only need to create one custom resource to add a team to a Kubernetes cluster.
+An administrator only need to create one custom resource to add a tenant to a Kubernetes cluster.
 No more manual operations to add Namespaces and Applications.
+
+Tenant users can create sub-namespaces within their tenant.
 
 ### Adding an app-of-apps Application
 
+Tenant users can create Application resources within their sub-namespaces.
+Application resources are strictly validated.
+No more deploying to another tenant's namespace by mistake.
+
 ### Changing ownership
 
+There are cases where you want to move ownership of an application between tenants.
+Accurate supports `kubectl accurate sub move` command to change the parent of a sub-namespace.
 
-## Upgrade Strategy
+https://cybozu-go.github.io/accurate/subnamespaces.html#changing-the-parent-of-a-sub-namespace
 
+An administrators can use this command to move the sub-namespace to another tenant.
+The permission of AppProjects, Applications and Namespaces will be updated automatically.
 
 ## Alternatives
 
