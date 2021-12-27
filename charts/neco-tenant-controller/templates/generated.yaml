@@ -256,7 +256,6 @@ metadata:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
     app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
     app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    control-plane: controller-manager
     helm.sh/chart: '{{ include "neco-tenant-controller.chart" . }}'
   name: '{{ template "neco-tenant-controller.fullname" . }}-controller-manager-metrics-service'
   namespace: '{{ .Release.Namespace }}'
@@ -267,8 +266,8 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
+    app.kubernetes.io/component: controller
     app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
-    control-plane: controller-manager
 ---
 apiVersion: v1
 kind: Service
@@ -286,8 +285,8 @@ spec:
     protocol: TCP
     targetPort: 9443
   selector:
+    app.kubernetes.io/component: controller
     app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
-    control-plane: controller-manager
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
