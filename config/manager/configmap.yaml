@@ -8,7 +8,7 @@ data:
     namespace:
       commonLabels:
         accurate.cybozu.com/template: init-template
-      rolebindingTemplate: |
+      roleBindingTemplate: |
         apiVersion: rbac.authorization.k8s.io/v1
         kind: RoleBinding
         roleRef:

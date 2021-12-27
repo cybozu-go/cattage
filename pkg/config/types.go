@@ -21,10 +21,10 @@ type NamespaceConfig struct {
 	// CommonLabels are labels to add to all namespaces to be deployed by neco-tenant-controller
 	CommonLabels map[string]string `json:"commonLabels,omitempty"`
 
-	// CommonLabels are labels to add to all namespaces to be deployed by neco-tenant-controller
+	// CommonAnnotations are annotations to add to all namespaces to be deployed by neco-tenant-controller
 	CommonAnnotations map[string]string `json:"commonAnnotations,omitempty"`
 
-	RoleBindingTemplate string `json:"rolebindingTemplate"`
+	RoleBindingTemplate string `json:"roleBindingTemplate"`
 }
 
 // ArgoCDConfig represents the configuration about Argo CD
@@ -43,7 +43,7 @@ func (c *Config) Validate() error {
 	allErrs = append(allErrs, v1annotationvalidation.ValidateAnnotations(c.Namespace.CommonAnnotations, field.NewPath("namespace", "commonAnnotations"))...)
 
 	if len(c.Namespace.RoleBindingTemplate) == 0 {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("namespace", "rolebindingTemplate"), c.Namespace.RoleBindingTemplate, "should not be empty"))
+		allErrs = append(allErrs, field.Invalid(field.NewPath("namespace", "roleBindingTemplate"), c.Namespace.RoleBindingTemplate, "should not be empty"))
 	}
 
 	for _, msg := range validation.IsDNS1123Subdomain(c.ArgoCD.Namespace) {

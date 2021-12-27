@@ -14,7 +14,7 @@ data:
       {{- with .Values.controller.config.namespace.commonAnntations }}
       commonAnnotations: {{ toYaml . | nindent 8 }}
       {{- end }}
-      rolebindingTemplate: {{ required ".Values.controller.config.namespace.rolebindingTemplate required!" .Values.controller.config.namespace.rolebindingTemplate | toYaml | nindent 8 }}
+      roleBindingTemplate: {{ required ".Values.controller.config.namespace.roleBindingTemplate required!" .Values.controller.config.namespace.roleBindingTemplate | toYaml | nindent 8 }}
     argocd:
       namespace: {{ required ".Values.controller.config.argocd.namespace required!" .Values.controller.config.argocd.namespace }}
       appProjectTemplate: {{ required ".Values.controller.config.argocd.appProjectTemplate required!" .Values.controller.config.argocd.appProjectTemplate | toYaml | nindent 8 }}

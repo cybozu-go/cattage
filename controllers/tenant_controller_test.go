@@ -24,10 +24,10 @@ import (
 )
 
 //go:embed testdata/appprojecttemplate.yaml
-var appprojectTemplate string
+var appProjectTemplate string
 
 //go:embed testdata/rolebindingtemplate.yaml
-var rolebindingTemplate string
+var roleBindingTemplate string
 
 var _ = Describe("Tenant controller", func() {
 	ctx := context.Background()
@@ -51,11 +51,11 @@ var _ = Describe("Tenant controller", func() {
 				CommonAnnotations: map[string]string{
 					"hoge": "fuga",
 				},
-				RoleBindingTemplate: rolebindingTemplate,
+				RoleBindingTemplate: roleBindingTemplate,
 			},
 			ArgoCD: tenantconfig.ArgoCDConfig{
 				Namespace:          "argocd",
-				AppProjectTemplate: appprojectTemplate,
+				AppProjectTemplate: appProjectTemplate,
 			},
 		}
 		tr := NewTenantReconciler(mgr.GetClient(), config)
