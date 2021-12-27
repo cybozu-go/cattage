@@ -1,0 +1,77 @@
+image:
+  # image.repository -- neco-tenant-controller image repository to use.
+  repository: ghcr.io/cybozu-go/neco-tenant-controller
+
+  # image.tag -- neco-tenant-controller image tag to use.
+  # @default -- `{{ .Chart.AppVersion }}`
+  tag:  # 0.1.0
+
+  # image.pullPolicy -- neco-tenant-controller image pullPolicy.
+  pullPolicy:  # Always
+
+controller:
+  # controller.replicas -- Specify the number of replicas of the controller Pod.
+  replicas: 1
+
+  # controller.resources -- Specify resources.
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+  # controller.terminationGracePeriodSeconds -- Specify terminationGracePeriodSeconds.
+  terminationGracePeriodSeconds: 10
+
+  # controller.extraArgs -- Optional additional arguments.
+  extraArgs: []
+
+  config:
+    # controller.config.namespace --
+    namespace:
+      commonLabels:
+        accurate.cybozu.com/template: init-template
+      rolebindingTemplate: |
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: admin
+        subjects:
+          - apiGroup: rbac.authorization.k8s.io
+            kind: Group
+            name: {{ .Name }}
+          {{ range .ExtraAdmins }}
+          - apiGroup: rbac.authorization.k8s.io
+            kind: Group
+            name: {{ . }}
+          {{ end }}
+    argocd:
+      namespace: argocd
+      appProjectTemplate: |
+        apiVersion: argoproj.io/v1alpha1
+        kind: AppProject
+        spec:
+          destinations:
+          {{ range .Namespaces }}
+            - namespace: {{ . }}
+              server: '*'
+          {{ end }}
+          namespaceResourceBlacklist:
+            - group: ""
+              kind: ResourceQuota
+            - group: ""
+              kind: LimitRange
+          orphanedResources:
+            warn: false
+          roles:
+            - groups:
+                - cybozu-go:{{ .Name }}
+                {{ range .ExtraAdmins }}
+                - cybozu-go:{{ . }}
+                {{ end }}
+              name: admin
+              policies:
+                - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
+          sourceRepos:
+            - '*'

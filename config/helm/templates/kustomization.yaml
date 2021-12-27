@@ -1,0 +1,16 @@
+resources:
+  - ../../rbac
+  - ../../webhook
+
+namespace: '{{ .Release.Namespace }}'
+
+namePrefix: '{{ template "neco-tenant-controller.fullname" . }}-'
+
+commonLabels:
+  app.kubernetes.io/name: '{{ include "neco-tenant-controller.name" . }}'
+
+patchesStrategicMerge:
+  - webhookcainjection_patch.yaml
+
+transformers:
+  - label-transformer.yaml

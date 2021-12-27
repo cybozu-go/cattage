@@ -72,9 +72,7 @@ $(KUBECTL):
 	chmod a+x $@
 
 $(HELM):
-	mkdir -p $(BIN_DIR)
-	curl -L -sS https://get.helm.sh/helm-v$(HELM_VERSION)-linux-amd64.tar.gz \
-	  | tar xz -C $(BIN_DIR) --strip-components 1 linux-amd64/helm
+	$(MAKE) -C .. helm
 
 .PHONY: argocd
 argocd: $(ARGOCD)

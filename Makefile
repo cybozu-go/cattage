@@ -2,6 +2,7 @@
 CTRL_TOOLS_VERSION=0.7.0
 CTRL_RUNTIME_VERSION := $(shell awk '/sigs.k8s.io\/controller-runtime/ {print substr($$2, 2)}' go.mod)
 KUSTOMIZE_VERSION = 4.4.1
+HELM_VERSION = 3.7.1
 CRD_TO_MARKDOWN_VERSION = 0.0.3
 TILT_VERSION = 0.23.4
 CTLPTL_VERSION = 0.6.2
@@ -49,6 +50,9 @@ help: ## Display this help.
 .PHONY: manifests
 manifests: kustomize controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(KUSTOMIZE) build config/helm/crds > charts/neco-tenant-controller/crds/tenant.yaml
+	$(KUSTOMIZE) build config/helm/templates > charts/neco-tenant-controller/templates/generated.yaml
+
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -144,6 +148,15 @@ $(KUSTOMIZE):
 	mkdir -p bin
 	curl -fsL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv$(KUSTOMIZE_VERSION)/kustomize_v$(KUSTOMIZE_VERSION)_linux_amd64.tar.gz | \
 	tar -C bin -xzf -
+
+HELM := $(shell pwd)/bin/helm
+.PHONY: helm
+helm: $(HELM) ## Download helm locally if necessary.
+
+$(HELM):
+	mkdir -p $(BIN_DIR)
+	curl -L -sS https://get.helm.sh/helm-v$(HELM_VERSION)-linux-amd64.tar.gz \
+	  | tar xz -C $(BIN_DIR) --strip-components 1 linux-amd64/helm
 
 CRD_TO_MARKDOWN := $(shell pwd)/bin/crd-to-markdown
 .PHONY: crd-to-markdown
