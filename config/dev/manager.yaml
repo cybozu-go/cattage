@@ -12,3 +12,4 @@ spec:
             - /mneco-tenant-controller
           args: null
           name: manager
+          securityContext: null

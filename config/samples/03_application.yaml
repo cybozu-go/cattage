@@ -10,9 +10,9 @@ metadata:
 spec:
   project: a-team
   source:
-    repoURL: https://github.com/neco-test/apps-sandbox.git
-    targetRevision: master
-    path: testhttpd
+    repoURL: https://github.com/cybozu-go/neco-tenant-controller.git
+    targetRevision: main
+    path: samples/argocd-config
   destination:
     server: https://kubernetes.default.svc
     namespace: sub-1

@@ -18,7 +18,7 @@ SUDO = sudo
 SHELL = /bin/bash
 .SHELLFLAGS = -e -o pipefail -c
 
-CRD_OPTIONS = "crd:crdVersions=v1,maxDescLen=220"
+CRD_OPTIONS = "crd:crdVersions=v1"
 
 # for Go
 GOOS = $(shell go env GOOS)
