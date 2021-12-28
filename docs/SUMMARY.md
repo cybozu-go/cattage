@@ -5,7 +5,7 @@
 # User manual
 
 - [Overview](overview.md)
-- [Getting started](getting_started.md)
+- [Setup](setup.md)
 - [Usage](usage.md)
 
 # References
