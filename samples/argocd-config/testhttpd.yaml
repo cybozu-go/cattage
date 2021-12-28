@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: testhttpd
+  namespace: sub-1
+spec:
+  project: a-team
+  source:
+    path: samples/testhttpd
+    targetRevision: main
+    repoURL: https://github.com/cybozu-go/neco-tenant-controller.git
+  destination:
+    namespace: sub-1
+    server: https://kubernetes.default.svc
