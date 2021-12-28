@@ -273,6 +273,24 @@ func (r *ApplicationReconciler) syncApplicationStatus(ctx context.Context, argoc
 	newApp.SetName(tenantApp.GetName())
 	if argocdApp != nil && argocdApp.UnstructuredContent()["status"] != nil {
 		newApp.UnstructuredContent()["status"] = argocdApp.DeepCopy().UnstructuredContent()["status"]
+
+		// This is a workaround.
+		// When `status.summary` is empty, controller will fail to sync status.
+		// So, controller sets an empty slice as dummy data.
+		summary, found, err := unstructured.NestedFieldCopy(newApp.UnstructuredContent(), "status", "summary")
+		if err != nil {
+			return err
+		}
+		if found {
+			summaryMap, ok := summary.(map[string]interface{})
+			if ok && len(summaryMap) == 0 {
+				logger.Info("status.summary is empty")
+				err = unstructured.SetNestedStringSlice(newApp.UnstructuredContent(), []string{""}, "status", "summary", "images")
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
 
 	managed, err := extract.ExtractManagedFields(tenantApp, constants.StatusFieldManager)
