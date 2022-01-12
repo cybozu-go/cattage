@@ -7,5 +7,5 @@ apiVersion: ctlptl.dev/v1alpha1
 kind: Cluster
 name: kind-dev
 product: kind
-kubernetesVersion: v1.22.0
+kubernetesVersion: v1.23.0
 registry: ctlptl-registry

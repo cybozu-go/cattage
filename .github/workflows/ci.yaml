@@ -25,6 +25,9 @@ jobs:
     - uses: actions/setup-go@v2
       with:
         go-version: ${{ env.go-version }}
+    - uses: aquaproj/aqua-installer@17bae6fde43b710e28a1651c37c7b85fc48fe7ab
+      with:
+        aqua_version: v0.10.0
     - run: make test
     - run: make check-generate
     - run: make envtest
@@ -32,13 +35,16 @@ jobs:
     name: End-to-End Tests
     strategy:
       matrix:
-        k8s-version: ["1.22.2"]
+        k8s-version: ["1.22.4", "1.23.1"]
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-go@v2
       with:
         go-version: ${{ env.go-version }}
+    - uses: aquaproj/aqua-installer@17bae6fde43b710e28a1651c37c7b85fc48fe7ab
+      with:
+        aqua_version: v0.10.0
     - run: make start KUBERNETES_VERSION=${{ matrix.k8s-version }}
       working-directory: e2e
     - run: make test

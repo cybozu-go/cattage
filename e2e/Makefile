@@ -1,15 +1,8 @@
-KIND_VERSION = 0.11.1
-KUBERNETES_VERSION = 1.22.2
+KUBERNETES_VERSION = 1.23.1
 ARGOCD_VERSION = 2.2.2
-HELM_VERSION = 3.7.1
 
-BIN_DIR := $(dir $(shell pwd))bin
-KIND := $(BIN_DIR)/kind
-KUBECTL := $(BIN_DIR)/kubectl
-HELM := $(BIN_DIR)/helm
-ARGOCD = $(BIN_DIR)/argocd
 KIND_CONFIG = kind-config.yaml
-export KUBECTL KUBECONFIG
+export KUBECONFIG
 
 .PHONY: help
 help:
@@ -21,62 +14,40 @@ help:
 	@echo "stop       Stop the kind cluster"
 
 .PHONY: start
-start: $(KIND) $(KUBECTL)
-	$(KIND) create cluster --name=cattage --config=$(KIND_CONFIG) --image=kindest/node:v$(KUBERNETES_VERSION) --wait 1m
+start:
+	kind create cluster --name=cattage --config=$(KIND_CONFIG) --image=kindest/node:v$(KUBERNETES_VERSION) --wait 1m
 	cd ..; docker build --no-cache -t cattage:dev .
-	$(KIND) load docker-image cattage:dev --name=cattage
+	kind load docker-image cattage:dev --name=cattage
 	$(MAKE) prepare
-	$(KUBECTL) apply -k ../config/default
-	$(KUBECTL) -n cattage wait --for=condition=available --timeout=180s --all deployments
+	kubectl apply -k ../config/default
+	kubectl -n cattage wait --for=condition=available --timeout=180s --all deployments
 
 .PHONY: prepare
-prepare: $(KUBECTL) $(HELM)
-	$(KUBECTL) apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
-	$(KUBECTL) -n cert-manager wait --for=condition=available --timeout=180s --all deployments
-	$(KUBECTL) create ns argocd
-	curl -sSLf https://raw.githubusercontent.com/argoproj/argo-cd/v$(ARGOCD_VERSION)/manifests/install.yaml | $(KUBECTL) -n argocd apply -f -
-	$(KUBECTL) -n argocd wait --for=condition=available --timeout=180s --all deployments
-	$(HELM) repo add accurate https://cybozu-go.github.io/accurate/
-	$(HELM) repo update
-	$(HELM) install --create-namespace --namespace accurate accurate -f accurate-values.yaml accurate/accurate
-	$(KUBECTL) -n accurate wait --for=condition=available --timeout=180s --all deployments
+prepare:
+	kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+	kubectl -n cert-manager wait --for=condition=available --timeout=180s --all deployments
+	kubectl create ns argocd
+	curl -sSLf https://raw.githubusercontent.com/argoproj/argo-cd/v$(ARGOCD_VERSION)/manifests/install.yaml | kubectl -n argocd apply -f -
+	kubectl -n argocd wait --for=condition=available --timeout=180s --all deployments
+	helm repo add accurate https://cybozu-go.github.io/accurate/
+	helm repo update
+	helm install --create-namespace --namespace accurate accurate -f accurate-values.yaml accurate/accurate
+	kubectl -n accurate wait --for=condition=available --timeout=180s --all deployments
 
 .PHONY: test
 test:
-	env PATH=$$(pwd)/../bin:$$PATH RUN_E2E=1 \
+	env RUN_E2E=1 \
 		go test -v -race . -ginkgo.progress -ginkgo.v -ginkgo.failFast
 
 .PHONY: logs
 logs:
 	rm -rf logs.tar.gz logs
-	$(KIND) export logs --name=cattage ./logs
+	kind export logs --name=cattage ./logs
 	tar czf logs.tar.gz logs
 	rm -rf logs
 
 .PHONY: stop
-stop: $(KIND)
-	$(KIND) delete cluster --name=cattage
+stop: 
+	kind delete cluster --name=cattage
 	-docker image rm cattage:dev
 	-docker image prune -f
-
-.PHONY: kind
-kind: $(KIND)
-$(KIND):
-	mkdir -p $(BIN_DIR)
-	curl -sfL -o $@ https://github.com/kubernetes-sigs/kind/releases/download/v$(KIND_VERSION)/kind-linux-amd64
-	chmod a+x $@
-
-$(KUBECTL):
-	mkdir -p $(BIN_DIR)
-	curl -sfL -o $@ https://dl.k8s.io/release/v$(KUBERNETES_VERSION)/bin/linux/amd64/kubectl
-	chmod a+x $@
-
-$(HELM):
-	$(MAKE) -C .. helm
-
-.PHONY: argocd
-argocd: $(ARGOCD)
-$(ARGOCD):
-	mkdir -p $(BIN_DIR)
-	curl -sSLf https://github.com/argoproj/argo-cd/releases/download/v$(ARGOCD_VERSION)/argocd-linux-amd64 -o $(ARGOCD)
-	chmod 755 $(ARGOCD)

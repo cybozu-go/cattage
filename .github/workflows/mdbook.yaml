@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
+    - uses: aquaproj/aqua-installer@17bae6fde43b710e28a1651c37c7b85fc48fe7ab
+      with:
+        aqua_version: v0.10.0
     - run: make book
     - uses: actions/upload-artifact@v2
       with:
