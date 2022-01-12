@@ -162,6 +162,7 @@ func (r *ApplicationReconciler) fixProject(ctx context.Context, argocdApp *unstr
 	tenantName := ns.Labels[constants.OwnerTenant]
 	if tenantName == "" {
 		if argocdApp != nil && argocdApp.GetDeletionTimestamp() == nil {
+			// Applications on namespaces that do not belong to a tenant will be removed.
 			logger.Info("Remove unmanaged application")
 			err = r.client.Delete(ctx, argocdApp)
 			if err != nil {
