@@ -22,14 +22,14 @@ data:
           - kind: ServiceAccount
             name: node-{{ .Name }}
             namespace: teleport
-          {{ range .ExtraAdmins }}
+          {{- range .ExtraAdmins }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ . }}
           - kind: ServiceAccount
             name: node-{{ . }}
             namespace: teleport
-          {{ end }}
+          {{- end }}
     argocd:
       namespace: argocd
       appProjectTemplate: |
@@ -37,10 +37,10 @@ data:
         kind: AppProject
         spec:
           destinations:
-          {{ range .Namespaces }}
+          {{- range .Namespaces }}
             - namespace: {{ . }}
               server: '*'
-          {{ end }}
+          {{- end }}
           namespaceResourceBlacklist:
             - group: ""
               kind: ResourceQuota
@@ -51,11 +51,15 @@ data:
           roles:
             - groups:
                 - cybozu-go:{{ .Name }}
-                {{ range .ExtraAdmins }}
+                {{- range .ExtraAdmins }}
                 - cybozu-go:{{ . }}
-                {{ end }}
+                {{- end }}
               name: admin
               policies:
                 - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
           sourceRepos:
+            {{- range .Repositories }}
+            - '{{ . }}'
+            {{- else }}
             - '*'
+            {{- end }}

@@ -8,8 +8,8 @@ subjects:
   - apiGroup: rbac.authorization.k8s.io
     kind: Group
     name: {{ .Name }}
-  {{ range .ExtraAdmins }}
+  {{- range .ExtraAdmins }}
   - apiGroup: rbac.authorization.k8s.io
     kind: Group
     name: {{ . }}
-  {{ end }}
+  {{- end }}

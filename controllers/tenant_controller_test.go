@@ -104,6 +104,9 @@ var _ = Describe("Tenant controller", func() {
 					ExtraAdmins: []string{
 						"d-team",
 					},
+					Repositories: []string{
+						"https://github.com/cybozu-go/*",
+					},
 				},
 			},
 		}
@@ -189,7 +192,7 @@ var _ = Describe("Tenant controller", func() {
 					"policies": ConsistOf("p, proj:x-team:admin, applications, *, x-team/*, allow"),
 				}),
 			),
-			"sourceRepos": ConsistOf("*"),
+			"sourceRepos": ConsistOf("https://github.com/cybozu-go/*"),
 		}))
 	})
 
@@ -306,7 +309,7 @@ var _ = Describe("Tenant controller", func() {
 					"policies": ConsistOf("p, proj:y-team:admin, applications, *, y-team/*, allow"),
 				}),
 			),
-			"sourceRepos": ConsistOf("*"),
+			"sourceRepos": ConsistOf("https://github.com/cybozu-go/*"),
 		}))
 
 		By("removing app-y2")

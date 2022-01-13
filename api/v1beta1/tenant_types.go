@@ -58,6 +58,10 @@ type ArgoCDSpec struct {
 	// Specify this if you want other tenant teams to be able to use your AppProject.
 	// +optional
 	ExtraAdmins []string `json:"extraAdmins,omitempty"`
+
+	// Repositories contains list of repository URLs which can be used by the tenant.
+	// +optional
+	Repositories []string `json:"repositories,omitempty"`
 }
 
 // TenantHealth defines the observed state of Tenant

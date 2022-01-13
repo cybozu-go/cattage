@@ -18,6 +18,7 @@ ArgoCDSpec defines the desired state of the settings for Argo CD
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | extraAdmins | ExtraAdmins are the names of the team to add to the AppProject user. Specify this if you want other tenant teams to be able to use your AppProject. | []string | false |
+| repositories | Repositories contains list of repository URLs which can be used by the tenant. | []string | false |
 
 [Back to Custom Resources](#custom-resources)
 

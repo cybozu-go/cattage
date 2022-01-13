@@ -406,13 +406,15 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 
 	var buf bytes.Buffer
 	err = tpl.Execute(&buf, struct {
-		Name        string
-		Namespaces  []string
-		ExtraAdmins []string
+		Name         string
+		Namespaces   []string
+		ExtraAdmins  []string
+		Repositories []string
 	}{
-		Name:        tenant.Name,
-		Namespaces:  namespaces,
-		ExtraAdmins: tenant.Spec.ArgoCD.ExtraAdmins,
+		Name:         tenant.Name,
+		Namespaces:   namespaces,
+		ExtraAdmins:  tenant.Spec.ArgoCD.ExtraAdmins,
+		Repositories: tenant.Spec.ArgoCD.Repositories,
 	})
 	if err != nil {
 		return err

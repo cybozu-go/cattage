@@ -13,4 +13,6 @@ metadata:
 spec:
   namespaces:
     - name: app-b
-
+  argocd:
+    repositories:
+      - "https://github.com/cybozu-go/*"

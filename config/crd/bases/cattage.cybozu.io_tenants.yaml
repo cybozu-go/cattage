@@ -49,6 +49,12 @@ spec:
                     items:
                       type: string
                     type: array
+                  repositories:
+                    description: Repositories contains list of repository URLs which
+                      can be used by the tenant.
+                    items:
+                      type: string
+                    type: array
                 type: object
               namespaces:
                 description: Namespaces are the list of root namespaces that belong

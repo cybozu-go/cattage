@@ -34,11 +34,11 @@ namespace:
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: {{ .Name }}
-      {{ range .ExtraAdmins }}
+      {{- range .ExtraAdmins }}
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: {{ . }}
-      {{ end }}
+      {{- end }}
 argocd:
   namespace: argocd
   appProjectTemplate: |
@@ -46,21 +46,25 @@ argocd:
     kind: AppProject
     spec:
       destinations:
-      {{ range .Namespaces }}
+      {{- range .Namespaces }}
         - namespace: {{ . }}
           server: '*'
-      {{ end }}
+      {{- end }}
       roles:
         - groups:
             - {{ .Name }}
-            {{ range .ExtraAdmins }}
+            {{- range .ExtraAdmins }}
             - {{ . }}
-            {{ end }}
+            {{- end }}
           name: admin
           policies:
             - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
       sourceRepos:
+        {{- range .Repositories }}
+        - '{{ . }}'
+        {{- else }}
         - '*'
+        {{- end }}
 ```
 
 `roleBindingTemplate` and `appProjectTemplate` can be written in go-template format.
