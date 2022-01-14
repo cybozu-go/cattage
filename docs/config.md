@@ -34,7 +34,7 @@ namespace:
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: {{ .Name }}
-      {{- range .ExtraAdmins }}
+      {{- range .Roles.admin }}
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: {{ . }}
@@ -53,7 +53,7 @@ argocd:
       roles:
         - groups:
             - {{ .Name }}
-            {{- range .ExtraAdmins }}
+            {{- range .Roles.admin }}
             - {{ . }}
             {{- end }}
           name: admin
@@ -71,18 +71,19 @@ argocd:
 
 `roleBindingTemplate` can use the following variables:
 
-| Key           | Type       | Description                   |
-|---------------|------------|-------------------------------|
-| `Name`        | `string`   | The name of a tenant.         |
-| `ExtraAdmins` | `[]string` | List of extra administrators. |
+| Key     | Type                  | Description                                                                      |
+|---------|-----------------------|----------------------------------------------------------------------------------|
+| `Name`  | `string`              | The name of the tenant.                                                          |
+| `Roles` | `map[string][]string` | Map of other tenants that are accessible to this tenant. The key is a role name. |
 
 `appProjectTemplate` can use the following variables:
 
-| Key           | Type       | Description                                                          |
-|---------------|------------|----------------------------------------------------------------------|
-| `Name`        | `string`   | The name of a tenant.                                                |
-| `ExtraAdmins` | `[]string` | List of extra administrators.                                        |
-| `Namespaces`  | `[]string` | List of namespaces belonging to a tenant (including sub-namespaces). |
+| Key            | Type                  | Description                                                                      |
+|----------------|-----------------------|----------------------------------------------------------------------------------|
+| `Name`         | `string`              | The name of the tenant.                                                          |
+| `Namespaces`   | `[]string`            | List of namespaces belonging to a tenant (including sub-namespaces).             |
+| `Repositories` | `[]string`            | List of repository URLs which can be used by the tenant.                         |
+| `Roles`        | `map[string][]string` | Map of other tenants that are accessible to this tenant. The key is a role name. |
 
 ## Environment variables
 

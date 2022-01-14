@@ -30,6 +30,10 @@ type TenantSpec struct {
 	// ArgoCD is the settings of Argo CD for this tenant
 	// +optional
 	ArgoCD ArgoCDSpec `json:"argocd,omitempty"`
+
+	// Delegates is a list of other tenants that are delegated access to this tenant.
+	// +optional
+	Delegates []Delegate `json:"delegates,omitempty"`
 }
 
 // NamespaceSpec defines the desired state of Namespace
@@ -45,23 +49,24 @@ type NamespaceSpec struct {
 	// Annotations are the annotations to add to the namespace
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
-
-	// ExtraAdmins are the names of the team to add to the namespace administrator.
-	// Specify this if you want other tenant teams to be able to use your namespace.
-	// +optional
-	ExtraAdmins []string `json:"extraAdmins,omitempty"`
 }
 
 // ArgoCDSpec defines the desired state of the settings for Argo CD
 type ArgoCDSpec struct {
-	// ExtraAdmins are the names of the team to add to the AppProject user.
-	// Specify this if you want other tenant teams to be able to use your AppProject.
-	// +optional
-	ExtraAdmins []string `json:"extraAdmins,omitempty"`
-
 	// Repositories contains list of repository URLs which can be used by the tenant.
 	// +optional
 	Repositories []string `json:"repositories,omitempty"`
+}
+
+// Delegate defines a tenant that is delegated access to a tenant.
+type Delegate struct {
+	// Name is the name of a delegated tenant
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+
+	// Roles is a list of roles that the tenant has
+	// +kubebuilder:validation:MinItems=1
+	Roles []string `json:"roles"`
 }
 
 // TenantHealth defines the observed state of Tenant

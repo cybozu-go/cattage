@@ -16,3 +16,7 @@ spec:
   argocd:
     repositories:
       - "https://github.com/cybozu-go/*"
+  delegates:
+    - name: a-team
+      roles:
+        - admin

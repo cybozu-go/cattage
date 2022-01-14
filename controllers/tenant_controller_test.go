@@ -95,17 +95,19 @@ var _ = Describe("Tenant controller", func() {
 						Annotations: map[string]string{
 							"abc": "def",
 						},
-						ExtraAdmins: []string{
-							"c-team",
-						},
 					},
 				},
 				ArgoCD: cattagev1beta1.ArgoCDSpec{
-					ExtraAdmins: []string{
-						"d-team",
-					},
 					Repositories: []string{
 						"https://github.com/cybozu-go/*",
+					},
+				},
+				Delegates: []cattagev1beta1.Delegate{
+					{
+						Name: "c-team",
+						Roles: []string{
+							"admin",
+						},
 					},
 				},
 			},
@@ -187,7 +189,7 @@ var _ = Describe("Tenant controller", func() {
 			}),
 			"roles": ConsistOf(
 				MatchAllKeys(Keys{
-					"groups":   ConsistOf("cybozu-go:x-team", "cybozu-go:d-team"),
+					"groups":   ConsistOf("cybozu-go:x-team", "cybozu-go:c-team"),
 					"name":     Equal("admin"),
 					"policies": ConsistOf("p, proj:x-team:admin, applications, *, x-team/*, allow"),
 				}),

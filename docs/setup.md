@@ -105,7 +105,7 @@ controller:
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ .Name }}
-          {{- range .ExtraAdmins }}
+          {{- range .Roles.admin }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ . }}
@@ -124,7 +124,7 @@ controller:
           roles:
             - groups:
                 - {{ .Name }}
-                {{- range .ExtraAdmins }}
+                {{- range .Roles.admin }}
                 - {{ . }}
                 {{- end }}
               name: admin

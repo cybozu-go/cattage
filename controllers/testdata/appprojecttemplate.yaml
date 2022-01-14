@@ -16,7 +16,7 @@ spec:
   roles:
     - groups:
         - cybozu-go:{{ .Name }}
-        {{- range .ExtraAdmins }}
+        {{- range .Roles.admin }}
         - cybozu-go:{{ . }}
         {{- end }}
       name: admin

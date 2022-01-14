@@ -22,7 +22,7 @@ data:
           - kind: ServiceAccount
             name: node-{{ .Name }}
             namespace: teleport
-          {{- range .ExtraAdmins }}
+          {{- range .Roles.admin }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ . }}
@@ -51,7 +51,7 @@ data:
           roles:
             - groups:
                 - cybozu-go:{{ .Name }}
-                {{- range .ExtraAdmins }}
+                {{- range .Roles.admin }}
                 - cybozu-go:{{ . }}
                 {{- end }}
               name: admin

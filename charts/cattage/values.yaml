@@ -41,7 +41,7 @@ controller:
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ .Name }}
-          {{- range .ExtraAdmins }}
+          {{- range .Roles.admin }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ . }}
@@ -67,7 +67,7 @@ controller:
           roles:
             - groups:
                 - cybozu-go:{{ .Name }}
-                {{- range .ExtraAdmins }}
+                {{- range .Roles.admin }}
                 - cybozu-go:{{ . }}
                 {{- end }}
               name: admin

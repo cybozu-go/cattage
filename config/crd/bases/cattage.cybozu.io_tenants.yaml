@@ -42,13 +42,6 @@ spec:
               argocd:
                 description: ArgoCD is the settings of Argo CD for this tenant
                 properties:
-                  extraAdmins:
-                    description: ExtraAdmins are the names of the team to add to the
-                      AppProject user. Specify this if you want other tenant teams
-                      to be able to use your AppProject.
-                    items:
-                      type: string
-                    type: array
                   repositories:
                     description: Repositories contains list of repository URLs which
                       can be used by the tenant.
@@ -56,6 +49,27 @@ spec:
                       type: string
                     type: array
                 type: object
+              delegates:
+                description: Delegates is a list of other tenants that are delegated
+                  access to this tenant.
+                items:
+                  description: Delegate defines a tenant that is delegated access
+                    to a tenant.
+                  properties:
+                    name:
+                      description: Name is the name of a delegated tenant
+                      type: string
+                    roles:
+                      description: Roles is a list of roles that the tenant has
+                      items:
+                        type: string
+                      minItems: 1
+                      type: array
+                  required:
+                  - name
+                  - roles
+                  type: object
+                type: array
               namespaces:
                 description: Namespaces are the list of root namespaces that belong
                   to this tenant
@@ -67,13 +81,6 @@ spec:
                         type: string
                       description: Annotations are the annotations to add to the namespace
                       type: object
-                    extraAdmins:
-                      description: ExtraAdmins are the names of the team to add to
-                        the namespace administrator. Specify this if you want other
-                        tenant teams to be able to use your namespace.
-                      items:
-                        type: string
-                      type: array
                     labels:
                       additionalProperties:
                         type: string

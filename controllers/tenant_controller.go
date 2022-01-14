@@ -300,6 +300,17 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 	})
 }
 
+func rolesMap(delegates []cattagev1beta1.Delegate) map[string][]string {
+	result := make(map[string][]string)
+
+	for _, d := range delegates {
+		for _, role := range d.Roles {
+			result[role] = append(result[role], d.Name)
+		}
+	}
+	return result
+}
+
 func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
 	for _, ns := range tenant.Spec.Namespaces {
 		namespace := accorev1.Namespace(ns.Name)
@@ -332,11 +343,11 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 		}
 		var buf bytes.Buffer
 		err = tpl.Execute(&buf, struct {
-			Name        string
-			ExtraAdmins []string
+			Name  string
+			Roles map[string][]string
 		}{
-			Name:        tenant.Name,
-			ExtraAdmins: ns.ExtraAdmins,
+			Name:  tenant.Name,
+			Roles: rolesMap(tenant.Spec.Delegates),
 		})
 		if err != nil {
 			return err
@@ -408,12 +419,12 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	err = tpl.Execute(&buf, struct {
 		Name         string
 		Namespaces   []string
-		ExtraAdmins  []string
+		Roles        map[string][]string
 		Repositories []string
 	}{
 		Name:         tenant.Name,
 		Namespaces:   namespaces,
-		ExtraAdmins:  tenant.Spec.ArgoCD.ExtraAdmins,
+		Roles:        rolesMap(tenant.Spec.Delegates),
 		Repositories: tenant.Spec.ArgoCD.Repositories,
 	})
 	if err != nil {
