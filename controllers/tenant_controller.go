@@ -144,7 +144,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 	return ctrl.Result{}, nil
 }
 
-func containNamespace(roots []cattagev1beta1.NamespaceSpec, ns corev1.Namespace) bool {
+func containNamespace(roots []cattagev1beta1.RootNamespaceSpec, ns corev1.Namespace) bool {
 	for _, root := range roots {
 		if root.Name == ns.Name {
 			return true
@@ -313,7 +313,7 @@ func rolesMap(delegates []cattagev1beta1.Delegate) map[string][]string {
 }
 
 func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
-	for _, ns := range tenant.Spec.Namespaces {
+	for _, ns := range tenant.Spec.RootNamespaces {
 		namespace := accorev1.Namespace(ns.Name)
 		labels := make(map[string]string)
 		for k, v := range r.config.Namespace.CommonLabels {
@@ -376,7 +376,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	for _, ns := range nss.Items {
-		if containNamespace(tenant.Spec.Namespaces, ns) {
+		if containNamespace(tenant.Spec.RootNamespaces, ns) {
 			continue
 		}
 		err := r.disownNamespace(ctx, &ns)

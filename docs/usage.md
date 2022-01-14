@@ -10,7 +10,7 @@ kind: Tenant
 metadata:
   name: your-team
 spec:
-  namespaces:
+  rootNamespaces:
     - name: your-root
 ```
 
@@ -113,7 +113,7 @@ kind: Tenant
 metadata:
   name: new-team
 spec:
-  namespaces:
+  rootNamespaces:
     - name: new-root
 ```
 
@@ -136,7 +136,7 @@ When a tenant user delete an Application resource on the tenant's namespace, an 
 If `resources-finalizer.argocd.argoproj.io` is annotated, resources deployed by the Application will be deleted.
 
 When an administrator deleted a tenant resource:
-- Namespaces for the tenant will remain
+- Root-namespaces and sub-namespaces for the tenant will remain
 - RoleBinding on the namespaces will be deleted
 - Applications on the namespaces will be deleted
 - AppProject for the tenant will be deleted

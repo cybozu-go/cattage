@@ -81,7 +81,7 @@ func (v *tenantValidator) Handle(ctx context.Context, req admission.Request) adm
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	for _, ns := range tenant.Spec.Namespaces {
+	for _, ns := range tenant.Spec.RootNamespaces {
 		namespace := &corev1.Namespace{}
 		err := v.client.Get(ctx, client.ObjectKey{Name: ns.Name}, namespace)
 		if apierrors.IsNotFound(err) {

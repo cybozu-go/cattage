@@ -70,11 +70,11 @@ spec:
                   - roles
                   type: object
                 type: array
-              namespaces:
-                description: Namespaces are the list of root namespaces that belong
+              rootNamespaces:
+                description: RootNamespaces are the list of root namespaces that belong
                   to this tenant
                 items:
-                  description: NamespaceSpec defines the desired state of Namespace
+                  description: RootNamespaceSpec defines the desired state of Namespace
                   properties:
                     annotations:
                       additionalProperties:
@@ -95,7 +95,7 @@ spec:
                 minItems: 1
                 type: array
             required:
-            - namespaces
+            - rootNamespaces
             type: object
           status:
             description: TenantStatus defines the observed state of Tenant

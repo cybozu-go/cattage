@@ -87,7 +87,7 @@ var _ = Describe("Tenant controller", func() {
 				Name: "x-team",
 			},
 			Spec: cattagev1beta1.TenantSpec{
-				Namespaces: []cattagev1beta1.NamespaceSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
 					{
 						Name: "app-x",
 						Labels: map[string]string{
@@ -205,7 +205,7 @@ var _ = Describe("Tenant controller", func() {
 				Name: "y-team",
 			},
 			Spec: cattagev1beta1.TenantSpec{
-				Namespaces: []cattagev1beta1.NamespaceSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
 					{Name: "app-y1"},
 					{Name: "app-y2"},
 				},
@@ -318,7 +318,7 @@ var _ = Describe("Tenant controller", func() {
 		By("removing app-y2")
 		err = k8sClient.Get(ctx, client.ObjectKey{Name: tenant.Name}, tenant)
 		Expect(err).ToNot(HaveOccurred())
-		tenant.Spec.Namespaces = []cattagev1beta1.NamespaceSpec{
+		tenant.Spec.RootNamespaces = []cattagev1beta1.RootNamespaceSpec{
 			{Name: "app-y1"},
 		}
 		err = k8sClient.Update(ctx, tenant)
@@ -372,10 +372,10 @@ var _ = Describe("Tenant controller", func() {
 		By("removing app-y1")
 		err = k8sClient.Get(ctx, client.ObjectKey{Name: tenant.Name}, tenant)
 		Expect(err).ToNot(HaveOccurred())
-		tenant.Spec.Namespaces = []cattagev1beta1.NamespaceSpec{}
+		tenant.Spec.RootNamespaces = []cattagev1beta1.RootNamespaceSpec{}
 		err = k8sClient.Update(ctx, tenant)
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).Should(ContainSubstring("\"y-team\" is invalid: spec.namespaces: Invalid value: 0: spec.namespaces in body should have at least 1 items"))
+		Expect(err.Error()).Should(ContainSubstring("\"y-team\" is invalid: spec.rootNamespaces: Invalid value: 0: spec.rootNamespaces in body should have at least 1 items"))
 	})
 
 	It("should remove tenant", func() {
@@ -385,7 +385,7 @@ var _ = Describe("Tenant controller", func() {
 				Finalizers: []string{constants.Finalizer},
 			},
 			Spec: cattagev1beta1.TenantSpec{
-				Namespaces: []cattagev1beta1.NamespaceSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
 					{Name: "app-z"},
 				},
 				ArgoCD: cattagev1beta1.ArgoCDSpec{},

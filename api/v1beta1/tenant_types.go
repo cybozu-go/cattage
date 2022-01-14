@@ -22,10 +22,10 @@ import (
 
 // TenantSpec defines the desired state of Tenant
 type TenantSpec struct {
-	// Namespaces are the list of root namespaces that belong to this tenant
+	// RootNamespaces are the list of root namespaces that belong to this tenant
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinItems=1
-	Namespaces []NamespaceSpec `json:"namespaces"`
+	RootNamespaces []RootNamespaceSpec `json:"rootNamespaces"`
 
 	// ArgoCD is the settings of Argo CD for this tenant
 	// +optional
@@ -36,8 +36,8 @@ type TenantSpec struct {
 	Delegates []Delegate `json:"delegates,omitempty"`
 }
 
-// NamespaceSpec defines the desired state of Namespace
-type NamespaceSpec struct {
+// RootNamespaceSpec defines the desired state of Namespace
+type RootNamespaceSpec struct {
 	// Name is the name of namespace to be generated
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`

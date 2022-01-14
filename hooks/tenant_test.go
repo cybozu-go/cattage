@@ -20,7 +20,7 @@ var _ = Describe("Tenant webhook", func() {
 				Name: "a-team",
 			},
 			Spec: cattagev1beta1.TenantSpec{
-				Namespaces: []cattagev1beta1.NamespaceSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
 					{
 						Name: "app-new",
 					},
@@ -42,7 +42,7 @@ var _ = Describe("Tenant webhook", func() {
 				Name: "b-team",
 			},
 			Spec: cattagev1beta1.TenantSpec{
-				Namespaces: []cattagev1beta1.NamespaceSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
 					{
 						Name: "app-y-team",
 					},
@@ -60,7 +60,7 @@ var _ = Describe("Tenant webhook", func() {
 				Name: "d-team",
 			},
 			Spec: cattagev1beta1.TenantSpec{
-				Namespaces: []cattagev1beta1.NamespaceSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
 					{
 						Name: "template",
 					},
@@ -78,7 +78,7 @@ var _ = Describe("Tenant webhook", func() {
 				Name: "e-team",
 			},
 			Spec: cattagev1beta1.TenantSpec{
-				Namespaces: []cattagev1beta1.NamespaceSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
 					{
 						Name: "sub-2",
 					},
