@@ -17,5 +17,6 @@ packages:
   - name: rust-lang/mdBook@v0.4.15
   - name: tilt-dev/tilt@v0.23.5
   - name: tilt-dev/ctlptl@v0.7.0
+  - name: GoogleContainerTools/container-structure-test@v1.11.0
   - name: clamoriniere/crd-to-markdown@v0.0.3
     registry: local

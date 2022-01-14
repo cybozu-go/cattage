@@ -88,16 +88,16 @@ test: test-tools
 	$(STATICCHECK) ./...
 	$(NILERR) ./...
 
+.PHONY: container-structure-test
+container-structure-test:
+	container-structure-test test --image ghcr.io/cybozu-go/cattage:$(shell git describe --tags --abbrev=0 || echo v0.0.0)-next-amd64 --config cst.yaml
+
 ##@ Build
 
 .PHONY: build
 build:
 	mkdir -p bin
 	GOBIN=$(shell pwd)/bin go install ./cmd/...
-
-.PHONY: docker-build
-docker-build:
-	docker build -t cattage:latest .
 
 ##@ Development
 

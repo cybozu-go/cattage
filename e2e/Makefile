@@ -16,6 +16,7 @@ help:
 .PHONY: start
 start:
 	kind create cluster --name=cattage --config=$(KIND_CONFIG) --image=kindest/node:v$(KUBERNETES_VERSION) --wait 1m
+	cd ..; CGO_ENABLED=0 go build -o cattage-controller ./cmd/cattage-controller/main.go
 	cd ..; docker build --no-cache -t cattage:dev .
 	kind load docker-image cattage:dev --name=cattage
 	$(MAKE) prepare
