@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/cybozu-go/cattage/pkg/accurate"
 	"github.com/cybozu-go/cattage/pkg/argocd"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -68,7 +69,7 @@ var _ = Describe("Cattage", func() {
 	})
 
 	It("should change ownership", func() {
-		kubectlSafe(nil, "label", "ns", "sub-1", "accurate.cybozu.com/parent=app-b", "--overwrite")
+		kubectlSafe(nil, "label", "ns", "sub-1", accurate.LabelParent+"=app-b", "--overwrite")
 
 		Eventually(func() error {
 			out, err := kubectl(nil, "get", "app", "-n", "sub-1", "sample", "-o", "json")

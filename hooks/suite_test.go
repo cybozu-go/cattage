@@ -27,6 +27,7 @@ import (
 
 	//+kubebuilder:scaffold:imports
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/pkg/accurate"
 	"github.com/cybozu-go/cattage/pkg/config"
 	"github.com/cybozu-go/cattage/pkg/constants"
 	. "github.com/onsi/ginkgo"
@@ -133,8 +134,8 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "sub-1"
 	ns.Labels = map[string]string{
-		constants.OwnerTenant:        "a-team",
-		"accurate.cybozu.com/parent": "app-a-team",
+		constants.OwnerTenant: "a-team",
+		accurate.LabelParent:  "app-a-team",
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())
@@ -142,8 +143,8 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "sub-2"
 	ns.Labels = map[string]string{
-		constants.OwnerTenant:        "e-team",
-		"accurate.cybozu.com/parent": "app-e-team",
+		constants.OwnerTenant: "e-team",
+		accurate.LabelParent:  "app-e-team",
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())
@@ -151,8 +152,8 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "app-a-team"
 	ns.Labels = map[string]string{
-		constants.OwnerTenant:      "a-team",
-		"accurate.cybozu.com/type": "root",
+		constants.OwnerTenant: "a-team",
+		accurate.LabelType:    accurate.NSTypeRoot,
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())
@@ -160,8 +161,8 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "app-y-team"
 	ns.Labels = map[string]string{
-		constants.OwnerTenant:      "y-team",
-		"accurate.cybozu.com/type": "root",
+		constants.OwnerTenant: "y-team",
+		accurate.LabelType:    accurate.NSTypeRoot,
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())
@@ -169,7 +170,7 @@ var _ = BeforeSuite(func() {
 	ns = &corev1.Namespace{}
 	ns.Name = "template"
 	ns.Labels = map[string]string{
-		"accurate.cybozu.com/type": "template",
+		accurate.LabelType: accurate.NSTypeTemplate,
 	}
 	err = k8sClient.Create(ctx, ns)
 	Expect(err).NotTo(HaveOccurred())

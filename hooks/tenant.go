@@ -22,6 +22,7 @@ import (
 	"net/http"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/pkg/accurate"
 	"github.com/cybozu-go/cattage/pkg/config"
 	"github.com/cybozu-go/cattage/pkg/constants"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -93,11 +94,11 @@ func (v *tenantValidator) Handle(ctx context.Context, req admission.Request) adm
 		if owner != "" && owner != tenant.Name {
 			return admission.Denied("deny to specify other owner's namespace")
 		}
-		nsType := namespace.Labels["accurate.cybozu.com/type"]
-		if nsType != "" && nsType != "root" {
+		nsType := namespace.Labels[accurate.LabelType]
+		if nsType != "" && nsType != accurate.NSTypeRoot {
 			return admission.Denied("deny to specify a namespace other than root")
 		}
-		parent := namespace.Labels["accurate.cybozu.com/parent"]
+		parent := namespace.Labels[accurate.LabelParent]
 		if parent != "" {
 			return admission.Denied("deny to specify a sub namespace")
 		}

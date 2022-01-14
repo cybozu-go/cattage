@@ -7,6 +7,7 @@ import (
 	"time"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/pkg/accurate"
 	"github.com/cybozu-go/cattage/pkg/argocd"
 	cacheclient "github.com/cybozu-go/cattage/pkg/client"
 	tenantconfig "github.com/cybozu-go/cattage/pkg/config"
@@ -46,7 +47,7 @@ var _ = Describe("Tenant controller", func() {
 		config = &tenantconfig.Config{
 			Namespace: tenantconfig.NamespaceConfig{
 				CommonLabels: map[string]string{
-					"accurate.cybozu.com/template": "init-template",
+					accurate.LabelTemplate: "init-template",
 				},
 				CommonAnnotations: map[string]string{
 					"hoge": "fuga",
@@ -124,11 +125,11 @@ var _ = Describe("Tenant controller", func() {
 		}).Should(Succeed())
 
 		Expect(ns.Labels).Should(MatchAllKeys(Keys{
-			"kubernetes.io/metadata.name":  Equal("app-x"),
-			"accurate.cybozu.com/type":     Equal("root"),
-			constants.OwnerTenant:          Equal("x-team"),
-			"foo":                          Equal("bar"),
-			"accurate.cybozu.com/template": Equal("init-template"),
+			"kubernetes.io/metadata.name": Equal("app-x"),
+			accurate.LabelType:            Equal(accurate.NSTypeRoot),
+			constants.OwnerTenant:         Equal("x-team"),
+			"foo":                         Equal("bar"),
+			accurate.LabelTemplate:        Equal("init-template"),
 		}))
 		Expect(ns.Annotations).Should(MatchAllKeys(Keys{
 			"abc":  Equal("def"),
@@ -222,10 +223,10 @@ var _ = Describe("Tenant controller", func() {
 			return nil
 		}).Should(Succeed())
 		Expect(nsy1.Labels).Should(MatchAllKeys(Keys{
-			"kubernetes.io/metadata.name":  Equal("app-y1"),
-			"accurate.cybozu.com/type":     Equal("root"),
-			constants.OwnerTenant:          Equal("y-team"),
-			"accurate.cybozu.com/template": Equal("init-template"),
+			"kubernetes.io/metadata.name": Equal("app-y1"),
+			accurate.LabelType:            Equal(accurate.NSTypeRoot),
+			constants.OwnerTenant:         Equal("y-team"),
+			accurate.LabelTemplate:        Equal("init-template"),
 		}))
 
 		nsy2 := &corev1.Namespace{}
@@ -236,10 +237,10 @@ var _ = Describe("Tenant controller", func() {
 			return nil
 		}).Should(Succeed())
 		Expect(nsy2.Labels).Should(MatchAllKeys(Keys{
-			"kubernetes.io/metadata.name":  Equal("app-y2"),
-			"accurate.cybozu.com/type":     Equal("root"),
-			constants.OwnerTenant:          Equal("y-team"),
-			"accurate.cybozu.com/template": Equal("init-template"),
+			"kubernetes.io/metadata.name": Equal("app-y2"),
+			accurate.LabelType:            Equal(accurate.NSTypeRoot),
+			constants.OwnerTenant:         Equal("y-team"),
+			accurate.LabelTemplate:        Equal("init-template"),
 		}))
 
 		rby1 := &rbacv1.RoleBinding{}
@@ -335,7 +336,7 @@ var _ = Describe("Tenant controller", func() {
 		}).Should(Succeed())
 		Expect(nsy2.Labels).Should(MatchAllKeys(Keys{
 			"kubernetes.io/metadata.name": Equal("app-y2"),
-			"accurate.cybozu.com/type":    Equal("root"),
+			accurate.LabelType:            Equal(accurate.NSTypeRoot),
 		}))
 		Eventually(func() error {
 			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "app-y2", Name: "y-team-admin"}, rby2)
@@ -401,10 +402,10 @@ var _ = Describe("Tenant controller", func() {
 			return nil
 		}).Should(Succeed())
 		Expect(ns.Labels).Should(MatchAllKeys(Keys{
-			"kubernetes.io/metadata.name":  Equal("app-z"),
-			"accurate.cybozu.com/type":     Equal("root"),
-			constants.OwnerTenant:          Equal("z-team"),
-			"accurate.cybozu.com/template": Equal("init-template"),
+			"kubernetes.io/metadata.name": Equal("app-z"),
+			accurate.LabelType:            Equal(accurate.NSTypeRoot),
+			constants.OwnerTenant:         Equal("z-team"),
+			accurate.LabelTemplate:        Equal("init-template"),
 		}))
 
 		rb := &rbacv1.RoleBinding{}
@@ -476,7 +477,7 @@ var _ = Describe("Tenant controller", func() {
 		}).Should(Succeed())
 		Expect(ns.Labels).Should(MatchAllKeys(Keys{
 			"kubernetes.io/metadata.name": Equal("app-z"),
-			"accurate.cybozu.com/type":    Equal("root"),
+			accurate.LabelType:            Equal(accurate.NSTypeRoot),
 		}))
 		Eventually(func() error {
 			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "app-z", Name: "z-team-admin"}, rb)

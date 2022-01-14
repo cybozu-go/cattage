@@ -23,6 +23,7 @@ import (
 	"text/template"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/pkg/accurate"
 	"github.com/cybozu-go/cattage/pkg/argocd"
 	extract "github.com/cybozu-go/cattage/pkg/client"
 	"github.com/cybozu-go/cattage/pkg/config"
@@ -321,7 +322,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 		for k, v := range ns.Labels {
 			labels[k] = v
 		}
-		labels["accurate.cybozu.com/type"] = "root"
+		labels[accurate.LabelType] = accurate.NSTypeRoot
 		labels[constants.OwnerTenant] = tenant.Name
 		namespace.WithLabels(labels)
 		annotations := make(map[string]string)
@@ -362,7 +363,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 			constants.OwnerTenant: tenant.Name,
 		})
 		rb.WithAnnotations(map[string]string{
-			"accurate.cybozu.com/propagate": "update",
+			accurate.AnnPropagate: accurate.PropagateUpdate,
 		})
 
 		err = r.patchRoleBinding(ctx, rb)
@@ -503,8 +504,8 @@ func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func SetupIndexForNamespace(ctx context.Context, mgr manager.Manager) error {
 	ns := &corev1.Namespace{}
 	err := mgr.GetFieldIndexer().IndexField(ctx, ns, constants.RootNamespaces, func(rawObj client.Object) []string {
-		nsType := rawObj.GetLabels()["accurate.cybozu.com/type"]
-		if nsType != "root" {
+		nsType := rawObj.GetLabels()[accurate.LabelType]
+		if nsType != accurate.NSTypeRoot {
 			return nil
 		}
 		tenantName := rawObj.GetLabels()[constants.OwnerTenant]
