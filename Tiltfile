@@ -10,10 +10,10 @@ def kubebuilder():
     '''
 
     def manifests():
-        return 'controller-gen crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'
+        return './bin/controller-gen crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'
 
     def generate():
-        return 'controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
+        return './bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
 
     def binary():
         return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o bin/cattage-controller cmd/cattage-controller/main.go'
