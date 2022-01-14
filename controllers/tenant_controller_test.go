@@ -309,7 +309,7 @@ var _ = Describe("Tenant controller", func() {
 					"policies": ConsistOf("p, proj:y-team:admin, applications, *, y-team/*, allow"),
 				}),
 			),
-			"sourceRepos": ConsistOf("https://github.com/cybozu-go/*"),
+			"sourceRepos": ConsistOf("*"),
 		}))
 
 		By("removing app-y2")
