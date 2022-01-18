@@ -6,7 +6,7 @@ Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][
 
 ## Motivation
 
-Argo CD has a problem that it is difficult to implement app-of-apps pattern in a multi-tenancy environment.
+There is a known limitation for Argo CD to implement app-of-apps pattern in a multi-tenancy environment.
 
 https://github.com/argoproj/argo-cd/issues/2785
 
