@@ -14,7 +14,7 @@ We have developed the following mechanism to resolve the problem.
 
 https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy
 
-However, the mechanism has the following problems:
+However, the mechanism still has the following problems:
 
 - Tenant users cannot create app-of-apps Application resources. They need to ask an administrator for that.
 - Application resources are not strictly validated. Tenant users can specify Project for other tenants, and can also specify duplicate names.
