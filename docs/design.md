@@ -21,7 +21,7 @@ However, the mechanism still has the following problems:
 - When a SubNamespace is created in [HNC][] or [Accurate][], an administrator needs to add it to the destinations of the Application resource.
   (Argo CD supports specifying wildcards in destinations, but that is not enough for us.)
 
-We are hoping for a better solution.
+We need to build a better solution.
 
 ## Goals
 
