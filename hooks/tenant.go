@@ -18,7 +18,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-//+kubebuilder:webhook:path=/mutate-multi-tenancy-cybozu-com-v1beta1-tenant,mutating=true,failurePolicy=fail,sideEffects=None,groups=cattage.cybozu.io,resources=tenants,verbs=create;update,versions=v1beta1,name=mtenant.kb.io,admissionReviewVersions={v1}
+//+kubebuilder:webhook:path=/mutate-cattage-cybozu-io-v1beta1-tenant,mutating=true,failurePolicy=fail,sideEffects=None,groups=cattage.cybozu.io,resources=tenants,verbs=create;update,versions=v1beta1,name=mtenant.kb.io,admissionReviewVersions={v1}
 
 type tenantMutator struct {
 	dec *admission.Decoder
@@ -45,7 +45,7 @@ func (m *tenantMutator) Handle(ctx context.Context, req admission.Request) admis
 	return admission.PatchResponseFromRaw(req.Object.Raw, data)
 }
 
-//+kubebuilder:webhook:path=/validate-multi-tenancy-cybozu-com-v1beta1-tenant,mutating=false,failurePolicy=fail,sideEffects=None,groups=cattage.cybozu.io,resources=tenants,verbs=create;update,versions=v1beta1,name=vtenant.kb.io,admissionReviewVersions={v1}
+//+kubebuilder:webhook:path=/validate-cattage-cybozu-io-v1beta1-tenant,mutating=false,failurePolicy=fail,sideEffects=None,groups=cattage.cybozu.io,resources=tenants,verbs=create;update,versions=v1beta1,name=vtenant.kb.io,admissionReviewVersions={v1}
 
 type tenantValidator struct {
 	client client.Client
@@ -98,12 +98,12 @@ func SetupTenantWebhook(mgr manager.Manager, dec *admission.Decoder, config *con
 	m := &tenantMutator{
 		dec: dec,
 	}
-	serv.Register("/mutate-multi-tenancy-cybozu-com-v1beta1-tenant", &webhook.Admission{Handler: m})
+	serv.Register("/mutate-cattage-cybozu-io-v1beta1-tenant", &webhook.Admission{Handler: m})
 
 	v := &tenantValidator{
 		client: mgr.GetClient(),
 		dec:    dec,
 		config: config,
 	}
-	serv.Register("/validate-multi-tenancy-cybozu-com-v1beta1-tenant", &webhook.Admission{Handler: v})
+	serv.Register("/validate-cattage-cybozu-io-v1beta1-tenant", &webhook.Admission{Handler: v})
 }

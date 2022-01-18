@@ -9,7 +9,7 @@ resources:
     namespaced: true
   controller: true
   domain: cybozu.io
-  group: multi-tenancy
+  group: cattage
   kind: Tenant
   path: github.com/cybozu-go/cattage/api/v1beta1
   version: v1beta1

@@ -327,7 +327,7 @@ webhooks:
     service:
       name: '{{ template "cattage.fullname" . }}-webhook-service'
       namespace: '{{ .Release.Namespace }}'
-      path: /mutate-multi-tenancy-cybozu-com-v1beta1-tenant
+      path: /mutate-cattage-cybozu-io-v1beta1-tenant
   failurePolicy: Fail
   name: mtenant.kb.io
   rules:
@@ -381,7 +381,7 @@ webhooks:
     service:
       name: '{{ template "cattage.fullname" . }}-webhook-service'
       namespace: '{{ .Release.Namespace }}'
-      path: /validate-multi-tenancy-cybozu-com-v1beta1-tenant
+      path: /validate-cattage-cybozu-io-v1beta1-tenant
   failurePolicy: Fail
   name: vtenant.kb.io
   rules:
