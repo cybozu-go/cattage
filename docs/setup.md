@@ -7,7 +7,7 @@ Namespaces must be isolated for each tenant.
 
 There are many ways to achieve Namespace isolation.
 In EKS and GKE, you can integrate RBAC with IAM.
-For on-premises, [Telepot](https://goteleport.com) and [Loft](https://loft.sh) may help you.
+For on-premises, [Teleport](https://goteleport.com) and [Loft](https://loft.sh) may help you.
 
 ## Argo CD
 
