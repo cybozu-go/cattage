@@ -138,7 +138,7 @@ func containNamespace(roots []cattagev1beta1.RootNamespaceSpec, ns corev1.Namesp
 }
 
 func (r *TenantReconciler) disownNamespace(ctx context.Context, ns *corev1.Namespace) error {
-	managed, err := accorev1.ExtractNamespace(ns, constants.FieldManager)
+	managed, err := accorev1.ExtractNamespace(ns, constants.TenantFieldManager)
 	if err != nil {
 		return err
 	}
@@ -240,7 +240,7 @@ func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.Name
 		return err
 	}
 
-	managed, err := accorev1.ExtractNamespace(&orig, constants.FieldManager)
+	managed, err := accorev1.ExtractNamespace(&orig, constants.TenantFieldManager)
 	if err != nil {
 		return err
 	}
@@ -250,7 +250,7 @@ func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.Name
 	}
 
 	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
-		FieldManager: constants.FieldManager,
+		FieldManager: constants.TenantFieldManager,
 		Force:        pointer.Bool(true),
 	})
 }
@@ -270,7 +270,7 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 		return err
 	}
 
-	managed, err := acrbacv1.ExtractRoleBinding(&orig, constants.FieldManager)
+	managed, err := acrbacv1.ExtractRoleBinding(&orig, constants.TenantFieldManager)
 	if err != nil {
 		return err
 	}
@@ -280,7 +280,7 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 	}
 
 	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
-		FieldManager: constants.FieldManager,
+		FieldManager: constants.TenantFieldManager,
 		Force:        pointer.Bool(true),
 	})
 }
@@ -429,7 +429,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 		constants.OwnerTenant: tenant.Name,
 	})
 
-	managed, err := extract.ExtractManagedFields(orig, constants.FieldManager)
+	managed, err := extract.ExtractManagedFields(orig, constants.TenantFieldManager)
 	if err != nil {
 		return err
 	}
@@ -439,7 +439,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 
 	err = r.client.Patch(ctx, proj, client.Apply, &client.PatchOptions{
 		Force:        pointer.BoolPtr(true),
-		FieldManager: constants.FieldManager,
+		FieldManager: constants.TenantFieldManager,
 	})
 	if err != nil {
 		logger.Error(err, "failed to patch AppProject")

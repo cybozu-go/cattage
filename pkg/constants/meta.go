@@ -10,7 +10,8 @@ const OwnerTenant = MetaPrefix + "tenant"
 
 const OwnerAppNamespace = MetaPrefix + "owner-namespace"
 
-const FieldManager = MetaPrefix + "cattage"
-const StatusFieldManager = FieldManager + "/status"
-const SpecFieldManager = FieldManager + "/spec"
-const ProjectFieldManager = FieldManager + "/project"
+const TenantFieldManager = MetaPrefix + "tenant-controller"
+const ApplicationFieldManager = MetaPrefix + "application-controller"
+const StatusFieldManager = ApplicationFieldManager + "/status"
+const SpecFieldManager = ApplicationFieldManager + "/spec"
+const ProjectFieldManager = ApplicationFieldManager + "/project"
