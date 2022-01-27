@@ -166,6 +166,10 @@ func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *cattagev1beta
 	if err != nil {
 		return err
 	}
+	labels := rb.GetLabels()
+	if labels == nil || labels[constants.OwnerTenant] != tenant.Name {
+		return nil
+	}
 	err = r.client.Delete(ctx, rb)
 	if err != nil {
 		return err
@@ -184,6 +188,10 @@ func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *cattage
 	}
 	if err != nil {
 		return err
+	}
+	labels := proj.GetLabels()
+	if labels == nil || labels[constants.OwnerTenant] != tenant.Name {
+		return nil
 	}
 	return r.client.Delete(ctx, proj)
 }
