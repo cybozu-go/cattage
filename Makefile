@@ -44,8 +44,8 @@ help: ## Display this help.
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-	kustomize build config/helm/crds > charts/cattage/crds/tenant.yaml
-	kustomize build config/helm/templates > charts/cattage/templates/generated.yaml
+	kustomize build config/helm/crds | yq e "." - > charts/cattage/crds/tenant.yaml
+	kustomize build config/helm/templates | yq e "." - > charts/cattage/templates/generated.yaml
 
 
 .PHONY: generate

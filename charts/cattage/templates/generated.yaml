@@ -20,37 +20,37 @@ metadata:
   name: '{{ template "cattage.fullname" . }}-leader-election-role'
   namespace: '{{ .Release.Namespace }}'
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - coordination.k8s.io
-  resources:
-  - leases
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -63,136 +63,98 @@ metadata:
     helm.sh/chart: '{{ include "cattage.chart" . }}'
   name: '{{ template "cattage.fullname" . }}-manager-role'
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
-  - update
-- apiGroups:
-  - argoproj.io
-  resources:
-  - applications
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - argoproj.io
-  resources:
-  - appprojects
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - cattage.cybozu.io
-  resources:
-  - tenants
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - cattage.cybozu.io
-  resources:
-  - tenants/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - cattage.cybozu.io
-  resources:
-  - tenants/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - clusterroles
-  verbs:
-  - bind
-  - escalate
-  - get
-  - list
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - rolebindings
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
-    app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "cattage.chart" . }}'
-  name: '{{ template "cattage.fullname" . }}-metrics-reader'
-rules:
-- nonResourceURLs:
-  - /metrics
-  verbs:
-  - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
-    app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "cattage.chart" . }}'
-  name: '{{ template "cattage.fullname" . }}-proxy-role'
-rules:
-- apiGroups:
-  - authentication.k8s.io
-  resources:
-  - tokenreviews
-  verbs:
-  - create
-- apiGroups:
-  - authorization.k8s.io
-  resources:
-  - subjectaccessreviews
-  verbs:
-  - create
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - applications
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - appprojects
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - cattage.cybozu.io
+    resources:
+      - tenants
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - cattage.cybozu.io
+    resources:
+      - tenants/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - cattage.cybozu.io
+    resources:
+      - tenants/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterroles
+    verbs:
+      - bind
+      - escalate
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - rolebindings
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -209,9 +171,9 @@ roleRef:
   kind: Role
   name: '{{ template "cattage.fullname" . }}-leader-election-role'
 subjects:
-- kind: ServiceAccount
-  name: '{{ template "cattage.fullname" . }}-controller-manager'
-  namespace: '{{ .Release.Namespace }}'
+  - kind: ServiceAccount
+    name: '{{ template "cattage.fullname" . }}-controller-manager'
+    namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -227,47 +189,9 @@ roleRef:
   kind: ClusterRole
   name: '{{ template "cattage.fullname" . }}-manager-role'
 subjects:
-- kind: ServiceAccount
-  name: '{{ template "cattage.fullname" . }}-controller-manager'
-  namespace: '{{ .Release.Namespace }}'
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
-    app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "cattage.chart" . }}'
-  name: '{{ template "cattage.fullname" . }}-proxy-rolebinding'
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: '{{ template "cattage.fullname" . }}-proxy-role'
-subjects:
-- kind: ServiceAccount
-  name: '{{ template "cattage.fullname" . }}-controller-manager'
-  namespace: '{{ .Release.Namespace }}'
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
-    app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
-    helm.sh/chart: '{{ include "cattage.chart" . }}'
-  name: '{{ template "cattage.fullname" . }}-controller-manager-metrics-service'
-  namespace: '{{ .Release.Namespace }}'
-spec:
-  ports:
-  - name: https
-    port: 8443
-    protocol: TCP
-    targetPort: https
-  selector:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
+  - kind: ServiceAccount
+    name: '{{ template "cattage.fullname" . }}-controller-manager'
+    namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: v1
 kind: Service
@@ -281,9 +205,9 @@ metadata:
   namespace: '{{ .Release.Namespace }}'
 spec:
   ports:
-  - port: 443
-    protocol: TCP
-    targetPort: 9443
+    - port: 443
+      protocol: TCP
+      targetPort: 9443
   selector:
     app.kubernetes.io/component: controller
     app.kubernetes.io/name: '{{ include "cattage.name" . }}'
@@ -292,8 +216,7 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ template "cattage.fullname"
-      . }}-serving-cert'
+    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ template "cattage.fullname" . }}-serving-cert'
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
     app.kubernetes.io/name: '{{ include "cattage.name" . }}'
@@ -301,53 +224,52 @@ metadata:
     helm.sh/chart: '{{ include "cattage.chart" . }}'
   name: '{{ template "cattage.fullname" . }}-mutating-webhook-configuration'
 webhooks:
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: '{{ template "cattage.fullname" . }}-webhook-service'
-      namespace: '{{ .Release.Namespace }}'
-      path: /mutate-argoproj-io-application
-  failurePolicy: Fail
-  name: mapplication.kb.io
-  rules:
-  - apiGroups:
-    - argoproj.io
-    apiVersions:
-    - v1alpha1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - applications
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: '{{ template "cattage.fullname" . }}-webhook-service'
-      namespace: '{{ .Release.Namespace }}'
-      path: /mutate-cattage-cybozu-io-v1beta1-tenant
-  failurePolicy: Fail
-  name: mtenant.kb.io
-  rules:
-  - apiGroups:
-    - cattage.cybozu.io
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - tenants
-  sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: '{{ template "cattage.fullname" . }}-webhook-service'
+        namespace: '{{ .Release.Namespace }}'
+        path: /mutate-argoproj-io-application
+    failurePolicy: Fail
+    name: mapplication.kb.io
+    rules:
+      - apiGroups:
+          - argoproj.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - applications
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: '{{ template "cattage.fullname" . }}-webhook-service'
+        namespace: '{{ .Release.Namespace }}'
+        path: /mutate-cattage-cybozu-io-v1beta1-tenant
+    failurePolicy: Fail
+    name: mtenant.kb.io
+    rules:
+      - apiGroups:
+          - cattage.cybozu.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - tenants
+    sideEffects: None
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ template "cattage.fullname"
-      . }}-serving-cert'
+    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ template "cattage.fullname" . }}-serving-cert'
   labels:
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
     app.kubernetes.io/name: '{{ include "cattage.name" . }}'
@@ -355,43 +277,43 @@ metadata:
     helm.sh/chart: '{{ include "cattage.chart" . }}'
   name: '{{ template "cattage.fullname" . }}-validating-webhook-configuration'
 webhooks:
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: '{{ template "cattage.fullname" . }}-webhook-service'
-      namespace: '{{ .Release.Namespace }}'
-      path: /validate-argoproj-io-application
-  failurePolicy: Fail
-  name: vapplication.kb.io
-  rules:
-  - apiGroups:
-    - argoproj.io
-    apiVersions:
-    - v1alpha1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - applications
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: '{{ template "cattage.fullname" . }}-webhook-service'
-      namespace: '{{ .Release.Namespace }}'
-      path: /validate-cattage-cybozu-io-v1beta1-tenant
-  failurePolicy: Fail
-  name: vtenant.kb.io
-  rules:
-  - apiGroups:
-    - cattage.cybozu.io
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - tenants
-  sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: '{{ template "cattage.fullname" . }}-webhook-service'
+        namespace: '{{ .Release.Namespace }}'
+        path: /validate-argoproj-io-application
+    failurePolicy: Fail
+    name: vapplication.kb.io
+    rules:
+      - apiGroups:
+          - argoproj.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - applications
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: '{{ template "cattage.fullname" . }}-webhook-service'
+        namespace: '{{ .Release.Namespace }}'
+        path: /validate-cattage-cybozu-io-v1beta1-tenant
+    failurePolicy: Fail
+    name: vtenant.kb.io
+    rules:
+      - apiGroups:
+          - cattage.cybozu.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - tenants
+    sideEffects: None
