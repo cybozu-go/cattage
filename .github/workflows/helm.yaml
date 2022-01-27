@@ -11,9 +11,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: aquaproj/aqua-installer@17bae6fde43b710e28a1651c37c7b85fc48fe7ab
+      - uses: aquaproj/aqua-installer@58fc6b885cba1f956127fa2b40d64eea0400bf7b #v0.7.0
         with:
-          aqua_version: v0.10.0
+          aqua_version: v0.10.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Check chart version
         run: |
           tag_version=${GITHUB_REF##*/chart-v}
@@ -37,9 +39,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: gh-pages
-      - uses: aquaproj/aqua-installer@17bae6fde43b710e28a1651c37c7b85fc48fe7ab
+      - uses: aquaproj/aqua-installer@58fc6b885cba1f956127fa2b40d64eea0400bf7b #v0.7.0
         with:
-          aqua_version: v0.10.0
+          aqua_version: v0.10.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/download-artifact@v2
         with:
           name: helm-charts

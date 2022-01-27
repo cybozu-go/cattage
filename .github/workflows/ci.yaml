@@ -38,9 +38,11 @@ jobs:
     - uses: actions/setup-go@v2
       with:
         go-version: ${{ env.go-version }}
-    - uses: aquaproj/aqua-installer@17bae6fde43b710e28a1651c37c7b85fc48fe7ab
+    - uses: aquaproj/aqua-installer@58fc6b885cba1f956127fa2b40d64eea0400bf7b #v0.7.0
       with:
-        aqua_version: v0.10.0
+        aqua_version: v0.10.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - run: make test
     - run: make check-generate
     - run: make envtest
@@ -55,9 +57,11 @@ jobs:
     - uses: actions/setup-go@v2
       with:
         go-version: ${{ env.go-version }}
-    - uses: aquaproj/aqua-installer@17bae6fde43b710e28a1651c37c7b85fc48fe7ab
+    - uses: aquaproj/aqua-installer@58fc6b885cba1f956127fa2b40d64eea0400bf7b #v0.7.0
       with:
-        aqua_version: v0.10.0
+        aqua_version: v0.10.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - run: make start KUBERNETES_VERSION=${{ matrix.k8s-version }}
       working-directory: e2e
     - run: make test
@@ -89,8 +93,10 @@ jobs:
         with:
           version: latest
           args: --snapshot --skip-publish --rm-dist
-      - uses: aquaproj/aqua-installer@17bae6fde43b710e28a1651c37c7b85fc48fe7ab
+      - uses: aquaproj/aqua-installer@58fc6b885cba1f956127fa2b40d64eea0400bf7b #v0.7.0
         with:
-          aqua_version: v0.10.0
+          aqua_version: v0.10.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test built containers
         run: make container-structure-test
