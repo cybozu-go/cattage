@@ -25,12 +25,10 @@ import (
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	accorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	acrbacv1 "k8s.io/client-go/applyconfigurations/rbac/v1"
-	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -452,36 +450,19 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	tenantHandler := func(o client.Object, q workqueue.RateLimitingInterface) {
+	tenantHandler := func(o client.Object) []reconcile.Request {
 		owner := o.GetLabels()[constants.OwnerTenant]
 		if owner == "" {
-			return
+			return nil
 		}
-		q.Add(reconcile.Request{NamespacedName: types.NamespacedName{
-			Name: owner,
-		}})
-	}
-
-	funcs := handler.Funcs{
-		CreateFunc: func(ev event.CreateEvent, q workqueue.RateLimitingInterface) {
-			tenantHandler(ev.Object, q)
-		},
-		UpdateFunc: func(ev event.UpdateEvent, q workqueue.RateLimitingInterface) {
-			if ev.ObjectNew.GetDeletionTimestamp() != nil {
-				return
-			}
-			tenantHandler(ev.ObjectOld, q)
-		},
-		DeleteFunc: func(ev event.DeleteEvent, q workqueue.RateLimitingInterface) {
-			tenantHandler(ev.Object, q)
-		},
+		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: owner}}}
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cattagev1beta1.Tenant{}).
-		Watches(&source.Kind{Type: &corev1.Namespace{}}, funcs).
-		Watches(&source.Kind{Type: &rbacv1.RoleBinding{}}, funcs).
-		Watches(&source.Kind{Type: argocd.AppProject()}, funcs).
+		Watches(&source.Kind{Type: &corev1.Namespace{}}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
+		Watches(&source.Kind{Type: &rbacv1.RoleBinding{}}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
+		Watches(&source.Kind{Type: argocd.AppProject()}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
 		Complete(r)
 }
 
