@@ -177,6 +177,15 @@ var _ = Describe("Application controller", func() {
 			return nil
 		}).Should(Succeed())
 
+		events := &corev1.EventList{}
+		err = k8sClient.List(ctx, events, client.InNamespace("sub-2"))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(events.Items).Should(ConsistOf(
+			MatchFields(IgnoreExtras, Fields{
+				"Reason": Equal("ApplicationSynced"),
+			}),
+		))
+
 		ns := &corev1.Namespace{}
 		ns.Name = "sub-2"
 		ns.Labels = map[string]string{}
@@ -194,7 +203,7 @@ var _ = Describe("Application controller", func() {
 			return errors.New("application still exists")
 		}).Should(Succeed())
 
-		events := &corev1.EventList{}
+		events = &corev1.EventList{}
 		err = k8sClient.List(ctx, events, client.InNamespace("sub-2"))
 		Expect(err).NotTo(HaveOccurred())
 		Expect(events.Items).Should(ConsistOf(
