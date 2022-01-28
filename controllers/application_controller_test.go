@@ -177,15 +177,6 @@ var _ = Describe("Application controller", func() {
 			return nil
 		}).Should(Succeed())
 
-		events := &corev1.EventList{}
-		err = k8sClient.List(ctx, events, client.InNamespace("sub-2"))
-		Expect(err).NotTo(HaveOccurred())
-		Expect(events.Items).Should(ConsistOf(
-			MatchFields(IgnoreExtras, Fields{
-				"Reason": Equal("ApplicationSynced"),
-			}),
-		))
-
 		ns := &corev1.Namespace{}
 		ns.Name = "sub-2"
 		ns.Labels = map[string]string{}
@@ -203,17 +194,28 @@ var _ = Describe("Application controller", func() {
 			return errors.New("application still exists")
 		}).Should(Succeed())
 
-		events = &corev1.EventList{}
-		err = k8sClient.List(ctx, events, client.InNamespace("sub-2"))
-		Expect(err).NotTo(HaveOccurred())
-		Expect(events.Items).Should(ConsistOf(
-			MatchFields(IgnoreExtras, Fields{
-				"Reason": Equal("ApplicationSynced"),
-			}),
-			MatchFields(IgnoreExtras, Fields{
-				"Reason": Equal("ApplicationRemoved"),
-			}),
-		))
+		Eventually(func() error {
+			events := &corev1.EventList{}
+			err = k8sClient.List(ctx, events, client.InNamespace("sub-2"))
+			if err != nil {
+				return err
+			}
+			var synced, removed bool
+			for _, ev := range events.Items {
+				if ev.Reason == "ApplicationSynced" {
+					synced = true
+				} else if ev.Reason == "ApplicationRemoved" {
+					removed = true
+				}
+			}
+			if !synced {
+				return errors.New("ApplicationSynced event not found")
+			}
+			if !removed {
+				return errors.New("ApplicationRemoved event not found")
+			}
+			return nil
+		}).Should(Succeed())
 	})
 
 	It("should fix project", func() {
