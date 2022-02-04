@@ -70,6 +70,20 @@ jobs:
       with:
         name: logs-${{ matrix.k8s-version }}.tar.gz
         path: e2e/logs.tar.gz
+  tilt:
+    name: Run tilt ci
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.go-version }}
+      - uses: ./.github/actions/aqua
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - run: make controller-gen
+      - run: make dev
+      - run: tilt ci
   dry-run:
     name: Dry-run release
     runs-on: ubuntu-20.04
