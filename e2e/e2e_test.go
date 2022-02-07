@@ -15,19 +15,19 @@ import (
 var _ = Describe("Cattage", func() {
 	It("should prepare", func() {
 		Eventually(func() error {
-			_, err := kubectl(nil, "apply", "-f", "../config/samples/00_template.yaml")
+			_, err := kubectl(nil, "apply", "-f", "../config/samples/template.yaml")
 			return err
 		}).Should(Succeed())
 		Eventually(func() error {
-			_, err := kubectl(nil, "apply", "-f", "../config/samples/01_tenant.yaml")
+			_, err := kubectl(nil, "apply", "-f", "../config/samples/tenant.yaml")
 			return err
 		}).Should(Succeed())
 		Eventually(func() error {
-			_, err := kubectl(nil, "apply", "-f", "../config/samples/02_subnamespace.yaml")
+			_, err := kubectl(nil, "apply", "-f", "../config/samples/subnamespace.yaml")
 			return err
 		}).Should(Succeed())
 		Eventually(func() error {
-			_, err := kubectl(nil, "apply", "-f", "../config/samples/03_application.yaml")
+			_, err := kubectl(nil, "apply", "-f", "../config/samples/application.yaml")
 			return err
 		}).Should(Succeed())
 	})
