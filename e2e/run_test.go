@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
-
-	. "github.com/onsi/gomega"
 )
 
 func kubectl(input []byte, args ...string) ([]byte, error) {
@@ -24,8 +22,10 @@ func kubectl(input []byte, args ...string) ([]byte, error) {
 	return nil, fmt.Errorf("kubectl failed with %s: stderr=%s", err, stderr)
 }
 
+/*
 func kubectlSafe(input []byte, args ...string) []byte {
 	out, err := kubectl(input, args...)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 	return out
 }
+*/

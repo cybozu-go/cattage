@@ -162,7 +162,7 @@ var _ = Describe("Application controller", func() {
 		))
 	})
 
-	It("should remove an application on unmanaged namespace", func() {
+	It("should fail to sync an application on unmanaged namespace", func() {
 		tenantApp, err := fillApplication("unmanaged-app", "sub-2", "a-team")
 		Expect(err).ToNot(HaveOccurred())
 
@@ -184,17 +184,6 @@ var _ = Describe("Application controller", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Eventually(func() error {
-			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: tenantApp.GetName()}, argocdApp)
-			if apierrors.IsNotFound(err) {
-				return nil
-			}
-			if err != nil {
-				return err
-			}
-			return errors.New("application still exists")
-		}).Should(Succeed())
-
-		Eventually(func() error {
 			events := &corev1.EventList{}
 			err = k8sClient.List(ctx, events, client.InNamespace("sub-2"))
 			if err != nil {
@@ -204,7 +193,7 @@ var _ = Describe("Application controller", func() {
 			for _, ev := range events.Items {
 				if ev.Reason == "ApplicationSynced" {
 					synced = true
-				} else if ev.Reason == "ApplicationRemoved" {
+				} else if ev.Reason == "CannotSync" {
 					removed = true
 				}
 			}
@@ -212,13 +201,13 @@ var _ = Describe("Application controller", func() {
 				return errors.New("ApplicationSynced event not found")
 			}
 			if !removed {
-				return errors.New("ApplicationRemoved event not found")
+				return errors.New("CannotSync event not found")
 			}
 			return nil
 		}).Should(Succeed())
 	})
 
-	It("should fix project", func() {
+	It("should fail to sync application on other tenant's namespace", func() {
 		tenantApp, err := fillApplication("changed-app", "sub-3", "a-team")
 		Expect(err).ToNot(HaveOccurred())
 
@@ -242,50 +231,27 @@ var _ = Describe("Application controller", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Eventually(func() error {
-			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantApp.GetNamespace(), Name: tenantApp.GetName()}, tenantApp); err != nil {
-				return err
-			}
-			project, found, err := unstructured.NestedString(tenantApp.UnstructuredContent(), "spec", "project")
+			events := &corev1.EventList{}
+			err = k8sClient.List(ctx, events, client.InNamespace("sub-2"))
 			if err != nil {
 				return err
 			}
-			if !found {
-				return errors.New("spec.project not found")
+			var synced, removed bool
+			for _, ev := range events.Items {
+				if ev.Reason == "ApplicationSynced" {
+					synced = true
+				} else if ev.Reason == "CannotSync" {
+					removed = true
+				}
 			}
-			if project != "b-team" {
-				return errors.New("spec.project has not been fixed: " + project)
+			if !synced {
+				return errors.New("ApplicationSynced event not found")
 			}
-			return nil
-		}).Should(Succeed())
-
-		Eventually(func() error {
-			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: tenantApp.GetName()}, argocdApp); err != nil {
-				return err
-			}
-			project, found, err := unstructured.NestedString(argocdApp.UnstructuredContent(), "spec", "project")
-			if err != nil {
-				return err
-			}
-			if !found {
-				return errors.New("spec.project not found")
-			}
-			if project != "b-team" {
-				return errors.New("spec.project has not been fixed: " + project)
+			if !removed {
+				return errors.New("CannotSync event not found")
 			}
 			return nil
 		}).Should(Succeed())
-
-		events := &corev1.EventList{}
-		err = k8sClient.List(ctx, events, client.InNamespace("sub-3"))
-		Expect(err).NotTo(HaveOccurred())
-		Expect(events.Items).Should(ConsistOf(
-			MatchFields(IgnoreExtras, Fields{
-				"Reason": Equal("ApplicationSynced"),
-			}),
-			MatchFields(IgnoreExtras, Fields{
-				"Reason": Equal("ProjectFixed"),
-			}),
-		))
 	})
 
 	It("should remove application", func() {

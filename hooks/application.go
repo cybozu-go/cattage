@@ -7,6 +7,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/cybozu-go/cattage/pkg/accurate"
 
 	"github.com/cybozu-go/cattage/pkg/argocd"
@@ -67,49 +71,54 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 		return admission.Allowed("")
 	}
 
-	app := argocd.Application()
-	if err := v.dec.Decode(req, app); err != nil {
+	tenantApp := argocd.Application()
+	if err := v.dec.Decode(req, tenantApp); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	if app.GetNamespace() == v.config.ArgoCD.Namespace {
+	if tenantApp.GetNamespace() == v.config.ArgoCD.Namespace {
 		return admission.Allowed("")
 	}
 
-	if app.GetDeletionTimestamp() != nil {
+	if tenantApp.GetDeletionTimestamp() != nil {
 		return admission.Allowed("")
 	}
 
 	ns := &corev1.Namespace{}
-	err := v.Client.Get(ctx, client.ObjectKey{Name: app.GetNamespace()}, ns)
+	err := v.Client.Get(ctx, client.ObjectKey{Name: tenantApp.GetNamespace()}, ns)
 	if err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
 
 	tenantName, ok := ns.Labels[constants.OwnerTenant]
 	if !ok {
-		return admission.Denied("an application cannot be created on unmanaged namespaces")
+		return admission.Denied("cannot create the application on a namespace that does not belong to a tenant")
 	}
 
-	apps := argocd.ApplicationList()
-	err = v.Client.List(ctx, apps, client.InNamespace(v.config.ArgoCD.Namespace))
-	if err != nil {
+	argocdApp := argocd.Application()
+	err = v.Client.Get(ctx, client.ObjectKey{Namespace: v.config.ArgoCD.Namespace, Name: tenantApp.GetName()}, argocdApp)
+	if err != nil && !apierrors.IsNotFound(err) {
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
-	for _, a := range apps.Items {
-		if app.GetName() == a.GetName() {
-			ownerNs := a.GetLabels()[constants.OwnerAppNamespace]
-			if ownerNs == "" {
-				break
+	if !apierrors.IsNotFound(err) {
+		ownerNs, ok := argocdApp.GetLabels()[constants.OwnerAppNamespace]
+		if !ok {
+			project, found, err := unstructured.NestedString(argocdApp.UnstructuredContent(), "spec", "project")
+			if err != nil {
+				return admission.Errored(http.StatusBadRequest, fmt.Errorf("unable to get spec.project; %w", err))
 			}
-			if app.GetNamespace() == ownerNs {
-				break
+			if !found {
+				return admission.Errored(http.StatusBadRequest, errors.New("spec.project not found"))
 			}
-			return admission.Denied("cannot create an application with the same name")
+			if project != tenantName {
+				return admission.Denied(field.Forbidden(field.NewPath("spec", "project"), "project of the application does not match the tenant name").Error())
+			}
+		} else if tenantApp.GetNamespace() != ownerNs {
+			return admission.Denied(field.Forbidden(field.NewPath("metadata", "namespace"), "the application is already managed by other namespace").Error())
 		}
 	}
 
-	project, found, err := unstructured.NestedString(app.UnstructuredContent(), "spec", "project")
+	project, found, err := unstructured.NestedString(tenantApp.UnstructuredContent(), "spec", "project")
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, fmt.Errorf("unable to get spec.project; %w", err))
 	}
@@ -118,17 +127,17 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 	}
 
 	if tenantName != project {
-		return admission.Denied("cannot specify a project for other tenants")
+		return admission.Denied(field.Forbidden(field.NewPath("spec", "project"), "project of the application does not match the tenant name").Error())
 	}
 
 	nsType := ns.Labels[accurate.LabelType]
 	if nsType == accurate.NSTypeRoot {
-		return admission.Allowed("ok").WithWarnings(
-			"Application resource has been created on a root namespace.",
-			"It is recommended to create Application resource on a sub-namespace.")
+		return admission.Allowed("").WithWarnings(
+			"The application resource has been created on a root namespace.",
+			"It is recommended to create the application resource on a sub-namespace.")
 	}
 
-	return admission.Allowed("ok")
+	return admission.Allowed("")
 }
 
 // SetupApplicationWebhook registers the webhooks for Application

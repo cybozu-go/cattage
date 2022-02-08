@@ -101,7 +101,24 @@ LAST SEEN   TYPE     REASON              OBJECT                  MESSAGE
 34s         Normal   StatusSynced        application/testhttpd   Sync application status succeeded
 ```
 
-## Changing ownership
+## How to manage resources that already exist
+
+Cattage can manage resources that have existed before with Tenant and Application.
+
+You can make an existing namespace belong to Tenant.
+However, the namespace must be root or not managed by accurate.
+
+A RoleBinding resource named `<tenant-name>-admin` will be created on a namespace belonging to a tenant.
+If a resource with the same name already exists, it will be overwritten.
+
+A AppProject resource with the same name as a tenant will be created in argocd namespace.
+If a resource with the same name already exists, it will be overwritten.
+
+When you create an Application on a sub-namespace, an Application resource with the same name will be created in argocd namespace.
+If that Application in argocd namespace exists, the Application will be overwritten only if the `spec.project` filed matches.
+If not, then the creation of the Application resource will be rejected.
+
+## How to change ownership
 
 The ownership of sub-namespace can be transferred to other tenant.
 
@@ -123,12 +140,22 @@ Use `kubectl accurate sub move` command to change the parent of your-sub namespa
 $ kubectl accurate sub move your-sub new-root
 ```
 
-`spec.project` field will be updated.
+As a result, `application/testhttpd` in your-sub will be out of sync with `application/testhttpd` in argocd.
+You can see it as an event resource.
 
 ```console
-$ kubectl get app -n your-sub testhttpd -o jsonpath="{.spec.project}"
-new-team
+$ kubectl get events -n your-sub
+LAST SEEN   TYPE      REASON         OBJECT                  MESSAGE
+10s         Warning   CannotSync     application/testhttpd   project 'your-team' of the application 'your-sub/testhttpd' does not match the tenant name 'new-team'
 ```
+
+Please change the project of `application/testhttpd` correctly.
+
+```console
+$ kubectl patch app testhttpd -n your-sub --type='json' -p '[{ "op": "replace", "path": "/spec/project", "value": "new-team"}]'
+```
+
+The application will sync again.
 
 ## Remove resources
 

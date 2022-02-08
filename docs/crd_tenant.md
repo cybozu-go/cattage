@@ -40,8 +40,8 @@ RootNamespaceSpec defines the desired state of Namespace.
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | name | Name is the name of namespace to be generated. | string | true |
-| labels | Labels are the labels to add to the namespace. | map[string]string | false |
-| annotations | Annotations are the annotations to add to the namespace. | map[string]string | false |
+| labels | Labels are the labels to add to the namespace. This supersedes `namespace.commonLabels` in the configuration. | map[string]string | false |
+| annotations | Annotations are the annotations to add to the namespace. This supersedes `namespace.commonAnnotations` in the configuration. | map[string]string | false |
 
 [Back to Custom Resources](#custom-resources)
 

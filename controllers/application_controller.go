@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cybozu-go/cattage/pkg/argocd"
 	extract "github.com/cybozu-go/cattage/pkg/client"
@@ -92,12 +93,7 @@ func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	err := r.reconcileApplication(ctx, argocdApp, tenantApp)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	return ctrl.Result{}, nil
+	return r.reconcileApplication(ctx, argocdApp, tenantApp)
 }
 
 func (r *ApplicationReconciler) finalize(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) (ctrl.Result, error) {
@@ -128,85 +124,84 @@ func (r *ApplicationReconciler) finalize(ctx context.Context, argocdApp *unstruc
 	return ctrl.Result{Requeue: true}, nil
 }
 
-func (r *ApplicationReconciler) reconcileApplication(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) error {
+func (r *ApplicationReconciler) reconcileApplication(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	removed, err := r.fixProject(ctx, argocdApp, tenantApp)
+	canSync, err := r.canSyncApplicationSpec(ctx, argocdApp, tenantApp)
 	if err != nil {
-		logger.Error(err, "failed to validate application project")
-		return err
+		return ctrl.Result{}, err
 	}
-	if removed {
-		return nil
+	if !canSync {
+		return ctrl.Result{
+			RequeueAfter: 30 * time.Minute,
+		}, nil
 	}
 
 	// Sync application spec from tenant to argocd.
 	err = r.syncApplicationSpec(ctx, argocdApp, tenantApp)
 	if err != nil {
 		logger.Error(err, "failed to sync application spec")
-		return err
+		return ctrl.Result{}, err
 	}
 	// Sync application status from argocd to tenant.
 	err = r.syncApplicationStatus(ctx, argocdApp, tenantApp)
 	if err != nil {
 		logger.Error(err, "failed to sync application status")
-		return err
+		return ctrl.Result{}, err
 	}
-	return nil
+	return ctrl.Result{}, nil
 }
 
-func (r *ApplicationReconciler) fixProject(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) (removed bool, err error) {
+func (r *ApplicationReconciler) canSyncApplicationSpec(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) (bool, error) {
 	logger := log.FromContext(ctx)
-
 	ns := &corev1.Namespace{}
-	err = r.client.Get(ctx, client.ObjectKey{Name: tenantApp.GetNamespace()}, ns)
+	err := r.client.Get(ctx, client.ObjectKey{Name: tenantApp.GetNamespace()}, ns)
 	if err != nil {
-		return
+		return false, err
 	}
-	tenantName := ns.Labels[constants.OwnerTenant]
-	if tenantName == "" {
-		if argocdApp != nil && argocdApp.GetDeletionTimestamp() == nil {
-			// Applications on namespaces that do not belong to a tenant will be removed.
-			logger.Info("Remove unmanaged application")
-			err = r.client.Delete(ctx, argocdApp)
+	tenantName, ok := ns.Labels[constants.OwnerTenant]
+	if !ok {
+		logger.Info("the namespace does not belong to a tenant", "targetNamespace", ns.Name)
+		r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "CannotSync", "the namespace '%s' does not belong to a tenant", ns.Name)
+		return false, nil
+	}
+
+	if argocdApp != nil {
+		ownerNs, ok := argocdApp.GetLabels()[constants.OwnerAppNamespace]
+		if !ok {
+			project, found, err := unstructured.NestedString(argocdApp.UnstructuredContent(), "spec", "project")
 			if err != nil {
-				r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "RemoveApplicationFailed", "Failed to remove unmanaged application", err)
-				return
+				return false, err
 			}
-			r.recorder.Eventf(tenantApp, corev1.EventTypeNormal, "ApplicationRemoved", "Remove unmanaged application succeeded")
+			if !found {
+				return false, errors.New("spec.project not found in the application: " + argocdApp.GetNamespace() + "/" + argocdApp.GetName())
+			}
+			if project != tenantName {
+				logger.Info("project of the application does not match the tenant name", "project", project, "tenantName", tenantName)
+				r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "CannotSync", "project '%s' of the application '%s/%s' does not match the tenant name '%s'", project, argocdApp.GetNamespace(), argocdApp.GetName(), tenantName)
+				return false, nil
+			}
+		} else if tenantApp.GetNamespace() != ownerNs {
+			logger.Info("the application is already managed by other namespace", "tenantNamespace", tenantApp.GetNamespace(), "ownerNamespace", ownerNs)
+			r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "CannotSync", "the application '%s/%s' is already managed by other namespace '%s'", tenantApp.GetNamespace(), tenantApp.GetName(), ownerNs)
+			return false, nil
 		}
-		removed = true
-		return
 	}
+
 	project, found, err := unstructured.NestedString(tenantApp.UnstructuredContent(), "spec", "project")
 	if err != nil {
-		return
+		return false, err
 	}
 	if !found {
-		err = errors.New("spec.project not found")
-		return
+		return false, errors.New("spec.project not found in the application: " + tenantApp.GetNamespace() + "/" + tenantApp.GetName())
 	}
 	if project != tenantName {
-		logger.Info("Overwrite project", "before", project, "after", tenantName)
-		newApp := argocd.Application()
-		newApp.SetNamespace(tenantApp.GetNamespace())
-		newApp.SetName(tenantApp.GetName())
-		err = unstructured.SetNestedField(newApp.UnstructuredContent(), tenantName, "spec", "project")
-		if err != nil {
-			return
-		}
-		err = r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
-			Force:        pointer.BoolPtr(true),
-			FieldManager: constants.ProjectFieldManager,
-		})
-		if err != nil {
-			r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "FixProjectFailed", "Failed to fix application project", err)
-			return
-		}
-		r.recorder.Eventf(tenantApp, corev1.EventTypeNormal, "ProjectFixed", "Fix application project succeeded")
-		return
+		logger.Info("project of the application does not match the tenant name", "project", project, "tenantName", tenantName)
+		r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "CannotSync", "project '%s' of the application '%s/%s' does not match the tenant name '%s'", project, tenantApp.GetNamespace(), tenantApp.GetName(), tenantName)
+		return false, nil
 	}
-	return
+
+	return true, nil
 }
 
 func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdApp *unstructured.Unstructured, tenantApp *unstructured.Unstructured) error {

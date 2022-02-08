@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/cybozu-go/cattage/pkg/accurate"
 	"github.com/cybozu-go/cattage/pkg/argocd"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -42,56 +41,6 @@ var _ = Describe("Cattage", func() {
 			if err := json.Unmarshal(out, app); err != nil {
 				return err
 			}
-			healthStatus, found, err := unstructured.NestedString(app.UnstructuredContent(), "status", "health", "status")
-			if err != nil {
-				return err
-			}
-			if !found {
-				return errors.New("status not found")
-			}
-			if healthStatus != "Healthy" {
-				return errors.New("status is not healthy")
-			}
-
-			syncStatus, found, err := unstructured.NestedString(app.UnstructuredContent(), "status", "sync", "status")
-			if err != nil {
-				return err
-			}
-			if !found {
-				return errors.New("status not found")
-			}
-			if syncStatus != "Synced" {
-				return errors.New("status is not synced")
-			}
-
-			return nil
-		}).Should(Succeed())
-	})
-
-	It("should change ownership", func() {
-		kubectlSafe(nil, "label", "ns", "sub-1", accurate.LabelParent+"=app-b", "--overwrite")
-
-		Eventually(func() error {
-			out, err := kubectl(nil, "get", "app", "-n", "sub-1", "sample", "-o", "json")
-			if err != nil {
-				return err
-			}
-			app := argocd.Application()
-			if err := json.Unmarshal(out, app); err != nil {
-				return err
-			}
-
-			project, found, err := unstructured.NestedString(app.UnstructuredContent(), "spec", "project")
-			if err != nil {
-				return err
-			}
-			if !found {
-				return errors.New("project not found")
-			}
-			if project != "b-team" {
-				return errors.New("project is not fixed")
-			}
-
 			healthStatus, found, err := unstructured.NestedString(app.UnstructuredContent(), "status", "health", "status")
 			if err != nil {
 				return err

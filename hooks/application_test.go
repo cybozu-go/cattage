@@ -59,7 +59,7 @@ var _ = Describe("Application webhook", func() {
 
 		err = k8sClient.Create(ctx, app)
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).Should(ContainSubstring("an application cannot be created on unmanaged namespaces"))
+		Expect(err.Error()).Should(ContainSubstring(" cannot create the application on a namespace that does not belong to a tenant"))
 	})
 
 	It("should deny creating an application managed by other application", func() {
@@ -75,7 +75,7 @@ var _ = Describe("Application webhook", func() {
 		Expect(err).NotTo(HaveOccurred())
 		err = k8sClient.Create(ctx, app)
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).Should(ContainSubstring("cannot create an application with the same name"))
+		Expect(err.Error()).Should(ContainSubstring("the application is already managed by other namespace"))
 	})
 
 	It("should allow creating an application managed by nobody", func() {
@@ -111,6 +111,6 @@ var _ = Describe("Application webhook", func() {
 
 		err = k8sClient.Create(ctx, app)
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).Should(ContainSubstring("cannot specify a project for other tenants"))
+		Expect(err.Error()).Should(ContainSubstring("project of the application does not match the tenant name"))
 	})
 })
