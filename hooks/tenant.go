@@ -64,8 +64,23 @@ func (v *tenantValidator) Handle(ctx context.Context, req admission.Request) adm
 	if err := v.dec.Decode(req, tenant); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
+	tenantList := &cattagev1beta1.TenantList{}
+	if err := v.client.List(ctx, tenantList); err != nil {
+		return admission.Errored(http.StatusBadRequest, err)
+	}
 
 	for _, ns := range tenant.Spec.RootNamespaces {
+		for _, t := range tenantList.Items {
+			if tenant.Name == t.Name {
+				continue
+			}
+			for _, n := range t.Spec.RootNamespaces {
+				if ns.Name == n.Name {
+					return admission.Denied("other tenant's root namespace is not allowed")
+				}
+			}
+		}
+
 		namespace := &corev1.Namespace{}
 		err := v.client.Get(ctx, client.ObjectKey{Name: ns.Name}, namespace)
 		if apierrors.IsNotFound(err) {
@@ -76,15 +91,15 @@ func (v *tenantValidator) Handle(ctx context.Context, req admission.Request) adm
 		}
 		owner := namespace.Labels[constants.OwnerTenant]
 		if owner != "" && owner != tenant.Name {
-			return admission.Denied("deny to specify other owner's namespace")
+			return admission.Denied("other owner's namespace is not allowed")
 		}
 		nsType := namespace.Labels[accurate.LabelType]
 		if nsType != "" && nsType != accurate.NSTypeRoot {
-			return admission.Denied("deny to specify a namespace other than root")
+			return admission.Denied("namespace other than root is not allowed")
 		}
 		parent := namespace.Labels[accurate.LabelParent]
 		if parent != "" {
-			return admission.Denied("deny to specify a sub namespace")
+			return admission.Denied("sub namespace is not allowed")
 		}
 	}
 
