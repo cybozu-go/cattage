@@ -103,7 +103,7 @@ var _ = Describe("Tenant controller", func() {
 						"https://github.com/cybozu-go/*",
 					},
 				},
-				Delegates: []cattagev1beta1.Delegate{
+				Delegates: []cattagev1beta1.DelegateSpec{
 					{
 						Name: "c-team",
 						Roles: []string{

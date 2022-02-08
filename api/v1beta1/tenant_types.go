@@ -17,7 +17,7 @@ type TenantSpec struct {
 
 	// Delegates is a list of other tenants that are delegated access to this tenant.
 	// +optional
-	Delegates []Delegate `json:"delegates,omitempty"`
+	Delegates []DelegateSpec `json:"delegates,omitempty"`
 }
 
 // RootNamespaceSpec defines the desired state of Namespace.
@@ -42,8 +42,8 @@ type ArgoCDSpec struct {
 	Repositories []string `json:"repositories,omitempty"`
 }
 
-// Delegate defines a tenant that is delegated access to a tenant.
-type Delegate struct {
+// DelegateSpec defines a tenant that is delegated access to a tenant.
+type DelegateSpec struct {
 	// Name is the name of a delegated tenant.
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`

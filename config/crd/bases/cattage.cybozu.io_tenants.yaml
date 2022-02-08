@@ -53,7 +53,7 @@ spec:
                 description: Delegates is a list of other tenants that are delegated
                   access to this tenant.
                 items:
-                  description: Delegate defines a tenant that is delegated access
+                  description: DelegateSpec defines a tenant that is delegated access
                     to a tenant.
                   properties:
                     name:

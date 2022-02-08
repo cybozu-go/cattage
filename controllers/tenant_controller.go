@@ -291,7 +291,7 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 	})
 }
 
-func rolesMap(delegates []cattagev1beta1.Delegate) map[string][]string {
+func rolesMap(delegates []cattagev1beta1.DelegateSpec) map[string][]string {
 	result := make(map[string][]string)
 
 	for _, d := range delegates {

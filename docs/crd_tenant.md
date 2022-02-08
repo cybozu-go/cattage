@@ -6,7 +6,7 @@
 ### Sub Resources
 
 * [ArgoCDSpec](#argocdspec)
-* [Delegate](#delegate)
+* [DelegateSpec](#delegatespec)
 * [RootNamespaceSpec](#rootnamespacespec)
 * [TenantList](#tenantlist)
 * [TenantSpec](#tenantspec)
@@ -22,9 +22,9 @@ ArgoCDSpec defines the desired state of the settings for Argo CD.
 
 [Back to Custom Resources](#custom-resources)
 
-#### Delegate
+#### DelegateSpec
 
-Delegate defines a tenant that is delegated access to a tenant.
+DelegateSpec defines a tenant that is delegated access to a tenant.
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
@@ -76,7 +76,7 @@ TenantSpec defines the desired state of Tenant.
 | ----- | ----------- | ------ | -------- |
 | rootNamespaces | RootNamespaces are the list of root namespaces that belong to this tenant. | [][RootNamespaceSpec](#rootnamespacespec) | true |
 | argocd | ArgoCD is the settings of Argo CD for this tenant. | [ArgoCDSpec](#argocdspec) | false |
-| delegates | Delegates is a list of other tenants that are delegated access to this tenant. | [][Delegate](#delegate) | false |
+| delegates | Delegates is a list of other tenants that are delegated access to this tenant. | [][DelegateSpec](#delegatespec) | false |
 
 [Back to Custom Resources](#custom-resources)
 
