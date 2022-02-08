@@ -14,7 +14,7 @@
 
 #### ArgoCDSpec
 
-ArgoCDSpec defines the desired state of the settings for Argo CD
+ArgoCDSpec defines the desired state of the settings for Argo CD.
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
@@ -28,26 +28,26 @@ Delegate defines a tenant that is delegated access to a tenant.
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| name | Name is the name of a delegated tenant | string | true |
-| roles | Roles is a list of roles that the tenant has | []string | true |
+| name | Name is the name of a delegated tenant. | string | true |
+| roles | Roles is a list of roles that the tenant has. | []string | true |
 
 [Back to Custom Resources](#custom-resources)
 
 #### RootNamespaceSpec
 
-RootNamespaceSpec defines the desired state of Namespace
+RootNamespaceSpec defines the desired state of Namespace.
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| name | Name is the name of namespace to be generated | string | true |
-| labels | Labels are the labels to add to the namespace | map[string]string | false |
-| annotations | Annotations are the annotations to add to the namespace | map[string]string | false |
+| name | Name is the name of namespace to be generated. | string | true |
+| labels | Labels are the labels to add to the namespace. | map[string]string | false |
+| annotations | Annotations are the annotations to add to the namespace. | map[string]string | false |
 
 [Back to Custom Resources](#custom-resources)
 
 #### Tenant
 
-Tenant is the Schema for the tenants API
+Tenant is the Schema for the tenants API.
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
@@ -59,7 +59,7 @@ Tenant is the Schema for the tenants API
 
 #### TenantList
 
-TenantList contains a list of Tenant
+TenantList contains a list of Tenant.
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
@@ -70,19 +70,19 @@ TenantList contains a list of Tenant
 
 #### TenantSpec
 
-TenantSpec defines the desired state of Tenant
+TenantSpec defines the desired state of Tenant.
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| rootNamespaces | RootNamespaces are the list of root namespaces that belong to this tenant | [][RootNamespaceSpec](#rootnamespacespec) | true |
-| argocd | ArgoCD is the settings of Argo CD for this tenant | [ArgoCDSpec](#argocdspec) | false |
+| rootNamespaces | RootNamespaces are the list of root namespaces that belong to this tenant. | [][RootNamespaceSpec](#rootnamespacespec) | true |
+| argocd | ArgoCD is the settings of Argo CD for this tenant. | [ArgoCDSpec](#argocdspec) | false |
 | delegates | Delegates is a list of other tenants that are delegated access to this tenant. | [][Delegate](#delegate) | false |
 
 [Back to Custom Resources](#custom-resources)
 
 #### TenantStatus
 
-TenantStatus defines the observed state of Tenant
+TenantStatus defines the observed state of Tenant.
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |

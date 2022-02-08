@@ -22,7 +22,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Tenant is the Schema for the tenants API
+        description: Tenant is the Schema for the tenants API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -37,10 +37,10 @@ spec:
           metadata:
             type: object
           spec:
-            description: TenantSpec defines the desired state of Tenant
+            description: TenantSpec defines the desired state of Tenant.
             properties:
               argocd:
-                description: ArgoCD is the settings of Argo CD for this tenant
+                description: ArgoCD is the settings of Argo CD for this tenant.
                 properties:
                   repositories:
                     description: Repositories contains list of repository URLs which
@@ -57,10 +57,10 @@ spec:
                     to a tenant.
                   properties:
                     name:
-                      description: Name is the name of a delegated tenant
+                      description: Name is the name of a delegated tenant.
                       type: string
                     roles:
-                      description: Roles is a list of roles that the tenant has
+                      description: Roles is a list of roles that the tenant has.
                       items:
                         type: string
                       minItems: 1
@@ -72,22 +72,22 @@ spec:
                 type: array
               rootNamespaces:
                 description: RootNamespaces are the list of root namespaces that belong
-                  to this tenant
+                  to this tenant.
                 items:
-                  description: RootNamespaceSpec defines the desired state of Namespace
+                  description: RootNamespaceSpec defines the desired state of Namespace.
                   properties:
                     annotations:
                       additionalProperties:
                         type: string
-                      description: Annotations are the annotations to add to the namespace
+                      description: Annotations are the annotations to add to the namespace.
                       type: object
                     labels:
                       additionalProperties:
                         type: string
-                      description: Labels are the labels to add to the namespace
+                      description: Labels are the labels to add to the namespace.
                       type: object
                     name:
-                      description: Name is the name of namespace to be generated
+                      description: Name is the name of namespace to be generated.
                       type: string
                   required:
                   - name
@@ -98,7 +98,7 @@ spec:
             - rootNamespaces
             type: object
           status:
-            description: TenantStatus defines the observed state of Tenant
+            description: TenantStatus defines the observed state of Tenant.
             properties:
               conditions:
                 description: Conditions is an array of conditions.

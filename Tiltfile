@@ -15,14 +15,19 @@ def generate():
     return './bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
 
 
+def apidoc():
+    return 'make apidoc;'
+
+
 def binary():
     return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o bin/cattage-controller cmd/cattage-controller/main.go'
+
 
 # Don't watch generated files
 watch_settings(ignore=['config/crd/bases/', 'config/rbac/role.yaml', 'config/webhook/manifests.yaml'])
 
 # Generate manifests and go files
-local(manifests() + generate())
+local(manifests() + generate() + apidoc())
 
 # Deploy CRD
 local_resource(

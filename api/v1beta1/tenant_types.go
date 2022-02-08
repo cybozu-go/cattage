@@ -4,14 +4,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// TenantSpec defines the desired state of Tenant
+// TenantSpec defines the desired state of Tenant.
 type TenantSpec struct {
-	// RootNamespaces are the list of root namespaces that belong to this tenant
+	// RootNamespaces are the list of root namespaces that belong to this tenant.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinItems=1
 	RootNamespaces []RootNamespaceSpec `json:"rootNamespaces"`
 
-	// ArgoCD is the settings of Argo CD for this tenant
+	// ArgoCD is the settings of Argo CD for this tenant.
 	// +optional
 	ArgoCD ArgoCDSpec `json:"argocd,omitempty"`
 
@@ -20,22 +20,22 @@ type TenantSpec struct {
 	Delegates []Delegate `json:"delegates,omitempty"`
 }
 
-// RootNamespaceSpec defines the desired state of Namespace
+// RootNamespaceSpec defines the desired state of Namespace.
 type RootNamespaceSpec struct {
-	// Name is the name of namespace to be generated
+	// Name is the name of namespace to be generated.
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 
-	// Labels are the labels to add to the namespace
+	// Labels are the labels to add to the namespace.
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Annotations are the annotations to add to the namespace
+	// Annotations are the annotations to add to the namespace.
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
-// ArgoCDSpec defines the desired state of the settings for Argo CD
+// ArgoCDSpec defines the desired state of the settings for Argo CD.
 type ArgoCDSpec struct {
 	// Repositories contains list of repository URLs which can be used by the tenant.
 	// +optional
@@ -44,16 +44,16 @@ type ArgoCDSpec struct {
 
 // Delegate defines a tenant that is delegated access to a tenant.
 type Delegate struct {
-	// Name is the name of a delegated tenant
+	// Name is the name of a delegated tenant.
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 
-	// Roles is a list of roles that the tenant has
+	// Roles is a list of roles that the tenant has.
 	// +kubebuilder:validation:MinItems=1
 	Roles []string `json:"roles"`
 }
 
-// TenantHealth defines the observed state of Tenant
+// TenantHealth defines the observed state of Tenant.
 // +kubebuilder:validation:Enum=Healthy;Unhealthy
 type TenantHealth string
 
@@ -62,7 +62,7 @@ const (
 	TenantUnhealthy = TenantHealth("Unhealthy")
 )
 
-// TenantStatus defines the observed state of Tenant
+// TenantStatus defines the observed state of Tenant.
 type TenantStatus struct {
 	// Health is the health of Tenant.
 	// +optional
@@ -82,7 +82,7 @@ const (
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:printcolumn:name="STATUS",type="string",JSONPath=".status.health"
 
-// Tenant is the Schema for the tenants API
+// Tenant is the Schema for the tenants API.
 type Tenant struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -93,7 +93,7 @@ type Tenant struct {
 
 //+kubebuilder:object:root=true
 
-// TenantList contains a list of Tenant
+// TenantList contains a list of Tenant.
 type TenantList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
