@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/cybozu-go/cattage/pkg/accurate"
+
 	"github.com/cybozu-go/cattage/pkg/argocd"
 	"github.com/cybozu-go/cattage/pkg/config"
 	"github.com/cybozu-go/cattage/pkg/constants"
@@ -117,6 +119,13 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 
 	if tenantName != project {
 		return admission.Denied("cannot specify a project for other tenants")
+	}
+
+	nsType := ns.Labels[accurate.LabelType]
+	if nsType == accurate.NSTypeRoot {
+		return admission.Allowed("ok").WithWarnings(
+			"Application resource has been created on a root namespace.",
+			"It is recommended to create Application resource on a sub-namespace.")
 	}
 
 	return admission.Allowed("ok")
