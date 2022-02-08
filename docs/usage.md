@@ -15,7 +15,7 @@ spec:
 ```
 
 The name of the tenant resource must match the name of the group in Kubernetes and Argo CD.
-The namespaces specified in `spec.namespaces` will be created automatically.
+The namespaces specified in `spec.rootNamespaces` will be created automatically.
 
 ```console
 $ kubectl get ns your-root
