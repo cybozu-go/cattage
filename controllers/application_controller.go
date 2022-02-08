@@ -47,6 +47,7 @@ type ApplicationReconciler struct {
 //+kubebuilder:rbac:groups="",resources=events,verbs=create;update;patch
 
 func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
 	app := argocd.Application()
 	if err := r.client.Get(ctx, req.NamespacedName, app); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -66,6 +67,9 @@ func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		tenantApp = argocd.Application()
 		err := r.client.Get(ctx, client.ObjectKey{Namespace: ownerNs, Name: argocdApp.GetName()}, tenantApp)
 		if err != nil {
+			if apierrors.IsNotFound(err) {
+				logger.Error(err, "Unable to find the corresponding tenant application.")
+			}
 			return ctrl.Result{}, err
 		}
 	} else {
