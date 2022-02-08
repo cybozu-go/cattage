@@ -7,13 +7,13 @@ The location can be changed with `--config-file` flag.
 
 The configuration file should be a JSON or YAML file having the following keys:
 
-| Key                             | Type                | Description                                                                                |
-|---------------------------------|---------------------|--------------------------------------------------------------------------------------------|
-| `namespace.commonLabels`        | `map[string]string` | Labels to be added to all namespaces belonging to all tenants.                                |
-| `namespace.commonAnnotations`   | `map[string]string` | Annotations to be added to all namespaces belonging to all tenants.                           |
-| `namespace.roleBindingTemplate` | `string`            | Template for RoleBinding resource that is created on all namespaces belonging to a tenant. |
-| `argocd.namepsace`              | `string`            | The name of namespace where Argo CD is running.                                            |
-| `argocd.appProjectTemplate`     | `string`            | Template for AppProject resources that is created for each tenant.                         |
+| Key                             | Type                | Description                                                                                                                                      |
+|---------------------------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `namespace.commonLabels`        | `map[string]string` | Labels to be added to all namespaces belonging to all tenants. This may be overridden by `rootNamespaces.labels` of a tenant resource.           |
+| `namespace.commonAnnotations`   | `map[string]string` | Annotations to be added to all namespaces belonging to all tenants. This may be overridden by `rootNamespaces.annotations` of a tenant resource. |
+| `namespace.roleBindingTemplate` | `string`            | Template for RoleBinding resource that is created on all namespaces belonging to a tenant.                                                       |
+| `argocd.namepsace`              | `string`            | The name of namespace where Argo CD is running.                                                                                                  |
+| `argocd.appProjectTemplate`     | `string`            | Template for AppProject resources that is created for each tenant.                                                                               |
 
 The repository includes an example as follows:
 

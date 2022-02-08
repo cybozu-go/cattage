@@ -19,9 +19,11 @@ type Config struct {
 // NamespaceConfig represents the configuration about Namespaces
 type NamespaceConfig struct {
 	// CommonLabels are labels to be added to all namespaces belonging to a tenant
+	// This may be overridden by `rootNamespaces.labels` of a tenant resource.
 	CommonLabels map[string]string `json:"commonLabels,omitempty"`
 
 	// CommonAnnotations are annotations to be added to all namespaces belonging to a tenant
+	// This may be overridden by `rootNamespaces.annotations` of a tenant resource.
 	CommonAnnotations map[string]string `json:"commonAnnotations,omitempty"`
 
 	// RoleBindingTemplate is a template for RoleBinding resource that is created on all namespaces belonging to a tenant

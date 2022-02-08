@@ -27,10 +27,12 @@ type RootNamespaceSpec struct {
 	Name string `json:"name"`
 
 	// Labels are the labels to add to the namespace.
+	// This supersedes `namespace.commonLabels` in the configuration.
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// Annotations are the annotations to add to the namespace.
+	// This supersedes `namespace.commonAnnotations` in the configuration.
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
