@@ -154,7 +154,7 @@ func (r *TenantReconciler) disownNamespace(ctx context.Context, ns *corev1.Names
 	return nil
 }
 
-func (r *TenantReconciler) removeRBAC(ctx context.Context, tenant *cattagev1beta1.Tenant, ns *corev1.Namespace) error {
+func (r *TenantReconciler) removeRoleBinding(ctx context.Context, tenant *cattagev1beta1.Tenant, ns *corev1.Namespace) error {
 	rb := &rbacv1.RoleBinding{}
 	err := r.client.Get(ctx, client.ObjectKey{Namespace: ns.Name, Name: tenant.Name + "-admin"}, rb)
 	if apierrors.IsNotFound(err) {
@@ -211,7 +211,7 @@ func (r *TenantReconciler) finalize(ctx context.Context, tenant *cattagev1beta1.
 		if err != nil {
 			return err
 		}
-		err = r.removeRBAC(ctx, tenant, &ns)
+		err = r.removeRoleBinding(ctx, tenant, &ns)
 		if err != nil {
 			return err
 		}
@@ -373,7 +373,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 		if err != nil {
 			return err
 		}
-		err = r.removeRBAC(ctx, tenant, &ns)
+		err = r.removeRoleBinding(ctx, tenant, &ns)
 		if err != nil {
 			return err
 		}
