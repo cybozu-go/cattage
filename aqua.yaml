@@ -3,19 +3,19 @@
 # https://aquaproj.github.io/
 registries:
   - type: standard
-    ref: v1.0.0 # renovate: depName=aquaproj/aqua-registry
+    ref: v1.1.0 # renovate: depName=aquaproj/aqua-registry
   - type: local
     name: local
     path: registry.yaml
 
 packages:
-  - name: argoproj/argo-cd@v2.2.4
+  - name: argoproj/argo-cd@v2.2.5
   - name: kubernetes/kubectl@v1.23.3
   - name: kubernetes-sigs/kubebuilder@v3.3.0
   - name: kubernetes-sigs/kustomize@kustomize/v4.4.1
   - name: kubernetes-sigs/kind@v0.11.1
   - name: rust-lang/mdBook@v0.4.15
-  - name: tilt-dev/tilt@v0.23.9
+  - name: tilt-dev/tilt@v0.24.1
   - name: tilt-dev/ctlptl@v0.7.5
   - name: GoogleContainerTools/container-structure-test@v1.11.0
   - name: mikefarah/yq@v4.18.1
