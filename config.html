@@ -146,8 +146,8 @@
 The location can be changed with <code>--config-file</code> flag.</p>
 <p>The configuration file should be a JSON or YAML file having the following keys:</p>
 <table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>namespace.commonLabels</code></td><td><code>map[string]string</code></td><td>Labels to be added to all namespaces belonging to a tenant.</td></tr>
-<tr><td><code>namespace.commonAnnotations</code></td><td><code>map[string]string</code></td><td>Annotations to be added to all namespaces belonging to a tenant.</td></tr>
+<tr><td><code>namespace.commonLabels</code></td><td><code>map[string]string</code></td><td>Labels to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.labels</code> of a tenant resource.</td></tr>
+<tr><td><code>namespace.commonAnnotations</code></td><td><code>map[string]string</code></td><td>Annotations to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.annotations</code> of a tenant resource.</td></tr>
 <tr><td><code>namespace.roleBindingTemplate</code></td><td><code>string</code></td><td>Template for RoleBinding resource that is created on all namespaces belonging to a tenant.</td></tr>
 <tr><td><code>argocd.namepsace</code></td><td><code>string</code></td><td>The name of namespace where Argo CD is running.</td></tr>
 <tr><td><code>argocd.appProjectTemplate</code></td><td><code>string</code></td><td>Template for AppProject resources that is created for each tenant.</td></tr>
@@ -169,11 +169,11 @@ The location can be changed with <code>--config-file</code> flag.</p>
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: {{ .Name }}
-      {{ range .ExtraAdmins }}
+      {{- range .Roles.admin }}
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: {{ . }}
-      {{ end }}
+      {{- end }}
 argocd:
   namespace: argocd
   appProjectTemplate: |
@@ -181,33 +181,38 @@ argocd:
     kind: AppProject
     spec:
       destinations:
-      {{ range .Namespaces }}
+      {{- range .Namespaces }}
         - namespace: {{ . }}
           server: '*'
-      {{ end }}
+      {{- end }}
       roles:
         - groups:
             - {{ .Name }}
-            {{ range .ExtraAdmins }}
+            {{- range .Roles.admin }}
             - {{ . }}
-            {{ end }}
+            {{- end }}
           name: admin
           policies:
             - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
       sourceRepos:
+        {{- range .Repositories }}
+        - '{{ . }}'
+        {{- else }}
         - '*'
+        {{- end }}
 </code></pre>
 <p><code>roleBindingTemplate</code> and <code>appProjectTemplate</code> can be written in go-template format.</p>
 <p><code>roleBindingTemplate</code> can use the following variables:</p>
 <table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of a tenant.</td></tr>
-<tr><td><code>ExtraAdmins</code></td><td><code>[]string</code></td><td>List of extra administrators.</td></tr>
+<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
+<tr><td><code>Roles</code></td><td><code>map[string][]string</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
 </tbody></table>
 <p><code>appProjectTemplate</code> can use the following variables:</p>
 <table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of a tenant.</td></tr>
-<tr><td><code>ExtraAdmins</code></td><td><code>[]string</code></td><td>List of extra administrators.</td></tr>
+<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
 <tr><td><code>Namespaces</code></td><td><code>[]string</code></td><td>List of namespaces belonging to a tenant (including sub-namespaces).</td></tr>
+<tr><td><code>Repositories</code></td><td><code>[]string</code></td><td>List of repository URLs which can be used by the tenant.</td></tr>
+<tr><td><code>Roles</code></td><td><code>map[string][]string</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
 </tbody></table>
 <h2 id="environment-variables"><a class="header" href="#environment-variables">Environment variables</a></h2>
 <table><thead><tr><th>Name</th><th>Required</th><th>Description</th></tr></thead><tbody>

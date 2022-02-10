@@ -184,7 +184,7 @@ It allows for <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/
 Namespaces must be isolated for each tenant.</p>
 <p>There are many ways to achieve Namespace isolation.
 In EKS and GKE, you can integrate RBAC with IAM.
-For on-premises, <a href="https://goteleport.com">Telepot</a> and <a href="https://loft.sh">Loft</a> may help you.</p>
+For on-premises, <a href="https://goteleport.com">Teleport</a> and <a href="https://loft.sh">Loft</a> may help you.</p>
 <h2 id="argo-cd"><a class="header" href="#argo-cd">Argo CD</a></h2>
 <p>Install Argo CD as shown in the following page:</p>
 <p>https://argo-cd.readthedocs.io/en/stable/getting_started/</p>
@@ -255,11 +255,11 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ .Name }}
-          {{ range .ExtraAdmins }}
+          {{- range .Roles.admin }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ . }}
-          {{ end }}
+          {{- end }}
     argocd:
       namespace: argocd
       appProjectTemplate: |
@@ -267,21 +267,25 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
         kind: AppProject
         spec:
           destinations:
-          {{ range .Namespaces }}
+          {{- range .Namespaces }}
             - namespace: {{ . }}
               server: '*'
-          {{ end }}
+          {{- end }}
           roles:
             - groups:
                 - {{ .Name }}
-                {{ range .ExtraAdmins }}
+                {{- range .Roles.admin }}
                 - {{ . }}
-                {{ end }}
+                {{- end }}
               name: admin
               policies:
                 - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
           sourceRepos:
+            {{- range .Repositories }}
+            - '{{ . }}'
+            {{- else }}
             - '*'
+            {{- end }}
 </code></pre>
 <p><code>appProjectTemplate</code> and <code>roleBindingTemplate</code> should be configured appropriately for your multi-tenancy environment.
 Read <a href="config.html">Configurations</a> for details.</p>
@@ -300,11 +304,11 @@ kind: Tenant
 metadata:
   name: your-team
 spec:
-  namespaces:
+  rootNamespaces:
     - name: your-root
 </code></pre>
 <p>The name of the tenant resource must match the name of the group in Kubernetes and Argo CD.
-The namespaces specified in <code>spec.namespaces</code> will be created automatically.</p>
+The namespaces specified in <code>spec.rootNamespaces</code> will be created automatically.</p>
 <pre><code class="language-console">$ kubectl get ns your-root
 NAME        STATUS   AGE
 your-root   Active   1m
@@ -363,7 +367,18 @@ LAST SEEN   TYPE     REASON              OBJECT                  MESSAGE
 45s         Normal   ApplicationSynced   application/testhttpd   Sync application spec succeeded
 34s         Normal   StatusSynced        application/testhttpd   Sync application status succeeded
 </code></pre>
-<h2 id="changing-ownership"><a class="header" href="#changing-ownership">Changing ownership</a></h2>
+<h2 id="how-to-manage-resources-that-already-exist"><a class="header" href="#how-to-manage-resources-that-already-exist">How to manage resources that already exist</a></h2>
+<p>Cattage can manage resources that have existed before with Tenant and Application.</p>
+<p>You can make an existing namespace belong to Tenant.
+However, the namespace must be root or not managed by accurate.</p>
+<p>A RoleBinding resource named <code>&lt;tenant-name&gt;-admin</code> will be created on a namespace belonging to a tenant.
+If a resource with the same name already exists, it will be overwritten.</p>
+<p>An AppProject resource with the same name as a tenant will be created in argocd namespace.
+If a resource with the same name already exists, it will be overwritten.</p>
+<p>When you create an Application on a sub-namespace, an Application resource with the same name will be created in argocd namespace.
+If that Application in argocd namespace exists, the Application will be overwritten only if the <code>spec.project</code> filed matches.
+If not, then the creation of the Application resource will be rejected.</p>
+<h2 id="how-to-change-ownership"><a class="header" href="#how-to-change-ownership">How to change ownership</a></h2>
 <p>The ownership of sub-namespace can be transferred to other tenant.</p>
 <p>Prepare a new tenant:</p>
 <pre><code class="language-yaml">apiVersion: cattage.cybozu.io/v1beta1
@@ -371,22 +386,28 @@ kind: Tenant
 metadata:
   name: new-team
 spec:
-  namespaces:
+  rootNamespaces:
     - name: new-root
 </code></pre>
 <p>Use <code>kubectl accurate sub move</code> command to change the parent of your-sub namespace to new-root.</p>
 <pre><code class="language-console">$ kubectl accurate sub move your-sub new-root
 </code></pre>
-<p><code>spec.project</code> field will be updated.</p>
-<pre><code class="language-console">$ kubectl get app -n your-sub testhttpd -o jsonpath=&quot;{.spec.project}&quot;
-new-team
+<p>As a result, <code>application/testhttpd</code> in your-sub will be out of sync with <code>application/testhttpd</code> in argocd.
+You can see it as an event resource.</p>
+<pre><code class="language-console">$ kubectl get events -n your-sub
+LAST SEEN   TYPE      REASON         OBJECT                  MESSAGE
+10s         Warning   CannotSync     application/testhttpd   project 'your-team' of the application 'your-sub/testhttpd' does not match the tenant name 'new-team'
 </code></pre>
+<p>Please change the project of <code>application/testhttpd</code> correctly.</p>
+<pre><code class="language-console">$ kubectl patch app testhttpd -n your-sub --type='json' -p '[{ &quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/spec/project&quot;, &quot;value&quot;: &quot;new-team&quot;}]'
+</code></pre>
+<p>The application will sync again.</p>
 <h2 id="remove-resources"><a class="header" href="#remove-resources">Remove resources</a></h2>
 <p>When a tenant user delete an Application resource on the tenant's namespace, an Application resource on argocd namespace will be deleted as well.
 If <code>resources-finalizer.argocd.argoproj.io</code> is annotated, resources deployed by the Application will be deleted.</p>
 <p>When an administrator deleted a tenant resource:</p>
 <ul>
-<li>Namespaces for the tenant will remain</li>
+<li>Root-namespaces and sub-namespaces for the tenant will remain</li>
 <li>RoleBinding on the namespaces will be deleted</li>
 <li>Applications on the namespaces will be deleted</li>
 <li>AppProject for the tenant will be deleted</li>
@@ -398,28 +419,35 @@ If <code>resources-finalizer.argocd.argoproj.io</code> is annotated, resources d
 <h3 id="sub-resources"><a class="header" href="#sub-resources">Sub Resources</a></h3>
 <ul>
 <li><a href="crd_tenant.html#argocdspec">ArgoCDSpec</a></li>
-<li><a href="crd_tenant.html#namespacespec">NamespaceSpec</a></li>
+<li><a href="crd_tenant.html#delegatespec">DelegateSpec</a></li>
+<li><a href="crd_tenant.html#rootnamespacespec">RootNamespaceSpec</a></li>
 <li><a href="crd_tenant.html#tenantlist">TenantList</a></li>
 <li><a href="crd_tenant.html#tenantspec">TenantSpec</a></li>
 <li><a href="crd_tenant.html#tenantstatus">TenantStatus</a></li>
 </ul>
 <h4 id="argocdspec"><a class="header" href="#argocdspec">ArgoCDSpec</a></h4>
-<p>ArgoCDSpec defines the desired state of the settings for Argo CD</p>
+<p>ArgoCDSpec defines the desired state of the settings for Argo CD.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
-<tr><td>extraAdmins</td><td>ExtraAdmins are the names of the team to add to the AppProject user. Specify this if you want other tenant teams to be able to use your AppProject.</td><td>[]string</td><td>false</td></tr>
+<tr><td>repositories</td><td>Repositories contains list of repository URLs which can be used by the tenant.</td><td>[]string</td><td>false</td></tr>
 </tbody></table>
 <p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
-<h4 id="namespacespec"><a class="header" href="#namespacespec">NamespaceSpec</a></h4>
-<p>NamespaceSpec defines the desired state of Namespace</p>
+<h4 id="delegatespec"><a class="header" href="#delegatespec">DelegateSpec</a></h4>
+<p>DelegateSpec defines a tenant that is delegated access to a tenant.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
-<tr><td>name</td><td>Name is the name of namespace to be generated</td><td>string</td><td>true</td></tr>
-<tr><td>labels</td><td>Labels are the labels to add to the namespace</td><td>map[string]string</td><td>false</td></tr>
-<tr><td>annotations</td><td>Annotations are the annotations to add to the namespace</td><td>map[string]string</td><td>false</td></tr>
-<tr><td>extraAdmins</td><td>ExtraAdmins are the names of the team to add to the namespace administrator. Specify this if you want other tenant teams to be able to use your namespace.</td><td>[]string</td><td>false</td></tr>
+<tr><td>name</td><td>Name is the name of a delegated tenant.</td><td>string</td><td>true</td></tr>
+<tr><td>roles</td><td>Roles is a list of roles that the tenant has.</td><td>[]string</td><td>true</td></tr>
+</tbody></table>
+<p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
+<h4 id="rootnamespacespec"><a class="header" href="#rootnamespacespec">RootNamespaceSpec</a></h4>
+<p>RootNamespaceSpec defines the desired state of Namespace.</p>
+<table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<tr><td>name</td><td>Name is the name of namespace to be generated.</td><td>string</td><td>true</td></tr>
+<tr><td>labels</td><td>Labels are the labels to add to the namespace. This supersedes <code>namespace.commonLabels</code> in the configuration.</td><td>map[string]string</td><td>false</td></tr>
+<tr><td>annotations</td><td>Annotations are the annotations to add to the namespace. This supersedes <code>namespace.commonAnnotations</code> in the configuration.</td><td>map[string]string</td><td>false</td></tr>
 </tbody></table>
 <p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenant"><a class="header" href="#tenant">Tenant</a></h4>
-<p>Tenant is the Schema for the tenants API</p>
+<p>Tenant is the Schema for the tenants API.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>metadata</td><td></td><td>metav1.ObjectMeta</td><td>false</td></tr>
 <tr><td>spec</td><td></td><td><a href="crd_tenant.html#tenantspec">TenantSpec</a></td><td>false</td></tr>
@@ -427,21 +455,22 @@ If <code>resources-finalizer.argocd.argoproj.io</code> is annotated, resources d
 </tbody></table>
 <p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantlist"><a class="header" href="#tenantlist">TenantList</a></h4>
-<p>TenantList contains a list of Tenant</p>
+<p>TenantList contains a list of Tenant.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>metadata</td><td></td><td>metav1.ListMeta</td><td>false</td></tr>
 <tr><td>items</td><td></td><td>[]<a href="crd_tenant.html#tenant">Tenant</a></td><td>true</td></tr>
 </tbody></table>
 <p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantspec"><a class="header" href="#tenantspec">TenantSpec</a></h4>
-<p>TenantSpec defines the desired state of Tenant</p>
+<p>TenantSpec defines the desired state of Tenant.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
-<tr><td>namespaces</td><td>Namespaces are the list of root namespaces that belong to this tenant</td><td>[]<a href="crd_tenant.html#namespacespec">NamespaceSpec</a></td><td>true</td></tr>
-<tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant</td><td><a href="crd_tenant.html#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
+<tr><td>rootNamespaces</td><td>RootNamespaces are the list of root namespaces that belong to this tenant.</td><td>[]<a href="crd_tenant.html#rootnamespacespec">RootNamespaceSpec</a></td><td>true</td></tr>
+<tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant.</td><td><a href="crd_tenant.html#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
+<tr><td>delegates</td><td>Delegates is a list of other tenants that are delegated access to this tenant.</td><td>[]<a href="crd_tenant.html#delegatespec">DelegateSpec</a></td><td>false</td></tr>
 </tbody></table>
 <p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantstatus"><a class="header" href="#tenantstatus">TenantStatus</a></h4>
-<p>TenantStatus defines the observed state of Tenant</p>
+<p>TenantStatus defines the observed state of Tenant.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>health</td><td>Health is the health of Tenant.</td><td>TenantHealth</td><td>false</td></tr>
 <tr><td>conditions</td><td>Conditions is an array of conditions.</td><td>[]metav1.Condition</td><td>false</td></tr>
@@ -453,8 +482,8 @@ If <code>resources-finalizer.argocd.argoproj.io</code> is annotated, resources d
 The location can be changed with <code>--config-file</code> flag.</p>
 <p>The configuration file should be a JSON or YAML file having the following keys:</p>
 <table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>namespace.commonLabels</code></td><td><code>map[string]string</code></td><td>Labels to be added to all namespaces belonging to a tenant.</td></tr>
-<tr><td><code>namespace.commonAnnotations</code></td><td><code>map[string]string</code></td><td>Annotations to be added to all namespaces belonging to a tenant.</td></tr>
+<tr><td><code>namespace.commonLabels</code></td><td><code>map[string]string</code></td><td>Labels to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.labels</code> of a tenant resource.</td></tr>
+<tr><td><code>namespace.commonAnnotations</code></td><td><code>map[string]string</code></td><td>Annotations to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.annotations</code> of a tenant resource.</td></tr>
 <tr><td><code>namespace.roleBindingTemplate</code></td><td><code>string</code></td><td>Template for RoleBinding resource that is created on all namespaces belonging to a tenant.</td></tr>
 <tr><td><code>argocd.namepsace</code></td><td><code>string</code></td><td>The name of namespace where Argo CD is running.</td></tr>
 <tr><td><code>argocd.appProjectTemplate</code></td><td><code>string</code></td><td>Template for AppProject resources that is created for each tenant.</td></tr>
@@ -476,11 +505,11 @@ The location can be changed with <code>--config-file</code> flag.</p>
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: {{ .Name }}
-      {{ range .ExtraAdmins }}
+      {{- range .Roles.admin }}
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: {{ . }}
-      {{ end }}
+      {{- end }}
 argocd:
   namespace: argocd
   appProjectTemplate: |
@@ -488,33 +517,38 @@ argocd:
     kind: AppProject
     spec:
       destinations:
-      {{ range .Namespaces }}
+      {{- range .Namespaces }}
         - namespace: {{ . }}
           server: '*'
-      {{ end }}
+      {{- end }}
       roles:
         - groups:
             - {{ .Name }}
-            {{ range .ExtraAdmins }}
+            {{- range .Roles.admin }}
             - {{ . }}
-            {{ end }}
+            {{- end }}
           name: admin
           policies:
             - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
       sourceRepos:
+        {{- range .Repositories }}
+        - '{{ . }}'
+        {{- else }}
         - '*'
+        {{- end }}
 </code></pre>
 <p><code>roleBindingTemplate</code> and <code>appProjectTemplate</code> can be written in go-template format.</p>
 <p><code>roleBindingTemplate</code> can use the following variables:</p>
 <table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of a tenant.</td></tr>
-<tr><td><code>ExtraAdmins</code></td><td><code>[]string</code></td><td>List of extra administrators.</td></tr>
+<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
+<tr><td><code>Roles</code></td><td><code>map[string][]string</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
 </tbody></table>
 <p><code>appProjectTemplate</code> can use the following variables:</p>
 <table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of a tenant.</td></tr>
-<tr><td><code>ExtraAdmins</code></td><td><code>[]string</code></td><td>List of extra administrators.</td></tr>
+<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
 <tr><td><code>Namespaces</code></td><td><code>[]string</code></td><td>List of namespaces belonging to a tenant (including sub-namespaces).</td></tr>
+<tr><td><code>Repositories</code></td><td><code>[]string</code></td><td>List of repository URLs which can be used by the tenant.</td></tr>
+<tr><td><code>Roles</code></td><td><code>map[string][]string</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
 </tbody></table>
 <h2 id="environment-variables"><a class="header" href="#environment-variables">Environment variables</a></h2>
 <table><thead><tr><th>Name</th><th>Required</th><th>Description</th></tr></thead><tbody>
@@ -551,18 +585,18 @@ argocd:
 <h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/">Argo CD</a> with <a href="https://cybozu-go.github.io/accurate/">Accurate</a>.</p>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
-<p>Argo CD has a problem that it is difficult to implement app-of-apps pattern in a multi-tenancy environment.</p>
+<p>There is a known limitation for Argo CD to implement app-of-apps pattern in a multi-tenancy environment.</p>
 <p>https://github.com/argoproj/argo-cd/issues/2785</p>
 <p>We have developed the following mechanism to resolve the problem.</p>
 <p>https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy</p>
-<p>However, the mechanism has the following problems:</p>
+<p>However, the mechanism still has the following problems:</p>
 <ul>
 <li>Tenant users cannot create app-of-apps Application resources. They need to ask an administrator for that.</li>
 <li>Application resources are not strictly validated. Tenant users can specify Project for other tenants, and can also specify duplicate names.</li>
 <li>When a SubNamespace is created in <a href="https://github.com/kubernetes-sigs/hierarchical-namespaces">HNC</a> or <a href="https://cybozu-go.github.io/accurate/">Accurate</a>, an administrator needs to add it to the destinations of the Application resource.
 (Argo CD supports specifying wildcards in destinations, but that is not enough for us.)</li>
 </ul>
-<p>We are hoping for a better solution.</p>
+<p>We need to build a better solution.</p>
 <h2 id="goals"><a class="header" href="#goals">Goals</a></h2>
 <ul>
 <li>Develop a Kubernetes custom controller to automate the configuration for multi-tenancy of Argo CD with Accurate.</li>
@@ -573,13 +607,13 @@ argocd:
 <h2 id="user-stories"><a class="header" href="#user-stories">User stories</a></h2>
 <h3 id="adding-a-tenant"><a class="header" href="#adding-a-tenant">Adding a tenant</a></h3>
 <p>An administrator only need to create one custom resource to add a tenant to a Kubernetes cluster.
-No more manual operations to add Applications AppProjects and Namespaces.</p>
+No more manual operations to add Applications, AppProjects and Namespaces.</p>
 <p>Tenant users can create sub-namespaces within their tenant.</p>
 <h3 id="adding-an-app-of-apps-application"><a class="header" href="#adding-an-app-of-apps-application">Adding an app-of-apps Application</a></h3>
 <p>Tenant users can create Application resources within their sub-namespaces.
 Application resources are strictly validated.
 No more deploying to another tenant's namespace by mistake.</p>
-<h3 id="changing-ownership-1"><a class="header" href="#changing-ownership-1">Changing ownership</a></h3>
+<h3 id="changing-ownership"><a class="header" href="#changing-ownership">Changing ownership</a></h3>
 <p>There are cases where you want to move ownership of an application between tenants.
 Accurate supports <code>kubectl accurate sub move</code> command to change the parent of a sub-namespace.</p>
 <p>https://cybozu-go.github.io/accurate/subnamespaces.html#changing-the-parent-of-a-sub-namespace</p>
@@ -612,26 +646,40 @@ Also, it does not solve our some problems.</p>
 <p>However, we love Argo CD (the many features and the useful UI).
 We already have a lot of manifests managed by Argo CD. It's hard to switch to another tool now.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="development"><a class="header" href="#development">Development</a></h1>
-<p>Cattage can be developed in Tilt.</p>
 <ol>
 <li>
 <p>Prepare a Linux box running Docker.</p>
 </li>
 <li>
-<p>Checkout this repository. </p>
+<p>Checkout this repository.</p>
 <pre><code class="language-console">$ git clone https://github.com/cybozu-go/cattage
 </code></pre>
 </li>
+</ol>
+<h2 id="setup-cli-tools"><a class="header" href="#setup-cli-tools">Setup CLI tools</a></h2>
+<ol>
+<li>
+<p>Install <a href="https://aquaproj.github.io">aqua</a>.</p>
+<p>https://aquaproj.github.io/docs/tutorial-basics/quick-start</p>
+</li>
+<li>
+<p>Install CLI tools.</p>
+<pre><code class="language-console">$ cd cybozu-go/cattage
+$ aqua i -l
+</code></pre>
+</li>
+</ol>
+<h2 id="development--debug"><a class="header" href="#development--debug">Development &amp; Debug</a></h2>
+<ol>
 <li>
 <p>Launch local Kubernetes cluster.</p>
-<pre><code class="language-console">$ cd cattage
+<pre><code class="language-console">$ cd cybozu-go/cattage
 $ make dev
 </code></pre>
 </li>
 <li>
-<p>Start Tilt.</p>
-<pre><code class="language-console">$ make tilt
-$ ./bin/tilt up
+<p>Start <a href="https://tilt.dev">Tilt</a>.</p>
+<pre><code class="language-console">$ tilt up
 </code></pre>
 </li>
 <li>

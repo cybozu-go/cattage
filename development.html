@@ -141,26 +141,40 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="development"><a class="header" href="#development">Development</a></h1>
-<p>Cattage can be developed in Tilt.</p>
 <ol>
 <li>
 <p>Prepare a Linux box running Docker.</p>
 </li>
 <li>
-<p>Checkout this repository. </p>
+<p>Checkout this repository.</p>
 <pre><code class="language-console">$ git clone https://github.com/cybozu-go/cattage
 </code></pre>
 </li>
+</ol>
+<h2 id="setup-cli-tools"><a class="header" href="#setup-cli-tools">Setup CLI tools</a></h2>
+<ol>
+<li>
+<p>Install <a href="https://aquaproj.github.io">aqua</a>.</p>
+<p>https://aquaproj.github.io/docs/tutorial-basics/quick-start</p>
+</li>
+<li>
+<p>Install CLI tools.</p>
+<pre><code class="language-console">$ cd cybozu-go/cattage
+$ aqua i -l
+</code></pre>
+</li>
+</ol>
+<h2 id="development--debug"><a class="header" href="#development--debug">Development &amp; Debug</a></h2>
+<ol>
 <li>
 <p>Launch local Kubernetes cluster.</p>
-<pre><code class="language-console">$ cd cattage
+<pre><code class="language-console">$ cd cybozu-go/cattage
 $ make dev
 </code></pre>
 </li>
 <li>
-<p>Start Tilt.</p>
-<pre><code class="language-console">$ make tilt
-$ ./bin/tilt up
+<p>Start <a href="https://tilt.dev">Tilt</a>.</p>
+<pre><code class="language-console">$ tilt up
 </code></pre>
 </li>
 <li>

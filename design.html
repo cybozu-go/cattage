@@ -144,18 +144,18 @@
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/">Argo CD</a> with <a href="https://cybozu-go.github.io/accurate/">Accurate</a>.</p>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
-<p>Argo CD has a problem that it is difficult to implement app-of-apps pattern in a multi-tenancy environment.</p>
+<p>There is a known limitation for Argo CD to implement app-of-apps pattern in a multi-tenancy environment.</p>
 <p>https://github.com/argoproj/argo-cd/issues/2785</p>
 <p>We have developed the following mechanism to resolve the problem.</p>
 <p>https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy</p>
-<p>However, the mechanism has the following problems:</p>
+<p>However, the mechanism still has the following problems:</p>
 <ul>
 <li>Tenant users cannot create app-of-apps Application resources. They need to ask an administrator for that.</li>
 <li>Application resources are not strictly validated. Tenant users can specify Project for other tenants, and can also specify duplicate names.</li>
 <li>When a SubNamespace is created in <a href="https://github.com/kubernetes-sigs/hierarchical-namespaces">HNC</a> or <a href="https://cybozu-go.github.io/accurate/">Accurate</a>, an administrator needs to add it to the destinations of the Application resource.
 (Argo CD supports specifying wildcards in destinations, but that is not enough for us.)</li>
 </ul>
-<p>We are hoping for a better solution.</p>
+<p>We need to build a better solution.</p>
 <h2 id="goals"><a class="header" href="#goals">Goals</a></h2>
 <ul>
 <li>Develop a Kubernetes custom controller to automate the configuration for multi-tenancy of Argo CD with Accurate.</li>
@@ -166,7 +166,7 @@
 <h2 id="user-stories"><a class="header" href="#user-stories">User stories</a></h2>
 <h3 id="adding-a-tenant"><a class="header" href="#adding-a-tenant">Adding a tenant</a></h3>
 <p>An administrator only need to create one custom resource to add a tenant to a Kubernetes cluster.
-No more manual operations to add Applications AppProjects and Namespaces.</p>
+No more manual operations to add Applications, AppProjects and Namespaces.</p>
 <p>Tenant users can create sub-namespaces within their tenant.</p>
 <h3 id="adding-an-app-of-apps-application"><a class="header" href="#adding-an-app-of-apps-application">Adding an app-of-apps Application</a></h3>
 <p>Tenant users can create Application resources within their sub-namespaces.

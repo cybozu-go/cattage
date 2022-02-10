@@ -147,28 +147,35 @@
 <h3 id="sub-resources"><a class="header" href="#sub-resources">Sub Resources</a></h3>
 <ul>
 <li><a href="#argocdspec">ArgoCDSpec</a></li>
-<li><a href="#namespacespec">NamespaceSpec</a></li>
+<li><a href="#delegatespec">DelegateSpec</a></li>
+<li><a href="#rootnamespacespec">RootNamespaceSpec</a></li>
 <li><a href="#tenantlist">TenantList</a></li>
 <li><a href="#tenantspec">TenantSpec</a></li>
 <li><a href="#tenantstatus">TenantStatus</a></li>
 </ul>
 <h4 id="argocdspec"><a class="header" href="#argocdspec">ArgoCDSpec</a></h4>
-<p>ArgoCDSpec defines the desired state of the settings for Argo CD</p>
+<p>ArgoCDSpec defines the desired state of the settings for Argo CD.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
-<tr><td>extraAdmins</td><td>ExtraAdmins are the names of the team to add to the AppProject user. Specify this if you want other tenant teams to be able to use your AppProject.</td><td>[]string</td><td>false</td></tr>
+<tr><td>repositories</td><td>Repositories contains list of repository URLs which can be used by the tenant.</td><td>[]string</td><td>false</td></tr>
 </tbody></table>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
-<h4 id="namespacespec"><a class="header" href="#namespacespec">NamespaceSpec</a></h4>
-<p>NamespaceSpec defines the desired state of Namespace</p>
+<h4 id="delegatespec"><a class="header" href="#delegatespec">DelegateSpec</a></h4>
+<p>DelegateSpec defines a tenant that is delegated access to a tenant.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
-<tr><td>name</td><td>Name is the name of namespace to be generated</td><td>string</td><td>true</td></tr>
-<tr><td>labels</td><td>Labels are the labels to add to the namespace</td><td>map[string]string</td><td>false</td></tr>
-<tr><td>annotations</td><td>Annotations are the annotations to add to the namespace</td><td>map[string]string</td><td>false</td></tr>
-<tr><td>extraAdmins</td><td>ExtraAdmins are the names of the team to add to the namespace administrator. Specify this if you want other tenant teams to be able to use your namespace.</td><td>[]string</td><td>false</td></tr>
+<tr><td>name</td><td>Name is the name of a delegated tenant.</td><td>string</td><td>true</td></tr>
+<tr><td>roles</td><td>Roles is a list of roles that the tenant has.</td><td>[]string</td><td>true</td></tr>
+</tbody></table>
+<p><a href="#custom-resources">Back to Custom Resources</a></p>
+<h4 id="rootnamespacespec"><a class="header" href="#rootnamespacespec">RootNamespaceSpec</a></h4>
+<p>RootNamespaceSpec defines the desired state of Namespace.</p>
+<table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<tr><td>name</td><td>Name is the name of namespace to be generated.</td><td>string</td><td>true</td></tr>
+<tr><td>labels</td><td>Labels are the labels to add to the namespace. This supersedes <code>namespace.commonLabels</code> in the configuration.</td><td>map[string]string</td><td>false</td></tr>
+<tr><td>annotations</td><td>Annotations are the annotations to add to the namespace. This supersedes <code>namespace.commonAnnotations</code> in the configuration.</td><td>map[string]string</td><td>false</td></tr>
 </tbody></table>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenant"><a class="header" href="#tenant">Tenant</a></h4>
-<p>Tenant is the Schema for the tenants API</p>
+<p>Tenant is the Schema for the tenants API.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>metadata</td><td></td><td>metav1.ObjectMeta</td><td>false</td></tr>
 <tr><td>spec</td><td></td><td><a href="#tenantspec">TenantSpec</a></td><td>false</td></tr>
@@ -176,21 +183,22 @@
 </tbody></table>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantlist"><a class="header" href="#tenantlist">TenantList</a></h4>
-<p>TenantList contains a list of Tenant</p>
+<p>TenantList contains a list of Tenant.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>metadata</td><td></td><td>metav1.ListMeta</td><td>false</td></tr>
 <tr><td>items</td><td></td><td>[]<a href="#tenant">Tenant</a></td><td>true</td></tr>
 </tbody></table>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantspec"><a class="header" href="#tenantspec">TenantSpec</a></h4>
-<p>TenantSpec defines the desired state of Tenant</p>
+<p>TenantSpec defines the desired state of Tenant.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
-<tr><td>namespaces</td><td>Namespaces are the list of root namespaces that belong to this tenant</td><td>[]<a href="#namespacespec">NamespaceSpec</a></td><td>true</td></tr>
-<tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant</td><td><a href="#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
+<tr><td>rootNamespaces</td><td>RootNamespaces are the list of root namespaces that belong to this tenant.</td><td>[]<a href="#rootnamespacespec">RootNamespaceSpec</a></td><td>true</td></tr>
+<tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant.</td><td><a href="#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
+<tr><td>delegates</td><td>Delegates is a list of other tenants that are delegated access to this tenant.</td><td>[]<a href="#delegatespec">DelegateSpec</a></td><td>false</td></tr>
 </tbody></table>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantstatus"><a class="header" href="#tenantstatus">TenantStatus</a></h4>
-<p>TenantStatus defines the observed state of Tenant</p>
+<p>TenantStatus defines the observed state of Tenant.</p>
 <table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>health</td><td>Health is the health of Tenant.</td><td>TenantHealth</td><td>false</td></tr>
 <tr><td>conditions</td><td>Conditions is an array of conditions.</td><td>[]metav1.Condition</td><td>false</td></tr>

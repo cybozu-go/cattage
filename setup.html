@@ -146,7 +146,7 @@
 Namespaces must be isolated for each tenant.</p>
 <p>There are many ways to achieve Namespace isolation.
 In EKS and GKE, you can integrate RBAC with IAM.
-For on-premises, <a href="https://goteleport.com">Telepot</a> and <a href="https://loft.sh">Loft</a> may help you.</p>
+For on-premises, <a href="https://goteleport.com">Teleport</a> and <a href="https://loft.sh">Loft</a> may help you.</p>
 <h2 id="argo-cd"><a class="header" href="#argo-cd">Argo CD</a></h2>
 <p>Install Argo CD as shown in the following page:</p>
 <p>https://argo-cd.readthedocs.io/en/stable/getting_started/</p>
@@ -217,11 +217,11 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ .Name }}
-          {{ range .ExtraAdmins }}
+          {{- range .Roles.admin }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
             name: {{ . }}
-          {{ end }}
+          {{- end }}
     argocd:
       namespace: argocd
       appProjectTemplate: |
@@ -229,21 +229,25 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
         kind: AppProject
         spec:
           destinations:
-          {{ range .Namespaces }}
+          {{- range .Namespaces }}
             - namespace: {{ . }}
               server: '*'
-          {{ end }}
+          {{- end }}
           roles:
             - groups:
                 - {{ .Name }}
-                {{ range .ExtraAdmins }}
+                {{- range .Roles.admin }}
                 - {{ . }}
-                {{ end }}
+                {{- end }}
               name: admin
               policies:
                 - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
           sourceRepos:
+            {{- range .Repositories }}
+            - '{{ . }}'
+            {{- else }}
             - '*'
+            {{- end }}
 </code></pre>
 <p><code>appProjectTemplate</code> and <code>roleBindingTemplate</code> should be configured appropriately for your multi-tenancy environment.
 Read <a href="config.html">Configurations</a> for details.</p>
