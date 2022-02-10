@@ -5,8 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-### Added
-### Changed
-### Removed
+## [0.1.0] - 2022-02-10
 
-[Unreleased]: https://github.com/cybozu-go/neco-template/compare/4b825dc642cb6eb9a060e54bf8d69288fbee4904...HEAD
+This is the first public release.
+
+[Unreleased]: https://github.com/cybozu-go/cattage/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/cybozu-go/cattage/compare/60bcea7b1cf9d79e5e439d0fa7dbb4629c9f1125...v0.1.0
