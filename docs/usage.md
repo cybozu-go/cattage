@@ -111,7 +111,7 @@ However, the namespace must be root or not managed by accurate.
 A RoleBinding resource named `<tenant-name>-admin` will be created on a namespace belonging to a tenant.
 If a resource with the same name already exists, it will be overwritten.
 
-A AppProject resource with the same name as a tenant will be created in argocd namespace.
+An AppProject resource with the same name as a tenant will be created in argocd namespace.
 If a resource with the same name already exists, it will be overwritten.
 
 When you create an Application on a sub-namespace, an Application resource with the same name will be created in argocd namespace.

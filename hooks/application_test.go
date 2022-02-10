@@ -62,7 +62,7 @@ var _ = Describe("Application webhook", func() {
 		Expect(err.Error()).Should(ContainSubstring(" cannot create the application on a namespace that does not belong to a tenant"))
 	})
 
-	It("should deny creating an application managed by other application", func() {
+	It("should deny creating an application managed by another application", func() {
 		app, err := fillApplication("other-app", "argocd", "a-team")
 		Expect(err).NotTo(HaveOccurred())
 		app.SetLabels(map[string]string{
@@ -75,7 +75,7 @@ var _ = Describe("Application webhook", func() {
 		Expect(err).NotTo(HaveOccurred())
 		err = k8sClient.Create(ctx, app)
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).Should(ContainSubstring("the application is already managed by other namespace"))
+		Expect(err.Error()).Should(ContainSubstring("the application is already managed by another namespace"))
 	})
 
 	It("should allow creating an application managed by nobody", func() {

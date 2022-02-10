@@ -182,8 +182,8 @@ func (r *ApplicationReconciler) canSyncApplicationSpec(ctx context.Context, argo
 				return false, nil
 			}
 		} else if tenantApp.GetNamespace() != ownerNs {
-			logger.Info("the application is already managed by other namespace", "tenantNamespace", tenantApp.GetNamespace(), "ownerNamespace", ownerNs)
-			r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "CannotSync", "the application '%s/%s' is already managed by other namespace '%s'", tenantApp.GetNamespace(), tenantApp.GetName(), ownerNs)
+			logger.Info("the application is already managed by another namespace", "tenantNamespace", tenantApp.GetNamespace(), "ownerNamespace", ownerNs)
+			r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "CannotSync", "the application '%s/%s' is already managed by another namespace '%s'", tenantApp.GetNamespace(), tenantApp.GetName(), ownerNs)
 			return false, nil
 		}
 	}

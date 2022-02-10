@@ -114,7 +114,7 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 				return admission.Denied(field.Forbidden(field.NewPath("spec", "project"), "project of the application does not match the tenant name").Error())
 			}
 		} else if tenantApp.GetNamespace() != ownerNs {
-			return admission.Denied(field.Forbidden(field.NewPath("metadata", "namespace"), "the application is already managed by other namespace").Error())
+			return admission.Denied(field.Forbidden(field.NewPath("metadata", "namespace"), "the application is already managed by another namespace").Error())
 		}
 	}
 
