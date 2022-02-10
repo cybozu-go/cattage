@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+spec:
+  template:
+    spec:
+      securityContext: null
+      containers:
+        - command:
+            - /cattage-controller
+          args: null
+          name: manager
+          securityContext: null

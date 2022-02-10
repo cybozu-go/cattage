@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: controller-config
+  namespace: system
+data:
+  config.yaml: |
+    namespace:
+      commonLabels:
+        accurate.cybozu.com/template: init-template
+      roleBindingTemplate: |
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: admin
+        subjects:
+          - apiGroup: rbac.authorization.k8s.io
+            kind: Group
+            name: {{ .Name }}
+          - kind: ServiceAccount
+            name: node-{{ .Name }}
+            namespace: teleport
+          {{- range .Roles.admin }}
+          - apiGroup: rbac.authorization.k8s.io
+            kind: Group
+            name: {{ . }}
+          - kind: ServiceAccount
+            name: node-{{ . }}
+            namespace: teleport
+          {{- end }}
+    argocd:
+      namespace: argocd
+      appProjectTemplate: |
+        apiVersion: argoproj.io/v1alpha1
+        kind: AppProject
+        spec:
+          destinations:
+          {{- range .Namespaces }}
+            - namespace: {{ . }}
+              server: '*'
+          {{- end }}
+          namespaceResourceBlacklist:
+            - group: ""
+              kind: ResourceQuota
+            - group: ""
+              kind: LimitRange
+          orphanedResources:
+            warn: false
+          roles:
+            - groups:
+                - cybozu-go:{{ .Name }}
+                {{- range .Roles.admin }}
+                - cybozu-go:{{ . }}
+                {{- end }}
+              name: admin
+              policies:
+                - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
+          sourceRepos:
+            {{- range .Repositories }}
+            - '{{ . }}'
+            {{- else }}
+            - '*'
+            {{- end }}

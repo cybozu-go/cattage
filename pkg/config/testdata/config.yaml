@@ -1,0 +1,15 @@
+namespace:
+  commonLabels:
+    foo: bar
+    a: b
+  commonAnnotations:
+    hoge: fuga
+    c: d
+  roleBindingTemplate: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+argocd:
+  namespace: argo
+  appProjectTemplate: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: AppProject

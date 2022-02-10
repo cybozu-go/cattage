@@ -1,0 +1,22 @@
+apiVersion: cattage.cybozu.io/v1beta1
+kind: Tenant
+metadata:
+  name: a-team
+spec:
+  rootNamespaces:
+    - name: app-a
+---
+apiVersion: cattage.cybozu.io/v1beta1
+kind: Tenant
+metadata:
+  name: b-team
+spec:
+  rootNamespaces:
+    - name: app-b
+  argocd:
+    repositories:
+      - "https://github.com/cybozu-go/*"
+  delegates:
+    - name: a-team
+      roles:
+        - admin
