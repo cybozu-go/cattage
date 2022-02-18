@@ -98,6 +98,9 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.go-version }}
+      - name: Setup tag for goreleaser
+        run: |
+          echo "GORELEASER_CURRENT_TAG=$(git describe --tags --abbrev=0 --match "v*" || echo v0.0.0)" >> $GITHUB_ENV
       - name: GoReleaser
         uses: goreleaser/goreleaser-action@79d4afbba1b4eff8b9a98e3d2e58c4dbaf094e2b # v2.8.1
         with:
