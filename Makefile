@@ -90,7 +90,7 @@ test: test-tools
 
 .PHONY: container-structure-test
 container-structure-test:
-	container-structure-test test --image ghcr.io/cybozu-go/cattage:$(shell git describe --tags --abbrev=0 || echo v0.0.0)-next-amd64 --config cst.yaml
+	container-structure-test test --image ghcr.io/cybozu-go/cattage:$(shell git describe --tags --abbrev=0 --match "v*" || echo v0.0.0)-next-amd64 --config cst.yaml
 
 ##@ Build
 
