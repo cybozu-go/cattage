@@ -40,8 +40,13 @@ func (m *applicationMutator) Handle(ctx context.Context, req admission.Request) 
 	if err := m.dec.Decode(req, app); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	// An application created with argocd cli will have an empty namespace.
-	if app.GetNamespace() == "" || app.GetNamespace() == m.config.ArgoCD.Namespace {
+
+	// Application created with argocd cli may have empty name/namespace.
+	// We set namespace obtained from req.
+	if app.GetNamespace() == "" {
+		app.SetNamespace(req.Namespace)
+	}
+	if app.GetNamespace() == m.config.ArgoCD.Namespace {
 		return admission.Allowed("")
 	}
 
@@ -73,8 +78,7 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 	if err := v.dec.Decode(req, tenantApp); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	// An application created with argocd cli will have an empty namespace.
-	if tenantApp.GetNamespace() == "" || tenantApp.GetNamespace() == v.config.ArgoCD.Namespace {
+	if tenantApp.GetNamespace() == v.config.ArgoCD.Namespace {
 		return admission.Allowed("")
 	}
 
