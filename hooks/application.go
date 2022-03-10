@@ -7,18 +7,15 @@ import (
 	"fmt"
 	"net/http"
 
-	"k8s.io/apimachinery/pkg/util/validation/field"
-
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/cybozu-go/cattage/pkg/accurate"
-
 	"github.com/cybozu-go/cattage/pkg/argocd"
 	"github.com/cybozu-go/cattage/pkg/config"
 	"github.com/cybozu-go/cattage/pkg/constants"
 	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -42,6 +39,12 @@ func (m *applicationMutator) Handle(ctx context.Context, req admission.Request) 
 	app := argocd.Application()
 	if err := m.dec.Decode(req, app); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
+	}
+
+	// Application created with argocd cli may have empty name/namespace.
+	// We set namespace obtained from req.
+	if app.GetNamespace() == "" {
+		app.SetNamespace(req.Namespace)
 	}
 	if app.GetNamespace() == m.config.ArgoCD.Namespace {
 		return admission.Allowed("")
@@ -75,7 +78,6 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 	if err := v.dec.Decode(req, tenantApp); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-
 	if tenantApp.GetNamespace() == v.config.ArgoCD.Namespace {
 		return admission.Allowed("")
 	}
