@@ -24,7 +24,7 @@ Cattage supports the following versions:
 
 | Cattage | Argo CD | Accurate |
 |---------|---------|----------|
-| 0.1.0   | 2.2.x   | 0.3.x    | 
+| 0.1.x   | 2.2.5   | 0.3.x    | 
 
 ## Documentation
 

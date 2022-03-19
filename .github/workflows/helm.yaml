@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - uses: azure/setup-helm@v1
         with:
-          version: v3.8.0
+          version: v3.8.1
       - name: Check chart version
         run: |
           tag_version=${GITHUB_REF##*/chart-v}
@@ -24,7 +24,7 @@ jobs:
           fi
       - name: Packaging the chart
         run: helm package ./charts/cattage/
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: helm-charts
           path: ./cattage-*.tgz
@@ -34,13 +34,13 @@ jobs:
     runs-on: ubuntu-20.04
     needs: build
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: gh-pages
       - uses: azure/setup-helm@v1
         with:
-          version: v3.8.0
-      - uses: actions/download-artifact@v2
+          version: v3.8.1
+      - uses: actions/download-artifact@v3
         with:
           name: helm-charts
       - name: Update charts index
