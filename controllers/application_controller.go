@@ -30,10 +30,13 @@ import (
 )
 
 func NewApplicationReconciler(client client.Client, recorder record.EventRecorder, config *config.Config) *ApplicationReconciler {
+	ch := make(chan event.GenericEvent)
+
 	return &ApplicationReconciler{
 		client:   client,
 		recorder: recorder,
 		config:   config,
+		channel:  ch,
 	}
 }
 
@@ -42,6 +45,7 @@ type ApplicationReconciler struct {
 	client   client.Client
 	recorder record.EventRecorder
 	config   *config.Config
+	channel  chan event.GenericEvent
 }
 
 //+kubebuilder:rbac:groups=argoproj.io,resources=applications,verbs=get;list;watch;create;update;patch;delete
@@ -50,16 +54,34 @@ type ApplicationReconciler struct {
 func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	app := argocd.Application()
-	if err := r.client.Get(ctx, req.NamespacedName, app); err != nil {
-		return ctrl.Result{}, client.IgnoreNotFound(err)
+
+	err := r.client.Get(ctx, req.NamespacedName, app)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return ctrl.Result{}, err
+	}
+
+	if apierrors.IsNotFound(err) && req.Namespace == r.config.ArgoCD.Namespace {
+		logger.Info("argocd application was deleted")
+		apps := argocd.ApplicationList()
+		err = r.client.List(ctx, apps)
+		if err != nil {
+			return ctrl.Result{}, client.IgnoreNotFound(err)
+		}
+		for _, ap := range apps.Items {
+			if ap.GetNamespace() != r.config.ArgoCD.Namespace && ap.GetName() == req.Name {
+				logger.Info("queue the tenant application", "tenantApp", ap)
+				r.channel <- event.GenericEvent{
+					Object: ap.DeepCopy(),
+				}
+				break
+			}
+		}
+		return ctrl.Result{}, nil
 	}
 
 	var argocdApp *unstructured.Unstructured
 	var tenantApp *unstructured.Unstructured
 	if req.Namespace == r.config.ArgoCD.Namespace {
-		if app.GetDeletionTimestamp() != nil {
-			return ctrl.Result{}, nil
-		}
 		argocdApp = app
 		ownerNs := argocdApp.GetLabels()[constants.OwnerAppNamespace]
 		if len(ownerNs) == 0 {
@@ -73,6 +95,16 @@ func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			}
 			return ctrl.Result{}, err
 		}
+		if tenantApp.GetDeletionTimestamp() != nil {
+			return ctrl.Result{}, nil
+		}
+		if argocdApp.GetDeletionTimestamp() != nil {
+			logger.Info("argocd application is deleting. queue the tenant application", "tenantApp", tenantApp)
+			r.channel <- event.GenericEvent{
+				Object: tenantApp,
+			}
+			return ctrl.Result{}, nil
+		}
 	} else {
 		tenantApp = app
 		argocdApp = argocd.Application()
@@ -83,7 +115,12 @@ func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		if apierrors.IsNotFound(err) {
 			argocdApp = nil
 		}
-
+		if argocdApp != nil && argocdApp.GetDeletionTimestamp() != nil {
+			logger.Info("argocd application is deleting. requeue the request")
+			return ctrl.Result{
+				Requeue: true,
+			}, nil
+		}
 		if tenantApp.GetDeletionTimestamp() != nil {
 			res, err := r.finalize(ctx, argocdApp, tenantApp)
 			if err != nil {
@@ -132,6 +169,7 @@ func (r *ApplicationReconciler) reconcileApplication(ctx context.Context, argocd
 		return ctrl.Result{}, err
 	}
 	if !canSync {
+		logger.Info("cannot sync the application spec. requeue the request after 30 minutes")
 		return ctrl.Result{
 			RequeueAfter: 30 * time.Minute,
 		}, nil
@@ -149,6 +187,7 @@ func (r *ApplicationReconciler) reconcileApplication(ctx context.Context, argocd
 		logger.Error(err, "failed to sync application status")
 		return ctrl.Result{}, err
 	}
+	logger.Info("Application successfully reconciled")
 	return ctrl.Result{}, nil
 }
 
@@ -263,6 +302,7 @@ func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdA
 		r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "SyncSpecFailed", "Failed to sync application spec", err)
 		return err
 	}
+	logger.Info("Sync application spec succeeded")
 	r.recorder.Eventf(tenantApp, corev1.EventTypeNormal, "ApplicationSynced", "Sync application spec succeeded")
 	return nil
 }
@@ -313,6 +353,7 @@ func (r *ApplicationReconciler) syncApplicationStatus(ctx context.Context, argoc
 		r.recorder.Eventf(tenantApp, corev1.EventTypeWarning, "SyncStatusFailed", "Failed to sync application status", err)
 		return err
 	}
+	logger.Info("Sync application status succeeded")
 	r.recorder.Eventf(tenantApp, corev1.EventTypeNormal, "StatusSynced", "Sync application status succeeded")
 	return nil
 }
@@ -335,6 +376,10 @@ func (r *ApplicationReconciler) SetupWithManager(ctx context.Context, mgr ctrl.M
 			}})
 		}
 	}
+	src := source.Channel{
+		Source: r.channel,
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(argocd.Application()).
 		Watches(&source.Kind{Type: &corev1.Namespace{}}, handler.Funcs{
@@ -345,5 +390,6 @@ func (r *ApplicationReconciler) SetupWithManager(ctx context.Context, mgr ctrl.M
 				nsHandler(ev.ObjectOld, q)
 			},
 		}).
+		Watches(&src, &handler.EnqueueRequestForObject{}).
 		Complete(r)
 }

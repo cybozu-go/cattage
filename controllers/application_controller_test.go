@@ -297,4 +297,35 @@ var _ = Describe("Application controller", func() {
 			return errors.New("application still exists")
 		}).Should(Succeed())
 	})
+
+	It("should resync when an application on argocd is deleted", func() {
+		tenantApp, err := fillApplication("resync-app", "sub-1", "a-team")
+		Expect(err).ToNot(HaveOccurred())
+
+		By("syncing an application spec")
+		err = k8sClient.Create(ctx, tenantApp)
+		Expect(err).ToNot(HaveOccurred())
+
+		argocdApp := argocd.Application()
+		Eventually(func() error {
+			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: tenantApp.GetName()}, argocdApp); err != nil {
+				return err
+			}
+			return nil
+		}).Should(Succeed())
+
+		err = k8sClient.Delete(ctx, argocdApp)
+		Expect(err).ToNot(HaveOccurred())
+
+		resyncedArgocdApp := argocd.Application()
+		Eventually(func() error {
+			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: tenantApp.GetName()}, resyncedArgocdApp); err != nil {
+				return err
+			}
+			if argocdApp.GetUID() == resyncedArgocdApp.GetUID() {
+				return errors.New("application should be resynced")
+			}
+			return nil
+		}).Should(Succeed())
+	})
 })
