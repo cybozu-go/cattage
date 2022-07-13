@@ -34,14 +34,14 @@ It should look like:
 
     ```console
     # Set VERSION and confirm it. It should not have "v" prefix.
-    $ VERSION=x.y.x
+    $ VERSION=x.y.z
     $ echo $VERSION
     ```
 
 2. Make a branch to release
 
     ```console
-    $ git neco dev "bump-$VERSION"`
+    $ git neco dev "bump-$VERSION"
     ```
 
 3. Update version strings in `version.go` in the top directory.
@@ -58,7 +58,7 @@ It should look like:
 
     ```console
     # Set VERSION again.
-    $ VERSION=x.y.x
+    $ VERSION=x.y.z
     $ echo $VERSION
 
     $ git checkout main
@@ -83,14 +83,14 @@ This will prevent the Cattage version from going up just by modifying the Helm C
 
     ```console
     # Set CHARTVERSION and confirm it. It should not have "v" prefix.
-    $ CHARTVERSION=x.y.x
+    $ CHARTVERSION=a.b.c
     $ echo $CHARTVERSION
     ```
 
 2. Make a branch to release
 
     ```console
-    $ git neco dev "bump-chart-$CHARTVERSION"`
+    $ git neco dev "bump-chart-$CHARTVERSION"
     ```
 
 3. Change the version of `Chart.yaml`.
@@ -106,7 +106,7 @@ This will prevent the Cattage version from going up just by modifying the Helm C
 
     ```console
     # Set CHARTVERSION again.
-    $ CHARTVERSION=x.y.x
+    $ CHARTVERSION=a.b.c
     $ echo $CHARTVERSION
 
     $ git checkout main
