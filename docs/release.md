@@ -30,7 +30,14 @@ It should look like:
 
 ## Bump version
 
-1. Determine a new version number.  Let it write `$VERSION` as `VERSION=x.y.z`.
+1. Determine a new version number. Then set `VERSION` variable.
+
+    ```console
+    # Set VERSION and confirm it. It should not have "v" prefix.
+    $ VERSION=x.y.x
+    $ echo $VERSION
+    ```
+
 2. Make a branch to release
 
     ```console
@@ -50,9 +57,17 @@ It should look like:
 7. Add a git tag to the main HEAD, then push it.
 
     ```console
+    # Set VERSION again.
+    $ VERSION=x.y.x
+    $ echo $VERSION
+
     $ git checkout main
     $ git pull
     $ git tag -a -m "Release v$VERSION" "v$VERSION"
+
+    # Make sure the release tag exists.
+    $ git tag -ln | grep $VERSION
+
     $ git push origin "v$VERSION"
     ```
 
@@ -64,18 +79,25 @@ create a new GitHub release.
 Cattage Helm Chart will be released independently of Cattage itself.
 This will prevent the Cattage version from going up just by modifying the Helm Chart.
 
-1. Determine a new version number of the chart. This version is not related to the version of Cattage. Let it write `$VERSION` as `VERSION=x.y.z`.
+1. Determine a new version number of the chart. This version is not related to the version of Cattage.
+
+    ```console
+    # Set CHARTVERSION and confirm it. It should not have "v" prefix.
+    $ CHARTVERSION=x.y.x
+    $ echo $CHARTVERSION
+    ```
+
 2. Make a branch to release
 
     ```console
-    $ git neco dev "bump-chart-$VERSION"`
+    $ git neco dev "bump-chart-$CHARTVERSION"`
     ```
 
 3. Change the version of `Chart.yaml`.
 4. Commit the change and push it.
 
     ```console
-    $ git commit -a -m "Bump chart version to $VERSION"
+    $ git commit -a -m "Bump chart version to $CHARTVERSION"
     $ git neco review
     ```
 
@@ -83,10 +105,18 @@ This will prevent the Cattage version from going up just by modifying the Helm C
 6. Add a git tag to the main HEAD, then push it.
 
     ```console
+    # Set CHARTVERSION again.
+    $ CHARTVERSION=x.y.x
+    $ echo $CHARTVERSION
+
     $ git checkout main
     $ git pull
-    $ git tag -a -m "Release Chart v$VERSION" "chart-v$VERSION"
-    $ git push origin "chart-v$VERSION"
+    $ git tag -a -m "Release Chart v$CHARTVERSION" "chart-v$CHARTVERSION"
+
+    # Make sure the release tag exists.
+    $ git tag -ln | grep $CHARTVERSION
+
+    $ git push origin "chart-v$CHARTVERSION"
     ```
 
 GitHub actions will upload the chart archive on `gh-pages` branch.
