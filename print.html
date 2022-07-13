@@ -715,11 +715,15 @@ It should look like:</p>
 <h2 id="bump-version"><a class="header" href="#bump-version">Bump version</a></h2>
 <ol>
 <li>
-<p>Determine a new version number.  Let it write <code>$VERSION</code> as <code>VERSION=x.y.z</code>.</p>
+<p>Determine a new version number. Then set <code>VERSION</code> variable.</p>
+<pre><code class="language-console"># Set VERSION and confirm it. It should not have &quot;v&quot; prefix.
+$ VERSION=x.y.z
+$ echo $VERSION
+</code></pre>
 </li>
 <li>
 <p>Make a branch to release</p>
-<pre><code class="language-console">$ git neco dev &quot;bump-$VERSION&quot;`
+<pre><code class="language-console">$ git neco dev &quot;bump-$VERSION&quot;
 </code></pre>
 </li>
 <li>
@@ -739,9 +743,17 @@ $ git neco review
 </li>
 <li>
 <p>Add a git tag to the main HEAD, then push it.</p>
-<pre><code class="language-console">$ git checkout main
+<pre><code class="language-console"># Set VERSION again.
+$ VERSION=x.y.z
+$ echo $VERSION
+
+$ git checkout main
 $ git pull
 $ git tag -a -m &quot;Release v$VERSION&quot; &quot;v$VERSION&quot;
+
+# Make sure the release tag exists.
+$ git tag -ln | grep $VERSION
+
 $ git push origin &quot;v$VERSION&quot;
 </code></pre>
 </li>
@@ -753,11 +765,15 @@ create a new GitHub release.</p>
 This will prevent the Cattage version from going up just by modifying the Helm Chart.</p>
 <ol>
 <li>
-<p>Determine a new version number of the chart. This version is not related to the version of Cattage. Let it write <code>$VERSION</code> as <code>VERSION=x.y.z</code>.</p>
+<p>Determine a new version number of the chart. This version is not related to the version of Cattage.</p>
+<pre><code class="language-console"># Set CHARTVERSION and confirm it. It should not have &quot;v&quot; prefix.
+$ CHARTVERSION=a.b.c
+$ echo $CHARTVERSION
+</code></pre>
 </li>
 <li>
 <p>Make a branch to release</p>
-<pre><code class="language-console">$ git neco dev &quot;bump-chart-$VERSION&quot;`
+<pre><code class="language-console">$ git neco dev &quot;bump-chart-$CHARTVERSION&quot;
 </code></pre>
 </li>
 <li>
@@ -765,7 +781,7 @@ This will prevent the Cattage version from going up just by modifying the Helm C
 </li>
 <li>
 <p>Commit the change and push it.</p>
-<pre><code class="language-console">$ git commit -a -m &quot;Bump chart version to $VERSION&quot;
+<pre><code class="language-console">$ git commit -a -m &quot;Bump chart version to $CHARTVERSION&quot;
 $ git neco review
 </code></pre>
 </li>
@@ -774,10 +790,18 @@ $ git neco review
 </li>
 <li>
 <p>Add a git tag to the main HEAD, then push it.</p>
-<pre><code class="language-console">$ git checkout main
+<pre><code class="language-console"># Set CHARTVERSION again.
+$ CHARTVERSION=a.b.c
+$ echo $CHARTVERSION
+
+$ git checkout main
 $ git pull
-$ git tag -a -m &quot;Release Chart v$VERSION&quot; &quot;chart-v$VERSION&quot;
-$ git push origin &quot;chart-v$VERSION&quot;
+$ git tag -a -m &quot;Release Chart v$CHARTVERSION&quot; &quot;chart-v$CHARTVERSION&quot;
+
+# Make sure the release tag exists.
+$ git tag -ln | grep $CHARTVERSION
+
+$ git push origin &quot;chart-v$CHARTVERSION&quot;
 </code></pre>
 </li>
 </ol>
