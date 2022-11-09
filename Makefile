@@ -86,7 +86,6 @@ test: test-tools
 	go vet ./...
 	test -z $$(gofmt -s -l . | tee /dev/stderr)
 	$(STATICCHECK) ./...
-	$(NILERR) ./...
 
 .PHONY: container-structure-test
 container-structure-test:
@@ -143,12 +142,8 @@ setup-envtest: ## Download setup-envtest locally if necessary
 	GOBIN=$(BIN_DIR) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 
 .PHONY: test-tools
-test-tools: $(STATICCHECK) $(NILERR)
+test-tools: $(STATICCHECK)
 
 $(STATICCHECK):
 	mkdir -p $(BIN_DIR)
 	GOBIN=$(BIN_DIR) go install honnef.co/go/tools/cmd/staticcheck@latest
-
-$(NILERR):
-	mkdir -p $(BIN_DIR)
-	GOBIN=$(BIN_DIR) go install github.com/gostaticanalysis/nilerr/cmd/nilerr@latest
