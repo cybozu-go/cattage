@@ -1,6 +1,6 @@
 # Tool versions
 CTRL_RUNTIME_VERSION := $(shell awk '/sigs.k8s.io\/controller-runtime/ {print substr($$2, 2)}' go.mod)
-ARGOCD_VERSION = 2.3.2
+ARGOCD_VERSION = 2.3.9
 
 # Test tools
 BIN_DIR := $(shell pwd)/bin

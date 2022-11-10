@@ -8,7 +8,7 @@ registries:
     name: local
     path: registry.yaml
 packages:
-  - name: argoproj/argo-cd@v2.3.2
+  - name: argoproj/argo-cd@v2.3.9
   - name: kubernetes/kubectl@v1.24.7
   - name: kubernetes-sigs/kubebuilder@v3.3.0
   - name: kubernetes-sigs/kustomize@kustomize/v4.5.3

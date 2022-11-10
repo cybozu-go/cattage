@@ -23,8 +23,8 @@ Cattage depends on the specification of Argo CD and Accurate.
 Cattage supports the following versions:
 
 | Cattage | Argo CD | Accurate |
-|---------|---------|----------|
-| 0.1.x   | 2.2.5   | 0.3.x    | 
+| ------- | ------- | -------- |
+| 0.1.x   | 2.3.9   | 0.3.x    |
 
 ## Documentation
 

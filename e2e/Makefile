@@ -1,5 +1,5 @@
-KUBERNETES_VERSION = 1.23.4
-ARGOCD_VERSION = 2.3.2
+KUBERNETES_VERSION = 1.24.7
+ARGOCD_VERSION = 2.3.9
 
 KIND_CONFIG = kind-config.yaml
 export KUBECONFIG
@@ -48,7 +48,7 @@ logs:
 	rm -rf logs
 
 .PHONY: stop
-stop: 
+stop:
 	kind delete cluster --name=cattage
 	-docker image rm cattage:dev
 	-docker image prune -f
