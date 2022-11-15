@@ -3,10 +3,7 @@
 # https://aquaproj.github.io/
 registries:
   - type: standard
-    ref: v1.10.0 # renovate: depName=aquaproj/aqua-registry
-  - type: local
-    name: local
-    path: registry.yaml
+    ref: v3.94.0 # renovate: depName=aquaproj/aqua-registry
 packages:
   - name: argoproj/argo-cd@v2.3.9
   - name: kubernetes/kubectl@v1.24.7
@@ -19,4 +16,3 @@ packages:
   - name: GoogleContainerTools/container-structure-test@v1.11.0
   - name: mikefarah/yq@v4.23.1
   - name: clamoriniere/crd-to-markdown@v0.0.3
-    registry: local
