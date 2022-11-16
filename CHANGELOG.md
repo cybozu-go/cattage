@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Support Kubernetes 1.24 ([#19](https://github.com/cybozu-go/cattage/pull/19))
+    - Build with go 1.18
+    - Update dependencies
+
 ## [0.1.2] - 2022-04-06
 
 ### Fixed

@@ -295,7 +295,7 @@ func (r *ApplicationReconciler) syncApplicationSpec(ctx context.Context, argocdA
 	}
 
 	err := r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
-		Force:        pointer.BoolPtr(true),
+		Force:        pointer.Bool(true),
 		FieldManager: constants.SpecFieldManager,
 	})
 	if err != nil {
@@ -346,7 +346,7 @@ func (r *ApplicationReconciler) syncApplicationStatus(ctx context.Context, argoc
 
 	// MEMO: Use `r.Patch` instead of `r.Status().Patch()`, because the status of application is not a sub-resource.
 	err = r.client.Patch(ctx, newApp, client.Apply, &client.PatchOptions{
-		Force:        pointer.BoolPtr(true),
+		Force:        pointer.Bool(true),
 		FieldManager: constants.StatusFieldManager,
 	})
 	if err != nil {

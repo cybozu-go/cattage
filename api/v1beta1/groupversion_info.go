@@ -1,6 +1,6 @@
 // Package v1beta1 contains API Schema definitions for the cattage v1beta1 API group
-//+kubebuilder:object:generate=true
-//+groupName=cattage.cybozu.io
+// +kubebuilder:object:generate=true
+// +groupName=cattage.cybozu.io
 package v1beta1
 
 import (

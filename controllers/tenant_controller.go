@@ -444,7 +444,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	}
 
 	err = r.client.Patch(ctx, proj, client.Apply, &client.PatchOptions{
-		Force:        pointer.BoolPtr(true),
+		Force:        pointer.Bool(true),
 		FieldManager: constants.TenantFieldManager,
 	})
 	if err != nil {
