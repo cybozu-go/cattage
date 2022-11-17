@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   cattage:
   - apiVersion: v2
+    appVersion: 0.1.3
+    created: "2022-11-17T08:26:03.987804532Z"
+    description: A Helm chart for cattage
+    digest: ecddf5873d02b6e0cc1ee07f53c70db6500c5dae4d781158c79c1006c59e569d
+    name: cattage
+    type: application
+    urls:
+    - https://cybozu-go.github.io/cattage/cattage-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
     appVersion: 0.1.2
-    created: "2022-04-06T09:06:00.998648098Z"
+    created: "2022-11-17T08:26:03.98731613Z"
     description: A Helm chart for cattage
     digest: 295959b12ccda31804b08eb9c75992d8b81ef6306f4aaa179b0a4fed5c3a0eb8
     name: cattage
@@ -13,7 +23,7 @@ entries:
     version: 0.1.4
   - apiVersion: v2
     appVersion: 0.1.1
-    created: "2022-04-06T09:06:00.998178398Z"
+    created: "2022-11-17T08:26:03.986870728Z"
     description: A Helm chart for cattage
     digest: 1de98041e8fe8010128d6a458e6ff635c1d6f749ac8eefbb9337ff4c7d1c8819
     name: cattage
@@ -23,7 +33,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-04-06T09:06:00.997713099Z"
+    created: "2022-11-17T08:26:03.986405226Z"
     description: A Helm chart for cattage
     digest: d2533bbc5bd29fcd6e03d32b4cbe12b9ca65002336d9bdba546a9dd3a1cf1a01
     name: cattage
@@ -33,7 +43,7 @@ entries:
     version: 0.1.2
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-04-06T09:06:00.9970287Z"
+    created: "2022-11-17T08:26:03.985707022Z"
     description: A Helm chart for cattage
     digest: 09cb4cf36e8f0642e94df3d07992c95b0438195e79cfd4b927351950e9889cbf
     name: cattage
@@ -43,7 +53,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-04-06T09:06:00.996467801Z"
+    created: "2022-11-17T08:26:03.98513192Z"
     description: A Helm chart for cattage
     digest: d04c1b766f3ea065379abf7958c661b6551e9bef08c0da610d9ccb3cd0d0b8b3
     name: cattage
@@ -51,4 +61,4 @@ entries:
     urls:
     - https://cybozu-go.github.io/cattage/cattage-0.1.0.tgz
     version: 0.1.0
-generated: "2022-04-06T09:06:00.994759003Z"
+generated: "2022-11-17T08:26:03.984043515Z"
