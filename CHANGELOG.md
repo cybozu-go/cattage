@@ -5,10 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.3] - 2022-11-16
+
 ### Changed
 
 - Support Kubernetes 1.24 ([#19](https://github.com/cybozu-go/cattage/pull/19))
-    - Build with go 1.18
+    - Build with go 1.19
     - Update dependencies
 
 ## [0.1.2] - 2022-04-06
@@ -25,7 +27,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This is the first public release.
 
-[Unreleased]: https://github.com/cybozu-go/cattage/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/cybozu-go/cattage/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/cybozu-go/cattage/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/cybozu-go/cattage/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/cybozu-go/cattage/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/cybozu-go/cattage/compare/60bcea7b1cf9d79e5e439d0fa7dbb4629c9f1125...v0.1.0
