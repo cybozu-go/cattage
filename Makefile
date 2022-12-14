@@ -1,6 +1,6 @@
 # Tool versions
 CTRL_RUNTIME_VERSION := $(shell awk '/sigs.k8s.io\/controller-runtime/ {print substr($$2, 2)}' go.mod)
-ARGOCD_VERSION = 2.4.17
+ARGOCD_VERSION = 2.5.4
 
 # Test tools
 BIN_DIR := $(shell pwd)/bin
@@ -52,6 +52,14 @@ manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and Cust
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
+.PHONY: install
+install: manifests ## Install CRDs into the K8s cluster specified in ~/.kube/config.
+	kustomize build config/crd | kubectl apply -f -
+
+.PHONY: uninstall
+uninstall: manifests ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
+	kustomize build config/crd | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+
 .PHONY: apidoc
 apidoc: $(wildcard api/*/*_types.go)
 	crd-to-markdown --links docs/links.csv -f api/v1beta1/tenant_types.go -n Tenant > docs/crd_tenant.md
@@ -94,9 +102,9 @@ container-structure-test:
 ##@ Build
 
 .PHONY: build
-build:
+build: generate
 	mkdir -p bin
-	GOBIN=$(shell pwd)/bin go install ./cmd/...
+	GOBIN=$(shell pwd)/bin CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install ./cmd/...
 
 ##@ Development
 

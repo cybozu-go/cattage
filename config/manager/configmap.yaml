@@ -57,6 +57,10 @@ data:
               name: admin
               policies:
                 - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
+          sourceNamespaces:
+          {{- range .Namespaces }}
+            - {{ . }}
+          {{- end }}
           sourceRepos:
             {{- range .Repositories }}
             - '{{ . }}'

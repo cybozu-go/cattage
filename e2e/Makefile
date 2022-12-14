@@ -1,5 +1,5 @@
 KUBERNETES_VERSION = 1.24.7
-ARGOCD_VERSION = 2.4.17
+ARGOCD_VERSION = 2.5.4
 
 KIND_CONFIG = kind-config.yaml
 export KUBECONFIG
@@ -29,6 +29,8 @@ prepare:
 	kubectl -n cert-manager wait --for=condition=available --timeout=180s --all deployments
 	kubectl create ns argocd
 	curl -sSLf https://raw.githubusercontent.com/argoproj/argo-cd/v$(ARGOCD_VERSION)/manifests/install.yaml | kubectl -n argocd apply -f -
+	kubectl patch deployment -n argocd argocd-server --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args", "value": ["--application-namespaces=*"]}]'
+	kubectl patch statefulset -n argocd argocd-application-controller --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args", "value": ["--application-namespaces=*"]}]'
 	kubectl -n argocd wait --for=condition=available --timeout=180s --all deployments
 	helm repo add accurate https://cybozu-go.github.io/accurate/
 	helm repo update

@@ -100,7 +100,6 @@ var _ = BeforeSuite(func() {
 		},
 	}
 	SetupTenantWebhook(mgr, dec, config)
-	SetupApplicationWebhook(mgr, dec, config)
 
 	//+kubebuilder:scaffold:webhook
 
