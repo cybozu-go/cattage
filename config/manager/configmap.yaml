@@ -46,8 +46,6 @@ data:
               kind: ResourceQuota
             - group: ""
               kind: LimitRange
-          orphanedResources:
-            warn: false
           roles:
             - groups:
                 - cybozu-go:{{ .Name }}
@@ -58,9 +56,9 @@ data:
               policies:
                 - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
           sourceNamespaces:
-          {{- range .Namespaces }}
+            {{- range .Namespaces }}
             - {{ . }}
-          {{- end }}
+            {{- end }}
           sourceRepos:
             {{- range .Repositories }}
             - '{{ . }}'

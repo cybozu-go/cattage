@@ -16,8 +16,6 @@ https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Mu
 
 However, the mechanism still has the following problems:
 
-- Tenant users cannot create app-of-apps Application resources. They need to ask an administrator for that.
-- Application resources are not strictly validated. Tenant users can specify Project for other tenants, and can also specify duplicate names.
 - When a SubNamespace is created in [HNC][] or [Accurate][], an administrator needs to add it to the destinations of the Application resource.
   (Argo CD supports specifying wildcards in destinations, but that is not enough for us.)
 
@@ -56,17 +54,6 @@ An administrators can use this command to move the sub-namespace to another tena
 The permission of AppProjects, Applications and Namespaces will be updated automatically.
 
 ## Alternatives
-
-### Argo CD: Multi-tenancy improvements
-
-Argo CD will improve multi-tenancy in the future.
-
-https://argo-cd.readthedocs.io/en/stable/roadmap/#multi-tenancy-improvements
-
-The above proposal would allow us to create Application resources in any namespace.
-
-If this feature is supported, we will migrate to it immediately.
-So we need to design our controller to be easy to migrate to.
 
 ### ApplicationSet
 

@@ -138,7 +138,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 
 func (r *TenantReconciler) migrateToArgoCD25(ctx context.Context) (bool /* needRequeue */, error) {
 	apps := argocd.ApplicationList()
-	if err := r.client.List(ctx, apps, client.HasLabels{constants.OwnerAppNamespace}); err != nil {
+	if err := r.client.List(ctx, apps, client.HasLabels{constants.OwnerAppNamespace}, client.InNamespace(r.config.ArgoCD.Namespace)); err != nil {
 		return false, fmt.Errorf("failed to list applications: %w", err)
 	}
 	if len(apps.Items) == 0 {
