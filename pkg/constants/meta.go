@@ -8,4 +8,6 @@ const Finalizer = MetaPrefix + "finalizer"
 
 const OwnerTenant = MetaPrefix + "tenant"
 
+const OwnerAppNamespace = MetaPrefix + "owner-namespace"
+
 const TenantFieldManager = MetaPrefix + "tenant-controller"
