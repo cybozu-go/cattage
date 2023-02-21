@@ -1,6 +1,6 @@
 # Tool versions
 CTRL_RUNTIME_VERSION := $(shell awk '/sigs.k8s.io\/controller-runtime/ {print substr($$2, 2)}' go.mod)
-ARGOCD_VERSION = 2.5.4
+ARGOCD_VERSION = 2.5.10
 
 # Test tools
 BIN_DIR := $(shell pwd)/bin
@@ -83,9 +83,9 @@ crds:
 .PHONY: envtest
 envtest: setup-envtest crds
 	source <($(SETUP_ENVTEST) use -p env); \
-		go test -v -count 1 -race ./controllers -ginkgo.progress -ginkgo.v -ginkgo.failFast
+		go test -v -count 1 -race ./controllers -ginkgo.v -ginkgo.fail-fast
 	source <($(SETUP_ENVTEST) use -p env); \
-		go test -v -count 1 -race ./hooks -ginkgo.progress -ginkgo.v -ginkgo.failFast
+		go test -v -count 1 -race ./hooks -ginkgo.v -ginkgo.fail-fast
 
 .PHONY: test
 test: test-tools
