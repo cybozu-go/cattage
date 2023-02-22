@@ -516,6 +516,7 @@ var _ = Describe("Tenant controller", func() {
 	Context("Migration to Argo CD 2.5", func() {
 		It("should remove old applications", func() {
 			oldApp, err := fillApplication("app", config.ArgoCD.Namespace, "a-team")
+			Expect(err).ToNot(HaveOccurred())
 			oldApp.SetLabels(map[string]string{
 				constants.OwnerAppNamespace: "sub-1",
 			})
@@ -534,6 +535,7 @@ var _ = Describe("Tenant controller", func() {
 
 		It("should not remove normal applications", func() {
 			normalApp, err := fillApplication("normal", config.ArgoCD.Namespace, "default")
+			Expect(err).ToNot(HaveOccurred())
 			normalApp.SetFinalizers([]string{
 				"resources-finalizer.argocd.argoproj.io",
 			})
