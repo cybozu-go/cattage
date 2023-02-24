@@ -256,26 +256,6 @@ webhooks:
       service:
         name: '{{ template "cattage.fullname" . }}-webhook-service'
         namespace: '{{ .Release.Namespace }}'
-        path: /mutate-argoproj-io-application
-    failurePolicy: Fail
-    name: mapplication.kb.io
-    rules:
-      - apiGroups:
-          - argoproj.io
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - applications
-    sideEffects: None
-  - admissionReviewVersions:
-      - v1
-    clientConfig:
-      service:
-        name: '{{ template "cattage.fullname" . }}-webhook-service'
-        namespace: '{{ .Release.Namespace }}'
         path: /mutate-cattage-cybozu-io-v1beta1-tenant
     failurePolicy: Fail
     name: mtenant.kb.io
@@ -303,26 +283,6 @@ metadata:
     helm.sh/chart: '{{ include "cattage.chart" . }}'
   name: '{{ template "cattage.fullname" . }}-validating-webhook-configuration'
 webhooks:
-  - admissionReviewVersions:
-      - v1
-    clientConfig:
-      service:
-        name: '{{ template "cattage.fullname" . }}-webhook-service'
-        namespace: '{{ .Release.Namespace }}'
-        path: /validate-argoproj-io-application
-    failurePolicy: Fail
-    name: vapplication.kb.io
-    rules:
-      - apiGroups:
-          - argoproj.io
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - applications
-    sideEffects: None
   - admissionReviewVersions:
       - v1
     clientConfig:

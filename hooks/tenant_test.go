@@ -90,37 +90,4 @@ var _ = Describe("Tenant webhook", func() {
 		Expect(err.Error()).Should(ContainSubstring("sub namespace is not allowed"))
 	})
 
-	It("should deny creating a tenant with other tenant's root namespace", func() {
-		tenantF := &cattagev1beta1.Tenant{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "f-team",
-			},
-			Spec: cattagev1beta1.TenantSpec{
-				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
-					{
-						Name: "app-f-team",
-					},
-				},
-			},
-		}
-		err := k8sClient.Create(ctx, tenantF)
-		Expect(err).NotTo(HaveOccurred())
-
-		tenantG := &cattagev1beta1.Tenant{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "g-team",
-			},
-			Spec: cattagev1beta1.TenantSpec{
-				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
-					{
-						Name: "app-f-team",
-					},
-				},
-			},
-		}
-		err = k8sClient.Create(ctx, tenantG)
-		Expect(err).To(HaveOccurred())
-
-		Expect(err.Error()).Should(ContainSubstring("other tenant's root namespace is not allowed"))
-	})
 })

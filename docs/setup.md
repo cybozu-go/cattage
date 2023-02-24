@@ -48,6 +48,9 @@ rules:
   - deletecollection
 ```
 
+Cattage requires Argo CD's [Applications in any namespace](https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/) is enabled.
+In order to enable the feature, add `--application-namespace="*"` parameter to `argocd-server` and `argocd-application-controller`.
+
 ## cert-manager
 
 Cattage and Accurate depend on [cert-manager][] to issue TLS certificate for admission webhooks.
@@ -130,6 +133,10 @@ controller:
               name: admin
               policies:
                 - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
+          sourceNamespaces:
+            {{- range .Namespaces }}
+            - {{ . }}
+            {{- end }}
           sourceRepos:
             {{- range .Repositories }}
             - '{{ . }}'

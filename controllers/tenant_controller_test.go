@@ -512,4 +512,61 @@ var _ = Describe("Tenant controller", func() {
 			return errors.New("tenant still exists")
 		}).Should(Succeed())
 	})
+
+	Context("Migration to Argo CD 2.5", func() {
+		It("should remove old applications", func() {
+			oldApp, err := fillApplication("app", config.ArgoCD.Namespace, "a-team")
+			Expect(err).ToNot(HaveOccurred())
+			oldApp.SetLabels(map[string]string{
+				constants.OwnerAppNamespace: "sub-1",
+			})
+			oldApp.SetFinalizers([]string{
+				"resources-finalizer.argocd.argoproj.io",
+			})
+			err = k8sClient.Create(ctx, oldApp)
+			Expect(err).ToNot(HaveOccurred())
+
+			app := argocd.Application()
+			Eventually(func(g Gomega) {
+				err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: oldApp.GetName()}, app)
+				g.Expect(apierrors.IsNotFound(err)).Should(BeTrue())
+			}).Should(Succeed())
+		})
+
+		It("should not remove normal applications", func() {
+			normalApp, err := fillApplication("normal", config.ArgoCD.Namespace, "default")
+			Expect(err).ToNot(HaveOccurred())
+			normalApp.SetFinalizers([]string{
+				"resources-finalizer.argocd.argoproj.io",
+			})
+			err = k8sClient.Create(ctx, normalApp)
+			Expect(err).ToNot(HaveOccurred())
+
+			app := argocd.Application()
+			Consistently(func(g Gomega) {
+				err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: normalApp.GetName()}, app)
+				g.Expect(err).ShouldNot(HaveOccurred())
+			}).Should(Succeed())
+		})
+	})
 })
+
+func fillApplication(name, namespace, project string) (*unstructured.Unstructured, error) {
+	app := argocd.Application()
+	app.SetName(name)
+	app.SetNamespace(namespace)
+	err := unstructured.SetNestedField(app.UnstructuredContent(), project, "spec", "project")
+	if err != nil {
+		return nil, err
+	}
+	err = unstructured.SetNestedField(app.UnstructuredContent(), "https://github.com/neco-test/apps-sandbox.git", "spec", "source", "repoURL")
+	if err != nil {
+		return nil, err
+	}
+	err = unstructured.SetNestedMap(app.UnstructuredContent(), map[string]interface{}{}, "spec", "destination")
+	if err != nil {
+		return nil, err
+	}
+
+	return app, nil
+}

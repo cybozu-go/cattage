@@ -78,27 +78,12 @@ Apply the resource:
 $ kubectl apply -f application.yaml
 ```
 
-Make sure that the Application resource are synchronized.
+Make sure that the Application resource is synchronized.
 
 ```console
 $ kubectl get application -n your-sub
 NAME        SYNC STATUS   HEALTH STATUS
 testhttpd   Synced        Healthy
-```
-
-```console
-$ kubectl get application -n argocd
-NAME        SYNC STATUS   HEALTH STATUS
-testhttpd   Synced        Healthy
-```
-
-Get the result of synchronization as events.
-
-```console
-$ kubectl get events -n your-sub
-LAST SEEN   TYPE     REASON              OBJECT                  MESSAGE
-45s         Normal   ApplicationSynced   application/testhttpd   Sync application spec succeeded
-34s         Normal   StatusSynced        application/testhttpd   Sync application status succeeded
 ```
 
 ## How to manage resources that already exist
@@ -113,10 +98,6 @@ If a resource with the same name already exists, it will be overwritten.
 
 An AppProject resource with the same name as a tenant will be created in argocd namespace.
 If a resource with the same name already exists, it will be overwritten.
-
-When you create an Application on a sub-namespace, an Application resource with the same name will be created in argocd namespace.
-If that Application in argocd namespace exists, the Application will be overwritten only if the `spec.project` filed matches.
-If not, then the creation of the Application resource will be rejected.
 
 ## How to change ownership
 
@@ -140,27 +121,16 @@ Use `kubectl accurate sub move` command to change the parent of your-sub namespa
 $ kubectl accurate sub move your-sub new-root
 ```
 
-As a result, `application/testhttpd` in your-sub will be out of sync with `application/testhttpd` in argocd.
-You can see it as an event resource.
-
-```console
-$ kubectl get events -n your-sub
-LAST SEEN   TYPE      REASON         OBJECT                  MESSAGE
-10s         Warning   CannotSync     application/testhttpd   project 'your-team' of the application 'your-sub/testhttpd' does not match the tenant name 'new-team'
-```
-
+As a result, `application/testhttpd` in your-sub will be out of sync.
 Please change the project of `application/testhttpd` correctly.
 
 ```console
 $ kubectl patch app testhttpd -n your-sub --type='json' -p '[{ "op": "replace", "path": "/spec/project", "value": "new-team"}]'
 ```
 
-The application will sync again.
+The application will be synced again.
 
 ## Remove resources
-
-When a tenant user delete an Application resource on the tenant's namespace, an Application resource on argocd namespace will be deleted as well.
-If `resources-finalizer.argocd.argoproj.io` is annotated, resources deployed by the Application will be deleted.
 
 When an administrator deleted a tenant resource:
 - Root-namespaces and sub-namespaces for the tenant will remain

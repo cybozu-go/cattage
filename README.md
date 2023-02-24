@@ -7,14 +7,11 @@
 
 Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][] with [Accurate][].
 
-**Project Status**: Initial development
-
 ## Features
 
 - Management of root-namespaces for tenants. Tenant users will be able to create sub-namespaces in those root-namespaces.
 - When a tenant user creates a sub-namespace, the AppProject will be automatically updated accordingly. Tenant users will be able to deploy applications with Argo CD to the namespaces.
 - The ownership of sub-namespaces can be changed between tenants.
-- Tenant users can create Application resources in their sub-namespaces without `argocd` command. It allows for [App Of Apps Pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) in multi-tenancy environments.
 
 ## Supported Version
 
@@ -23,7 +20,8 @@ Cattage depends on the specification of Argo CD and Accurate.
 Cattage supports the following versions:
 
 | Cattage      | Argo CD | Accurate |
-| ------------ | ------- | -------- |
+|--------------|---------|----------|
+| 1.0.0        | 2.5.x   | 0.4.x    |
 | 0.1.4        | 2.4.17  | 0.4.x    |
 | 0.1.3        | 2.3.9   | 0.4.x    |
 | 0.1.2        | 2.3.2   | 0.3.x    |

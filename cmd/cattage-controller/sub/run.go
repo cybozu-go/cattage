@@ -72,20 +72,11 @@ func subMain(ns, addr string, port int) error {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)
 	}
 
-	if err := controllers.NewApplicationReconciler(
-		mgr.GetClient(),
-		mgr.GetEventRecorderFor("cattage"),
-		cfg,
-	).SetupWithManager(ctx, mgr); err != nil {
-		return fmt.Errorf("unable to create Namespace controller: %w", err)
-	}
-
 	dec, err := admission.NewDecoder(scheme)
 	if err != nil {
 		return fmt.Errorf("unable to create admission decoder: %w", err)
 	}
 	hooks.SetupTenantWebhook(mgr, dec, cfg)
-	hooks.SetupApplicationWebhook(mgr, dec, cfg)
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

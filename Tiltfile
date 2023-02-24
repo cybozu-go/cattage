@@ -6,35 +6,20 @@ COPY ./bin/cattage-controller /
 CMD ["/cattage-controller"]
 '''
 
+# Generate manifests and go files
+local_resource('make manifests', "make manifests", deps=["api", "controllers", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
+local_resource('make generate', "make generate", deps=["api", "controllers", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
 
-def manifests():
-    return './bin/controller-gen crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'
-
-
-def generate():
-    return './bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
-
-
-def apidoc():
-    return 'make apidoc;'
-
-
-def binary():
-    return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o bin/cattage-controller cmd/cattage-controller/main.go'
-
+# Deploy CRD
+local_resource(
+    'CRD', 'make install', deps=["api"],
+    ignore=['*/*/zz_generated.deepcopy.go'], labels=['cattage'])
 
 # Don't watch generated files
 watch_settings(ignore=['config/crd/bases/', 'config/rbac/role.yaml', 'config/webhook/manifests.yaml'])
 
-# Generate manifests and go files
-local(manifests() + generate() + apidoc())
-
-# Deploy CRD
-local_resource(
-    'CRD', manifests() + 'kustomize build config/crd | kubectl apply -f -', deps=["api"],
-    ignore=['*/*/zz_generated.deepcopy.go'], labels=['cattage'])
-
 # Deploy Cattage
+watch_file('./config/')
 k8s_yaml(kustomize('./config/dev'))
 k8s_resource(new_name='Cattage Resources', objects=[
     'cattage:namespace',
@@ -54,7 +39,7 @@ k8s_resource(new_name='Cattage Resources', objects=[
 
 k8s_resource(workload='cattage-controller-manager', labels=['cattage'])
 local_resource(
-    'Watch & Compile', generate() + binary(), deps=['controllers', 'pkg', 'hooks', 'cmd', 'version.go', 'api'],
+    'Watch & Compile', 'make build', deps=['controllers', 'pkg', 'hooks', 'cmd', 'version.go', 'api'],
     ignore=['*/*/zz_generated.deepcopy.go'],
     labels=['cattage'])
 

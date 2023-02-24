@@ -56,6 +56,8 @@ type TenantReconciler struct {
 //+kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles,verbs=get;list;watch;escalate;bind
+//+kubebuilder:rbac:groups=argoproj.io,resources=applications,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=events,verbs=create;update;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -68,6 +70,14 @@ type TenantReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	logger := log.FromContext(ctx)
+
+	needRequeue, err := r.migrateToArgoCD25(ctx)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if needRequeue {
+		return ctrl.Result{Requeue: true}, nil
+	}
 
 	tenant := &cattagev1beta1.Tenant{}
 	if err := r.client.Get(ctx, req.NamespacedName, tenant); err != nil {
@@ -124,6 +134,46 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 	logger.Info("Tenant successfully reconciled")
 
 	return ctrl.Result{}, nil
+}
+
+func (r *TenantReconciler) migrateToArgoCD25(ctx context.Context) (bool /* needRequeue */, error) {
+	apps := argocd.ApplicationList()
+	if err := r.client.List(ctx, apps, client.HasLabels{constants.OwnerAppNamespace}, client.InNamespace(r.config.ArgoCD.Namespace)); err != nil {
+		return false, fmt.Errorf("failed to list applications: %w", err)
+	}
+	if len(apps.Items) == 0 {
+		return false, nil
+	}
+
+	needRequeue := false
+	for _, app := range apps.Items {
+		if controllerutil.ContainsFinalizer(&app, argocd.ResourcesFinalizer) {
+			needRequeue = true
+			controllerutil.RemoveFinalizer(&app, argocd.ResourcesFinalizer)
+			err := r.client.Update(ctx, &app)
+			if err != nil {
+				return false, err
+			}
+		}
+	}
+	if needRequeue {
+		return true, nil
+	}
+	for _, app := range apps.Items {
+		uid := app.GetUID()
+		resourceVersion := app.GetResourceVersion()
+		cond := metav1.Preconditions{
+			UID:             &uid,
+			ResourceVersion: &resourceVersion,
+		}
+		err := r.client.Delete(ctx, &app, &client.DeleteOptions{
+			Preconditions: &cond,
+		})
+		if err != nil {
+			return false, err
+		}
+	}
+	return true, nil
 }
 
 func containNamespace(roots []cattagev1beta1.RootNamespaceSpec, ns corev1.Namespace) bool {

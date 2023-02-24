@@ -62,8 +62,6 @@ controller:
               kind: ResourceQuota
             - group: ""
               kind: LimitRange
-          orphanedResources:
-            warn: false
           roles:
             - groups:
                 - cybozu-go:{{ .Name }}
@@ -73,6 +71,10 @@ controller:
               name: admin
               policies:
                 - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
+          sourceNamespaces:
+            {{- range .Namespaces }}
+            - {{ . }}
+            {{- end }}
           sourceRepos:
             {{- range .Repositories }}
             - '{{ . }}'

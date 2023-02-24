@@ -5,6 +5,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### **Breaking Changes**
+
+- Support Argo CD's [Applications in any namespace](https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/)
+  - Need Argo CD 2.5 or higher required.
+  - Synced Applications in argocd namespace will be removed.
+  - You have to add `--application-namespaces="*"` parameter to `argocd-application-controller` and `argocd-server`.
+  - You have to add `sourceNamespaces` field in `appProjectTemplate`.
+
 ## [0.1.4] - 2022-12-15
 
 ### Changed

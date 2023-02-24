@@ -1,4 +1,4 @@
 package cattage
 
 // Version represents the version of cattage.
-const Version = "0.1.4"
+const Version = "1.0.0"
