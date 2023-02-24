@@ -177,6 +177,8 @@ rules:
   - watch
   - deletecollection
 </code></pre>
+<p>Cattage requires Argo CD's <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/">Applications in any namespace</a> is enabled.
+In order to enable the feature, add <code>--application-namespace=&quot;*&quot;</code> parameter to <code>argocd-server</code> and <code>argocd-application-controller</code>.</p>
 <h2 id="cert-manager"><a class="header" href="#cert-manager">cert-manager</a></h2>
 <p>Cattage and Accurate depend on [cert-manager][] to issue TLS certificate for admission webhooks.
 If cert-manager is not installed on your cluster, install it as follows:</p>
@@ -242,6 +244,10 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
               name: admin
               policies:
                 - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
+          sourceNamespaces:
+            {{- range .Namespaces }}
+            - {{ . }}
+            {{- end }}
           sourceRepos:
             {{- range .Repositories }}
             - '{{ . }}'

@@ -196,20 +196,10 @@ spec:
 <p>Apply the resource:</p>
 <pre><code class="language-console">$ kubectl apply -f application.yaml
 </code></pre>
-<p>Make sure that the Application resource are synchronized.</p>
+<p>Make sure that the Application resource is synchronized.</p>
 <pre><code class="language-console">$ kubectl get application -n your-sub
 NAME        SYNC STATUS   HEALTH STATUS
 testhttpd   Synced        Healthy
-</code></pre>
-<pre><code class="language-console">$ kubectl get application -n argocd
-NAME        SYNC STATUS   HEALTH STATUS
-testhttpd   Synced        Healthy
-</code></pre>
-<p>Get the result of synchronization as events.</p>
-<pre><code class="language-console">$ kubectl get events -n your-sub
-LAST SEEN   TYPE     REASON              OBJECT                  MESSAGE
-45s         Normal   ApplicationSynced   application/testhttpd   Sync application spec succeeded
-34s         Normal   StatusSynced        application/testhttpd   Sync application status succeeded
 </code></pre>
 <h2 id="how-to-manage-resources-that-already-exist"><a class="header" href="#how-to-manage-resources-that-already-exist">How to manage resources that already exist</a></h2>
 <p>Cattage can manage resources that have existed before with Tenant and Application.</p>
@@ -219,9 +209,6 @@ However, the namespace must be root or not managed by accurate.</p>
 If a resource with the same name already exists, it will be overwritten.</p>
 <p>An AppProject resource with the same name as a tenant will be created in argocd namespace.
 If a resource with the same name already exists, it will be overwritten.</p>
-<p>When you create an Application on a sub-namespace, an Application resource with the same name will be created in argocd namespace.
-If that Application in argocd namespace exists, the Application will be overwritten only if the <code>spec.project</code> filed matches.
-If not, then the creation of the Application resource will be rejected.</p>
 <h2 id="how-to-change-ownership"><a class="header" href="#how-to-change-ownership">How to change ownership</a></h2>
 <p>The ownership of sub-namespace can be transferred to other tenant.</p>
 <p>Prepare a new tenant:</p>
@@ -236,19 +223,12 @@ spec:
 <p>Use <code>kubectl accurate sub move</code> command to change the parent of your-sub namespace to new-root.</p>
 <pre><code class="language-console">$ kubectl accurate sub move your-sub new-root
 </code></pre>
-<p>As a result, <code>application/testhttpd</code> in your-sub will be out of sync with <code>application/testhttpd</code> in argocd.
-You can see it as an event resource.</p>
-<pre><code class="language-console">$ kubectl get events -n your-sub
-LAST SEEN   TYPE      REASON         OBJECT                  MESSAGE
-10s         Warning   CannotSync     application/testhttpd   project 'your-team' of the application 'your-sub/testhttpd' does not match the tenant name 'new-team'
-</code></pre>
-<p>Please change the project of <code>application/testhttpd</code> correctly.</p>
+<p>As a result, <code>application/testhttpd</code> in your-sub will be out of sync.
+Please change the project of <code>application/testhttpd</code> correctly.</p>
 <pre><code class="language-console">$ kubectl patch app testhttpd -n your-sub --type='json' -p '[{ &quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/spec/project&quot;, &quot;value&quot;: &quot;new-team&quot;}]'
 </code></pre>
-<p>The application will sync again.</p>
+<p>The application will be synced again.</p>
 <h2 id="remove-resources"><a class="header" href="#remove-resources">Remove resources</a></h2>
-<p>When a tenant user delete an Application resource on the tenant's namespace, an Application resource on argocd namespace will be deleted as well.
-If <code>resources-finalizer.argocd.argoproj.io</code> is annotated, resources deployed by the Application will be deleted.</p>
 <p>When an administrator deleted a tenant resource:</p>
 <ul>
 <li>Root-namespaces and sub-namespaces for the tenant will remain</li>

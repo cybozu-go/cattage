@@ -150,8 +150,6 @@
 <p>https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy</p>
 <p>However, the mechanism still has the following problems:</p>
 <ul>
-<li>Tenant users cannot create app-of-apps Application resources. They need to ask an administrator for that.</li>
-<li>Application resources are not strictly validated. Tenant users can specify Project for other tenants, and can also specify duplicate names.</li>
 <li>When a SubNamespace is created in <a href="https://github.com/kubernetes-sigs/hierarchical-namespaces">HNC</a> or <a href="https://cybozu-go.github.io/accurate/">Accurate</a>, an administrator needs to add it to the destinations of the Application resource.
 (Argo CD supports specifying wildcards in destinations, but that is not enough for us.)</li>
 </ul>
@@ -179,12 +177,6 @@ Accurate supports <code>kubectl accurate sub move</code> command to change the p
 <p>An administrators can use this command to move the sub-namespace to another tenant.
 The permission of AppProjects, Applications and Namespaces will be updated automatically.</p>
 <h2 id="alternatives"><a class="header" href="#alternatives">Alternatives</a></h2>
-<h3 id="argo-cd-multi-tenancy-improvements"><a class="header" href="#argo-cd-multi-tenancy-improvements">Argo CD: Multi-tenancy improvements</a></h3>
-<p>Argo CD will improve multi-tenancy in the future.</p>
-<p>https://argo-cd.readthedocs.io/en/stable/roadmap/#multi-tenancy-improvements</p>
-<p>The above proposal would allow us to create Application resources in any namespace.</p>
-<p>If this feature is supported, we will migrate to it immediately.
-So we need to design our controller to be easy to migrate to.</p>
 <h3 id="applicationset"><a class="header" href="#applicationset">ApplicationSet</a></h3>
 <p>ApplicationSet is one of the features of Argo CD which generates Application resources based on user input.</p>
 <p>https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/</p>

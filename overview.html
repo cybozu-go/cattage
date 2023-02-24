@@ -143,7 +143,6 @@
                         <h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/en/stable/">Argo CD</a> with <a href="https://github.com/cybozu-go/accurate">Accurate</a>.</p>
 <h2 id="features"><a class="header" href="#features">Features</a></h2>
-<h3 id="for-administrators"><a class="header" href="#for-administrators">For Administrators</a></h3>
 <ul>
 <li>
 <p>Management of root-namespaces for tenants</p>
@@ -161,19 +160,6 @@ Tenant users will be able to deploy applications with Argo CD to the namespaces.
 <p>The ownership of sub-namespaces can be changed between tenants</p>
 <p>Sometimes users may want to move the ownership of an application to another tenant.
 When the parent of a sub-namespace is changed, Cattage will automatically update the permissions.</p>
-</li>
-</ul>
-<h3 id="for-tenant-users"><a class="header" href="#for-tenant-users">For Tenant Users</a></h3>
-<ul>
-<li>
-<p>Sync Argo CD Application resources</p>
-<p>Tenant users can create Application resources in their sub-namespaces without <code>argocd</code> command.
-Cattage will synchronize Application resource between the tenant namespace and argocd namespace.
-It allows for <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern">App Of Apps Pattern</a> in multi-tenancy environments.</p>
-</li>
-<li>
-<p>Validate Argo CD Application resources</p>
-<p>Tenant users can only specify their own AppProject when creating an application resource.</p>
 </li>
 </ul>
 
