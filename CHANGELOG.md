@@ -5,13 +5,23 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2023-02-27
+
 ### **Breaking Changes**
 
 - Support Argo CD's [Applications in any namespace](https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/)
-  - Need Argo CD 2.5 or higher required.
+  - Argo CD 2.5 or higher is required.
   - Synced Applications in argocd namespace will be removed.
   - You have to add `--application-namespaces="*"` parameter to `argocd-application-controller` and `argocd-server`.
   - You have to add `sourceNamespaces` field in `appProjectTemplate`.
+
+### Changed
+
+- Support Argo CD 2.5 ([#22](https://github.com/cybozu-go/cattage/pull/22))
+- Support Kubernetes 1.25 ([#26](https://github.com/cybozu-go/cattage/pull/26))
+  - Build with go 1.20
+  - Update Ubuntu to 22.04
+  - Update dependencies
 
 ## [0.1.4] - 2022-12-15
 
@@ -41,7 +51,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This is the first public release.
 
-[Unreleased]: https://github.com/cybozu-go/cattage/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/cybozu-go/cattage/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/cybozu-go/cattage/compare/v0.1.4...v1.0.0
 [0.1.4]: https://github.com/cybozu-go/cattage/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/cybozu-go/cattage/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/cybozu-go/cattage/compare/v0.1.1...v0.1.2
