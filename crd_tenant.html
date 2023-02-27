@@ -4,8 +4,10 @@
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>Tenant custom resource - Cattage Documentation</title>
+
+
         <!-- Custom HTML head -->
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -16,25 +18,29 @@
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/chrome.css">
         <link rel="stylesheet" href="css/print.css" media="print">
+
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
         <link rel="stylesheet" href="fonts/fonts.css">
+
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css">
         <link rel="stylesheet" href="tomorrow-night.css">
         <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -50,7 +56,7 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
@@ -62,7 +68,7 @@
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
+        <script>
             var html = document.querySelector('html');
             var sidebar = 'hidden';
             if (document.body.clientWidth >= 1080) {
@@ -83,7 +89,7 @@
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
+                                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky bordered">
                     <div class="left-buttons">
                         <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -93,7 +99,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
@@ -116,6 +122,7 @@
                         <a href="https://github.com/cybozu-go/cattage/edit/main/docs/./crd_tenant.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
+
                     </div>
                 </div>
 
@@ -129,8 +136,9 @@
                         </ul>
                     </div>
                 </div>
+
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -155,54 +163,61 @@
 </ul>
 <h4 id="argocdspec"><a class="header" href="#argocdspec">ArgoCDSpec</a></h4>
 <p>ArgoCDSpec defines the desired state of the settings for Argo CD.</p>
-<table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>repositories</td><td>Repositories contains list of repository URLs which can be used by the tenant.</td><td>[]string</td><td>false</td></tr>
 </tbody></table>
+</div>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="delegatespec"><a class="header" href="#delegatespec">DelegateSpec</a></h4>
 <p>DelegateSpec defines a tenant that is delegated access to a tenant.</p>
-<table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>name</td><td>Name is the name of a delegated tenant.</td><td>string</td><td>true</td></tr>
 <tr><td>roles</td><td>Roles is a list of roles that the tenant has.</td><td>[]string</td><td>true</td></tr>
 </tbody></table>
+</div>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="rootnamespacespec"><a class="header" href="#rootnamespacespec">RootNamespaceSpec</a></h4>
 <p>RootNamespaceSpec defines the desired state of Namespace.</p>
-<table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>name</td><td>Name is the name of namespace to be generated.</td><td>string</td><td>true</td></tr>
 <tr><td>labels</td><td>Labels are the labels to add to the namespace. This supersedes <code>namespace.commonLabels</code> in the configuration.</td><td>map[string]string</td><td>false</td></tr>
 <tr><td>annotations</td><td>Annotations are the annotations to add to the namespace. This supersedes <code>namespace.commonAnnotations</code> in the configuration.</td><td>map[string]string</td><td>false</td></tr>
 </tbody></table>
+</div>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenant"><a class="header" href="#tenant">Tenant</a></h4>
 <p>Tenant is the Schema for the tenants API.</p>
-<table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>metadata</td><td></td><td>metav1.ObjectMeta</td><td>false</td></tr>
 <tr><td>spec</td><td></td><td><a href="#tenantspec">TenantSpec</a></td><td>false</td></tr>
 <tr><td>status</td><td></td><td><a href="#tenantstatus">TenantStatus</a></td><td>false</td></tr>
 </tbody></table>
+</div>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantlist"><a class="header" href="#tenantlist">TenantList</a></h4>
 <p>TenantList contains a list of Tenant.</p>
-<table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>metadata</td><td></td><td>metav1.ListMeta</td><td>false</td></tr>
 <tr><td>items</td><td></td><td>[]<a href="#tenant">Tenant</a></td><td>true</td></tr>
 </tbody></table>
+</div>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantspec"><a class="header" href="#tenantspec">TenantSpec</a></h4>
 <p>TenantSpec defines the desired state of Tenant.</p>
-<table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>rootNamespaces</td><td>RootNamespaces are the list of root namespaces that belong to this tenant.</td><td>[]<a href="#rootnamespacespec">RootNamespaceSpec</a></td><td>true</td></tr>
 <tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant.</td><td><a href="#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
 <tr><td>delegates</td><td>Delegates is a list of other tenants that are delegated access to this tenant.</td><td>[]<a href="#delegatespec">DelegateSpec</a></td><td>false</td></tr>
 </tbody></table>
+</div>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantstatus"><a class="header" href="#tenantstatus">TenantStatus</a></h4>
 <p>TenantStatus defines the observed state of Tenant.</p>
-<table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
 <tr><td>health</td><td>Health is the health of Tenant.</td><td>TenantHealth</td><td>false</td></tr>
 <tr><td>conditions</td><td>Conditions is an array of conditions.</td><td>[]metav1.Condition</td><td>false</td></tr>
 </tbody></table>
+</div>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
 
                     </main>
@@ -212,9 +227,11 @@
                             <a rel="prev" href="usage.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
+
                             <a rel="next" href="config.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
+
                         <div style="clear: both"></div>
                     </nav>
                 </div>
@@ -224,6 +241,7 @@
                     <a rel="prev" href="usage.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
+
                     <a rel="next" href="config.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
@@ -231,16 +249,25 @@
 
         </div>
 
-        <script type="text/javascript">
+
+
+
+        <script>
             window.playground_copyable = true;
         </script>
-        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
-        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
+
+
+    </div>
     </body>
 </html>
