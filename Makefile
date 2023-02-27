@@ -42,15 +42,15 @@ help: ## Display this help.
 ##@ Development
 
 .PHONY: manifests
-manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+manifests: ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+	controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	kustomize build config/helm/crds | yq e "." - > charts/cattage/crds/tenant.yaml
 	kustomize build config/helm/templates | yq e "." - > charts/cattage/templates/generated.yaml
 
 
 .PHONY: generate
-generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+generate: ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+	controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: install
 install: manifests ## Install CRDs into the K8s cluster specified in ~/.kube/config.
@@ -136,12 +136,6 @@ login-argocd:
 	argocd login localhost:8080 --insecure --username admin --password $$(kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 
 ##@ Tools
-
-CONTROLLER_GEN := $(BIN_DIR)/controller-gen
-.PHONY: controller-gen
-controller-gen: ## Download controller-gen locally if necessary.
-	mkdir -p $(BIN_DIR)
-	GOBIN=$(BIN_DIR) go install sigs.k8s.io/controller-tools/cmd/controller-gen
 
 SETUP_ENVTEST := $(BIN_DIR)/setup-envtest
 .PHONY: setup-envtest

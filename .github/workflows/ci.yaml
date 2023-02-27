@@ -4,40 +4,43 @@ on:
   push:
     branches:
     - 'main'
-env:
-  go-version: 1.19
-  cache-version: 1
 jobs:
   build:
     name: Build binaries
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: ${{ env.go-version }}
+        go-version-file: go.mod
+        cache: true
+    - uses: ./.github/actions/aqua
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
     - run: make build
   check-goreleaser-config:
     name: Check goreleaser.yml
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Setup go
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.go-version }}
-      - uses: goreleaser/goreleaser-action@b953231f81b8dfd023c58e0854a721e35037f28b # v2.9.1
+          go-version-file: go.mod
+          cache: true
+      - uses: goreleaser/goreleaser-action@f82d6c1c344bcacabba2c841718984797f664a6b # v4.2.0
         with:
           version: latest
           args: check -f .goreleaser.yml
   test:
     name: Small tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: ${{ env.go-version }}
+        go-version-file: go.mod
+        cache: true
     - uses: ./.github/actions/aqua
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -48,13 +51,14 @@ jobs:
     name: End-to-End Tests
     strategy:
       matrix:
-        k8s-version: ["1.22.15", "1.23.13", "1.24.7"]
-    runs-on: ubuntu-20.04
+        k8s-version: ["1.23.13", "1.24.7", "1.25.3"]
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: ${{ env.go-version }}
+        go-version-file: go.mod
+        cache: true
     - uses: ./.github/actions/aqua
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -72,21 +76,21 @@ jobs:
         path: e2e/logs.tar.gz
   tilt:
     name: Run tilt ci
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.go-version }}
+          go-version-file: go.mod
+          cache: true
       - uses: ./.github/actions/aqua
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - run: make controller-gen
       - run: make dev
       - run: tilt ci
   dry-run:
     name: Dry-run release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -97,17 +101,18 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.go-version }}
+          go-version-file: go.mod
+          cache: true
+      - uses: ./.github/actions/aqua
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup tag for goreleaser
         run: |
           echo "GORELEASER_CURRENT_TAG=$(git describe --tags --abbrev=0 --match "v*" || echo v0.0.0)" >> $GITHUB_ENV
       - name: GoReleaser
-        uses: goreleaser/goreleaser-action@b953231f81b8dfd023c58e0854a721e35037f28b # v2.9.1
+        uses: goreleaser/goreleaser-action@f82d6c1c344bcacabba2c841718984797f664a6b # v4.2.0
         with:
           version: latest
-          args: --snapshot --skip-publish --rm-dist
-      - uses: ./.github/actions/aqua
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          args: --snapshot --skip-publish --clean
       - name: Test built containers
         run: make container-structure-test
