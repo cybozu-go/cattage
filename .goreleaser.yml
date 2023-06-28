@@ -10,6 +10,8 @@ builds:
     goarch:
       - amd64
       - arm64
+    ldflags:
+      - -X github.com/cybozu-go/cattage.Version={{.Version}}
 dockers:
   - image_templates:
     - "ghcr.io/cybozu-go/{{.ProjectName}}:{{ .Version }}-amd64"
@@ -48,8 +50,4 @@ checksum:
 snapshot:
   name_template: "{{ .Tag }}-next"
 changelog:
-  sort: asc
-  filters:
-    exclude:
-      - '^docs:'
-      - '^test:'
+  use: github-native
