@@ -6,7 +6,7 @@ registries:
     ref: v3.138.0 # renovate: depName=aquaproj/aqua-registry
 packages:
   - name: argoproj/argo-cd@v2.6.7
-  - name: kubernetes/kubectl@v1.25.9
+  - name: kubernetes/kubectl@v1.25.11
   - name: kubernetes-sigs/kubebuilder@v3.8.0
   - name: kubernetes-sigs/kustomize@kustomize/v4.5.7
   - name: kubernetes-sigs/kind@v0.18.0
