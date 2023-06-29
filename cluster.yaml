@@ -7,5 +7,5 @@ apiVersion: ctlptl.dev/v1alpha1
 kind: Cluster
 name: kind-cattage-dev
 product: kind
-kubernetesVersion: v1.24.7
+kubernetesVersion: v1.24.7 # renovate: kindest/node
 registry: ctlptl-registry
