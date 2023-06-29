@@ -4,7 +4,7 @@ image:
 
   # image.tag -- cattage image tag to use.
   # @default -- `{{ .Chart.AppVersion }}`
-  tag:  # 1.0.1
+  tag: app-version-placeholder
 
   # image.pullPolicy -- cattage image pullPolicy.
   pullPolicy:  # Always
