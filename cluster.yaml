@@ -7,5 +7,5 @@ apiVersion: ctlptl.dev/v1alpha1
 kind: Cluster
 name: kind-cattage-dev
 product: kind
-kubernetesVersion: v1.24.7
+kubernetesVersion: v1.27.3
 registry: ctlptl-registry

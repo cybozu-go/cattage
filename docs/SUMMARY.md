@@ -18,3 +18,4 @@
 - [Design notes](design.md)
 - [Development](development.md)
 - [Release procedure](release.md)
+- [Maintenance](maintenance.md)

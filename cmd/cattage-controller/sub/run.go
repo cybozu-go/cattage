@@ -11,11 +11,11 @@ import (
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
 	"github.com/cybozu-go/cattage/controllers"
 	"github.com/cybozu-go/cattage/hooks"
-	cacheclient "github.com/cybozu-go/cattage/pkg/client"
 	"github.com/cybozu-go/cattage/pkg/config"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -43,8 +43,12 @@ func subMain(ns, addr string, port int) error {
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                  scheme,
-		NewClient:               cacheclient.NewCachingClient,
+		Scheme: scheme,
+		Client: client.Options{
+			Cache: &client.CacheOptions{
+				Unstructured: true,
+			},
+		},
 		MetricsBindAddress:      options.metricsAddr,
 		HealthProbeBindAddress:  options.probeAddr,
 		LeaderElection:          true,
@@ -72,11 +76,7 @@ func subMain(ns, addr string, port int) error {
 		return fmt.Errorf("unable to create Namespace controller: %w", err)
 	}
 
-	dec, err := admission.NewDecoder(scheme)
-	if err != nil {
-		return fmt.Errorf("unable to create admission decoder: %w", err)
-	}
-	hooks.SetupTenantWebhook(mgr, dec, cfg)
+	hooks.SetupTenantWebhook(mgr, admission.NewDecoder(scheme), cfg)
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
