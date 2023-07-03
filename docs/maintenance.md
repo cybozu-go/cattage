@@ -23,4 +23,5 @@ If Argo CD API has changed, please fix the relevant source code.
 
 ## How to update dependencies
 
-TBD.
+Renovate will create PRs that update dependencies once a week.
+However, Argo CD is not subject to Renovate. Also, Kubernetes is only updated with patched versions.
