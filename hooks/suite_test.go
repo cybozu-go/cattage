@@ -90,16 +90,13 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	dec, err := admission.NewDecoder(scheme)
-	Expect(err).NotTo(HaveOccurred())
-
 	config := &config.Config{
 		Namespace: config.NamespaceConfig{},
 		ArgoCD: config.ArgoCDConfig{
 			Namespace: "argocd",
 		},
 	}
-	SetupTenantWebhook(mgr, dec, config)
+	SetupTenantWebhook(mgr, admission.NewDecoder(scheme), config)
 
 	//+kubebuilder:scaffold:webhook
 

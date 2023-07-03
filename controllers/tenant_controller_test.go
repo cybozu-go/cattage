@@ -9,7 +9,6 @@ import (
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
 	"github.com/cybozu-go/cattage/pkg/accurate"
 	"github.com/cybozu-go/cattage/pkg/argocd"
-	cacheclient "github.com/cybozu-go/cattage/pkg/client"
 	tenantconfig "github.com/cybozu-go/cattage/pkg/config"
 	"github.com/cybozu-go/cattage/pkg/constants"
 	. "github.com/onsi/ginkgo/v2"
@@ -40,7 +39,11 @@ var _ = Describe("Tenant controller", func() {
 			Scheme:             scheme,
 			LeaderElection:     false,
 			MetricsBindAddress: "0",
-			NewClient:          cacheclient.NewCachingClient,
+			Client: client.Options{
+				Cache: &client.CacheOptions{
+					Unstructured: true,
+				},
+			},
 		})
 		Expect(err).ToNot(HaveOccurred())
 

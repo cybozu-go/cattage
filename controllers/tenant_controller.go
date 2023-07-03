@@ -33,7 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 func NewTenantReconciler(client client.Client, config *config.Config) *TenantReconciler {
@@ -508,7 +507,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	tenantHandler := func(o client.Object) []reconcile.Request {
+	tenantHandler := func(ctx context.Context, o client.Object) []reconcile.Request {
 		owner := o.GetLabels()[constants.OwnerTenant]
 		if owner == "" {
 			return nil
@@ -518,9 +517,9 @@ func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cattagev1beta1.Tenant{}).
-		Watches(&source.Kind{Type: &corev1.Namespace{}}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
-		Watches(&source.Kind{Type: &rbacv1.RoleBinding{}}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
-		Watches(&source.Kind{Type: argocd.AppProject()}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
+		Watches(&corev1.Namespace{}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
+		Watches(&rbacv1.RoleBinding{}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
+		Watches(argocd.AppProject(), handler.EnqueueRequestsFromMapFunc(tenantHandler)).
 		Complete(r)
 }
 

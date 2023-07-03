@@ -1,0 +1,26 @@
+# Maintenance
+
+## How to update supported Kubernetes
+
+Cattage supports the three latest Kubernetes versions.
+If a new Kubernetes is released, please update the following files.
+
+- Update Kubernetes version in `e2e/Makefile`, `.github/workflows/ci.yaml` and `cluster.yaml`.
+- Update kubectl version in `aqua.yaml`.
+- Update `k8s.io/*` and `sigs.k8s.io/controller-runtime` packages version in `go.mod`.
+
+If Kubernetes or controller-runtime API has changed, please fix the relevant source code.
+
+## How to update supported Argo CD
+
+Cattage supports one Argo CD version.
+If a new Argo CD is released, please update the following files.
+
+- Update Argo CD Version in `aqua.yaml`, `e2e/Makefile` and `Makefile`.
+- Run `make crds`.
+
+If Argo CD API has changed, please fix the relevant source code.
+
+## How to update dependencies
+
+TBD.
