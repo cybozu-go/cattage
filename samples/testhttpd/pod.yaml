@@ -5,7 +5,7 @@ metadata:
   namespace: sub-1
 spec:
   containers:
-  - image: quay.io/cybozu/testhttpd:0.1.6
+  - image: ghcr.io/cybozu/testhttpd:0.2.3
     imagePullPolicy: IfNotPresent
     name: testhttpd
     ports:
