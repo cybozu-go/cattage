@@ -24,18 +24,30 @@ start:
 
 .PHONY: prepare
 prepare:
+	# Setup cert-manager
 	kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
 	kubectl -n cert-manager wait --for=condition=available --timeout=180s --all deployments
 
-	helm repo add argo https://argoproj.github.io/argo-helm
+	# Setup stakater/Reloader
+	helm repo add stakater https://stakater.github.io/stakater-charts
 	helm repo update
-	helm install --create-namespace --namespace argocd argocd -f argocd-values.yaml argo/argo-cd
+	helm install --create-namespace --namespace reloader reloader -f manifests/reloader-values.yaml stakater/reloader
+	kubectl -n reloader wait --for=condition=available --timeout=180s --all deployments
+
+	# Setup Argo CD
+	kubectl create namespace argocd
+	kustomize build --enable-helm ./manifests | kubectl apply -f -
 	kubectl -n argocd wait --for=condition=available --timeout=180s --all deployments
 
+	# Setup accurate
 	helm repo add accurate https://cybozu-go.github.io/accurate
 	helm repo update
-	helm install --create-namespace --namespace accurate accurate -f accurate-values.yaml accurate/accurate
+	helm install --create-namespace --namespace accurate accurate -f manifests/accurate-values.yaml accurate/accurate
 	kubectl -n accurate wait --for=condition=available --timeout=180s --all deployments
+
+.PHONY: generate-second-controller
+generate-second-controller:
+	kustomize build --enable-helm ./manifests | yq ea '. as $$i ireduce ([]; . + $$i) | .[] | select(.kind=="StatefulSet") | .metadata.name="second-application-controller"' > ./manifests/second-application-controller.yaml
 
 .PHONY: test
 test:

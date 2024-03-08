@@ -53,6 +53,11 @@ spec:
                       type: string
                     type: array
                 type: object
+              controllerName:
+                description: |-
+                  ControllerName is the name of the application-controller that manages this tenant's applications.
+                  If not specified, the default controller is used.
+                type: string
               delegates:
                 description: Delegates is a list of other tenants that are delegated
                   access to this tenant.

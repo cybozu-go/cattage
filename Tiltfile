@@ -23,7 +23,6 @@ watch_file('./config/')
 k8s_yaml(kustomize('./config/dev'))
 k8s_resource(new_name='Cattage Resources', objects=[
     'cattage:namespace',
-    'tenants.cattage.cybozu.io:customresourcedefinition',
     'cattage-mutating-webhook-configuration:mutatingwebhookconfiguration',
     'cattage-controller-manager:serviceaccount',
     'cattage-leader-election-role:role',

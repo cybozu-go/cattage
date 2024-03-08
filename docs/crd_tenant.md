@@ -77,6 +77,7 @@ TenantSpec defines the desired state of Tenant.
 | rootNamespaces | RootNamespaces are the list of root namespaces that belong to this tenant. | [][RootNamespaceSpec](#rootnamespacespec) | true |
 | argocd | ArgoCD is the settings of Argo CD for this tenant. | [ArgoCDSpec](#argocdspec) | false |
 | delegates | Delegates is a list of other tenants that are delegated access to this tenant. | [][DelegateSpec](#delegatespec) | false |
+| controllerName | ControllerName is the name of the application-controller that manages this tenant's applications. If not specified, the default controller is used. | string | false |
 
 [Back to Custom Resources](#custom-resources)
 

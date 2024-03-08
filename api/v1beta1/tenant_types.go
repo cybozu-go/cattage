@@ -18,6 +18,11 @@ type TenantSpec struct {
 	// Delegates is a list of other tenants that are delegated access to this tenant.
 	// +optional
 	Delegates []DelegateSpec `json:"delegates,omitempty"`
+
+	// ControllerName is the name of the application-controller that manages this tenant's applications.
+	// If not specified, the default controller is used.
+	// +optional
+	ControllerName string `json:"controllerName,omitempty"`
 }
 
 // RootNamespaceSpec defines the desired state of Namespace.

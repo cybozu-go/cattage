@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 	"text/template"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
@@ -57,6 +58,7 @@ type TenantReconciler struct {
 //+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles,verbs=get;list;watch;escalate;bind
 //+kubebuilder:rbac:groups=argoproj.io,resources=applications,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=events,verbs=create;update;patch
+//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -113,6 +115,18 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 	}
 
 	err = r.reconcileArgoCD(ctx, tenant)
+	if err != nil {
+		tenant.Status.Health = cattagev1beta1.TenantUnhealthy
+		meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
+			Type:    cattagev1beta1.ConditionReady,
+			Status:  metav1.ConditionFalse,
+			Reason:  "Failed",
+			Message: err.Error(),
+		})
+		return ctrl.Result{}, err
+	}
+
+	err = r.reconcileConfigMapForApplicationController(ctx, tenant)
 	if err != nil {
 		tenant.Status.Health = cattagev1beta1.TenantUnhealthy
 		meta.SetStatusCondition(&tenant.Status.Conditions, metav1.Condition{
@@ -252,7 +266,7 @@ func (r *TenantReconciler) finalize(ctx context.Context, tenant *cattagev1beta1.
 	}
 	logger.Info("starting finalization")
 	nss := &corev1.NamespaceList{}
-	if err := r.client.List(ctx, nss, client.MatchingFields{constants.RootNamespaces: tenant.Name}); err != nil {
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.RootNamespaceIndex: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	for _, ns := range nss.Items {
@@ -411,7 +425,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 		}
 	}
 	nss := &corev1.NamespaceList{}
-	if err := r.client.List(ctx, nss, client.MatchingFields{constants.RootNamespaces: tenant.Name}); err != nil {
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.RootNamespaceIndex: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	for _, ns := range nss.Items {
@@ -442,7 +456,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	}
 
 	nss := &corev1.NamespaceList{}
-	if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaces: tenant.Name}); err != nil {
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: tenant.Name}); err != nil {
 		return fmt.Errorf("failed to list namespaces: %w", err)
 	}
 	namespaces := make([]string, len(nss.Items))
@@ -505,6 +519,150 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	return nil
 }
 
+func (r *TenantReconciler) reconcileConfigMapForApplicationController(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
+	cmList := &corev1.ConfigMapList{}
+	err := r.client.List(ctx, cmList, client.MatchingLabels{constants.ManagedByLabel: "cattage"})
+	if err != nil {
+		return err
+	}
+	controllerNames := map[string]struct{}{}
+	for _, cm := range cmList.Items {
+		if cm.Labels[constants.ControllerNameLabel] != "" {
+			controllerNames[cm.Labels[constants.ControllerNameLabel]] = struct{}{}
+		}
+	}
+	controllerName := tenant.Spec.ControllerName
+	if controllerName == "" {
+		controllerName = constants.DefaultApplicationControllerName
+	}
+	controllerNames[controllerName] = struct{}{}
+
+	for name := range controllerNames {
+		err := r.updateConfigMap(ctx, name)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = r.updateAllTenantNamespacesConfigMap(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *TenantReconciler) updateConfigMap(ctx context.Context, controllerName string) error {
+	logger := log.FromContext(ctx)
+
+	configMapName := controllerName + "-application-controller-cm"
+	cm := &corev1.ConfigMap{}
+	cm.Name = configMapName
+	cm.Namespace = r.config.ArgoCD.Namespace
+
+	tenants := &cattagev1beta1.TenantList{}
+	if err := r.client.List(ctx, tenants, client.MatchingFields{constants.ControllerNameIndex: controllerName}); err != nil {
+		return fmt.Errorf("failed to list tenants: %w", err)
+	}
+
+	if len(tenants.Items) == 0 {
+		err := r.client.Delete(ctx, cm)
+		return err
+	}
+
+	namespaces := make([]string, 0)
+	for _, t := range tenants.Items {
+		nss := &corev1.NamespaceList{}
+		if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: t.Name}); err != nil {
+			return fmt.Errorf("failed to list namespaces: %w", err)
+		}
+		for _, ns := range nss.Items {
+			namespaces = append(namespaces, ns.Name)
+		}
+	}
+
+	op, err := ctrl.CreateOrUpdate(ctx, r.client, cm, func() error {
+		cm.Labels = map[string]string{
+			constants.ManagedByLabel:      "cattage",
+			constants.PartOfLabel:         "argocd",
+			constants.ControllerNameLabel: controllerName,
+		}
+		cm.Data = map[string]string{
+			"application.namespaces": strings.Join(namespaces, ","),
+		}
+		cm.OwnerReferences = nil
+		for _, tenant := range tenants.Items {
+			err := controllerutil.SetOwnerReference(&tenant, cm, r.client.Scheme())
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		logger.Error(err, "failed to update ConfigMap")
+		return err
+	}
+	if op != controllerutil.OperationResultNone {
+		logger.Info("ConfigMap successfully reconciled")
+	}
+
+	return nil
+}
+
+func (r *TenantReconciler) updateAllTenantNamespacesConfigMap(ctx context.Context) error {
+	logger := log.FromContext(ctx)
+
+	configMapName := "tenant-namespaces-cm"
+	cm := &corev1.ConfigMap{}
+	cm.Name = configMapName
+	cm.Namespace = r.config.ArgoCD.Namespace
+
+	tenantList := &cattagev1beta1.TenantList{}
+	err := r.client.List(ctx, tenantList)
+	if err != nil {
+		return err
+	}
+
+	allNamespaces := make([]string, 0)
+	for _, tenant := range tenantList.Items {
+		nss := &corev1.NamespaceList{}
+		if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: tenant.Name}); err != nil {
+			return fmt.Errorf("failed to list namespaces: %w", err)
+		}
+		for _, ns := range nss.Items {
+			allNamespaces = append(allNamespaces, ns.Name)
+		}
+	}
+
+	op, err := ctrl.CreateOrUpdate(ctx, r.client, cm, func() error {
+		cm.Labels = map[string]string{
+			constants.ManagedByLabel: "cattage",
+			constants.PartOfLabel:    "argocd",
+		}
+		cm.Data = map[string]string{
+			"application.namespaces": strings.Join(allNamespaces, ","),
+		}
+		cm.OwnerReferences = nil
+		for _, tenant := range tenantList.Items {
+			err := controllerutil.SetOwnerReference(&tenant, cm, r.client.Scheme())
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		logger.Error(err, "failed to update ConfigMap")
+		return err
+	}
+	if op != controllerutil.OperationResultNone {
+		logger.Info("ConfigMap successfully reconciled")
+	}
+
+	return nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	tenantHandler := func(ctx context.Context, o client.Object) []reconcile.Request {
@@ -525,7 +683,7 @@ func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func SetupIndexForNamespace(ctx context.Context, mgr manager.Manager) error {
 	ns := &corev1.Namespace{}
-	err := mgr.GetFieldIndexer().IndexField(ctx, ns, constants.RootNamespaces, func(rawObj client.Object) []string {
+	err := mgr.GetFieldIndexer().IndexField(ctx, ns, constants.RootNamespaceIndex, func(rawObj client.Object) []string {
 		nsType := rawObj.GetLabels()[accurate.LabelType]
 		if nsType != accurate.NSTypeRoot {
 			return nil
@@ -540,11 +698,24 @@ func SetupIndexForNamespace(ctx context.Context, mgr manager.Manager) error {
 		return err
 	}
 
-	return mgr.GetFieldIndexer().IndexField(ctx, ns, constants.TenantNamespaces, func(rawObj client.Object) []string {
+	err = mgr.GetFieldIndexer().IndexField(ctx, ns, constants.TenantNamespaceIndex, func(rawObj client.Object) []string {
 		tenantName := rawObj.GetLabels()[constants.OwnerTenant]
 		if tenantName == "" {
 			return nil
 		}
 		return []string{tenantName}
+	})
+	if err != nil {
+		return err
+	}
+
+	tenant := &cattagev1beta1.Tenant{}
+	return mgr.GetFieldIndexer().IndexField(ctx, tenant, constants.ControllerNameIndex, func(rawObj client.Object) []string {
+		tenant := rawObj.(*cattagev1beta1.Tenant)
+		controllerName := tenant.Spec.ControllerName
+		if controllerName == "" {
+			return []string{constants.DefaultApplicationControllerName}
+		}
+		return []string{controllerName}
 	})
 }
