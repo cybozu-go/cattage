@@ -25,7 +25,7 @@ import (
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	accorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	acrbacv1 "k8s.io/client-go/applyconfigurations/rbac/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -306,7 +306,7 @@ func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.Name
 
 	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
 		FieldManager: constants.TenantFieldManager,
-		Force:        pointer.Bool(true),
+		Force:        ptr.To(true),
 	})
 }
 
@@ -336,7 +336,7 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 
 	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
 		FieldManager: constants.TenantFieldManager,
-		Force:        pointer.Bool(true),
+		Force:        ptr.To(true),
 	})
 }
 
@@ -493,7 +493,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	}
 
 	err = r.client.Patch(ctx, proj, client.Apply, &client.PatchOptions{
-		Force:        pointer.Bool(true),
+		Force:        ptr.To(true),
 		FieldManager: constants.TenantFieldManager,
 	})
 	if err != nil {

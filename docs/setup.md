@@ -151,7 +151,7 @@ Read [Configurations](config.md) for details.
 Setup Helm repository:
 
  ```console
- $ helm repo add cattage https://cybozu-go.github.io/cattage/
+ $ helm repo add cattage https://cybozu-go.github.io/cattage
  $ helm repo update
    ```
 
