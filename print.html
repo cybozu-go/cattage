@@ -1,17 +1,17 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>Cattage Documentation</title>
-        <meta name="robots" content="noindex" />
+        <meta name="robots" content="noindex">
 
 
         <!-- Custom HTML head -->
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -32,7 +32,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -62,31 +62,38 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded affix "><li class="part-title">User manual</li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded affix "><li class="part-title">References</li><li class="chapter-item expanded "><a href="crd_tenant.html"><strong aria-hidden="true">4.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">5.</strong> Configurations</a></li><li class="chapter-item expanded affix "><li class="part-title">Developer documents</li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">6.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">7.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">8.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">9.</strong> Maintenance</a></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
 
         <!-- Track and set sidebar scroll position -->
@@ -117,9 +124,9 @@
                                 <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -217,7 +224,7 @@ kind: ClusterRole
 metadata:
   name: application-admin
   labels:
-    rbac.authorization.k8s.io/aggregate-to-admin: &quot;true&quot;
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
 rules:
 - apiGroups:
   - argoproj.io
@@ -234,7 +241,7 @@ rules:
   - deletecollection
 </code></pre>
 <p>Cattage requires Argo CD's <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/">Applications in any namespace</a> is enabled.
-In order to enable the feature, add <code>--application-namespace=&quot;*&quot;</code> parameter to <code>argocd-server</code> and <code>argocd-application-controller</code>.</p>
+In order to enable the feature, add <code>--application-namespace="*"</code> parameter to <code>argocd-server</code> and <code>argocd-application-controller</code>.</p>
 <h2 id="cert-manager"><a class="header" href="#cert-manager">cert-manager</a></h2>
 <p>Cattage and Accurate depend on [cert-manager][] to issue TLS certificate for admission webhooks.
 If cert-manager is not installed on your cluster, install it as follows:</p>
@@ -314,7 +321,7 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
 <p><code>appProjectTemplate</code> and <code>roleBindingTemplate</code> should be configured appropriately for your multi-tenancy environment.
 Read <a href="config.html">Configurations</a> for details.</p>
 <p>Setup Helm repository:</p>
-<pre><code class="language-console">$ helm repo add cattage https://cybozu-go.github.io/cattage/
+<pre><code class="language-console">$ helm repo add cattage https://cybozu-go.github.io/cattage
 $ helm repo update
 </code></pre>
 <p>Install the Helm chart with your values.yaml:</p>
@@ -405,7 +412,7 @@ spec:
 </code></pre>
 <p>As a result, <code>application/testhttpd</code> in your-sub will be out of sync.
 Please change the project of <code>application/testhttpd</code> correctly.</p>
-<pre><code class="language-console">$ kubectl patch app testhttpd -n your-sub --type='json' -p '[{ &quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/spec/project&quot;, &quot;value&quot;: &quot;new-team&quot;}]'
+<pre><code class="language-console">$ kubectl patch app testhttpd -n your-sub --type='json' -p '[{ "op": "replace", "path": "/spec/project", "value": "new-team"}]'
 </code></pre>
 <p>The application will be synced again.</p>
 <h2 id="remove-resources"><a class="header" href="#remove-resources">Remove resources</a></h2>
@@ -578,23 +585,23 @@ argocd:
       --add_dir_header                   If true, adds the file directory to the header
       --alsologtostderr                  log to standard error as well as files
       --cert-dir string                  webhook certificate directory
-      --config-file string               Configuration file path (default &quot;/etc/cattage/config.yaml&quot;)
-      --health-probe-addr string         Listen address for health probes (default &quot;:8081&quot;)
+      --config-file string               Configuration file path (default "/etc/cattage/config.yaml")
+      --health-probe-addr string         Listen address for health probes (default ":8081")
   -h, --help                             help for cattage-controller
-      --leader-election-id string        ID for leader election by controller-runtime (default &quot;cattage&quot;)
+      --leader-election-id string        ID for leader election by controller-runtime (default "cattage")
       --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
       --log_dir string                   If non-empty, write log files in this directory
       --log_file string                  If non-empty, use this log file
       --log_file_max_size uint           Defines the maximum size a log file can grow to. Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
       --logtostderr                      log to standard error instead of files (default true)
-      --metrics-addr string              The address the metric endpoint binds to (default &quot;:8080&quot;)
+      --metrics-addr string              The address the metric endpoint binds to (default ":8080")
       --skip_headers                     If true, avoid header prefixes in the log messages
       --skip_log_headers                 If true, avoid headers when opening log files
       --stderrthreshold severity         logs at or above this threshold go to stderr (default 2)
   -v, --v Level                          number for the log level verbosity
       --version                          version for cattage-controller
       --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
-      --webhook-addr string              Listen address for the webhook endpoint (default &quot;:9443&quot;)
+      --webhook-addr string              Listen address for the webhook endpoint (default ":9443")
       --zap-devel                        Development Mode defaults(encoder=consoleEncoder,logLevel=Debug,stackTraceLevel=Warn). Production Mode defaults(encoder=jsonEncoder,logLevel=Info,stackTraceLevel=Error)
       --zap-encoder encoder              Zap log encoding (one of 'json' or 'console')
       --zap-log-level level              Zap Level to configure the verbosity of logging. Can be one of 'debug', 'info', 'error', or any integer value &gt; 0 which corresponds to custom debug levels of increasing verbosity
@@ -714,7 +721,7 @@ Please refer to <code>.github/release.yml</code> for the kind of labels.</p>
 <ol>
 <li>
 <p>Determine a new version number. Then set <code>VERSION</code> variable.</p>
-<pre><code class="language-console"># Set VERSION and confirm it. It should not have &quot;v&quot; prefix.
+<pre><code class="language-console"># Set VERSION and confirm it. It should not have "v" prefix.
 $ VERSION=x.y.z
 $ echo $VERSION
 </code></pre>
@@ -722,7 +729,7 @@ $ echo $VERSION
 <li>
 <p>Add a git tag to the main HEAD, then push it.</p>
 <pre><code class="language-console">$ git checkout main
-$ git tag -a -m &quot;Release v$VERSION&quot; &quot;v$VERSION&quot;
+$ git tag -a -m "Release v$VERSION" "v$VERSION"
 $ git tag -ln | grep $VERSION
 $ git push origin v$VERSION
 </code></pre>
