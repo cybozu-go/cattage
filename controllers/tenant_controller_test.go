@@ -21,6 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 //go:embed testdata/appprojecttemplate.yaml
@@ -36,9 +37,11 @@ var _ = Describe("Tenant controller", func() {
 
 	BeforeEach(func() {
 		mgr, err := ctrl.NewManager(k8sCfg, ctrl.Options{
-			Scheme:             scheme,
-			LeaderElection:     false,
-			MetricsBindAddress: "0",
+			Scheme:         scheme,
+			LeaderElection: false,
+			Metrics: metricsserver.Options{
+				BindAddress: "0",
+			},
 			Client: client.Options{
 				Cache: &client.CacheOptions{
 					Unstructured: true,

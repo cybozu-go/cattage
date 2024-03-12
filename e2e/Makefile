@@ -1,5 +1,4 @@
-KUBERNETES_VERSION = v1.27.3 # renovate: kindest/node
-ARGOCD_VERSION = 2.6.8
+KUBERNETES_VERSION = v1.29.2 # renovate: kindest/node
 
 KIND_CONFIG = kind-config.yaml
 export KUBECONFIG
@@ -27,12 +26,13 @@ start:
 prepare:
 	kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
 	kubectl -n cert-manager wait --for=condition=available --timeout=180s --all deployments
-	kubectl create ns argocd
-	curl -sSLf https://raw.githubusercontent.com/argoproj/argo-cd/v$(ARGOCD_VERSION)/manifests/install.yaml | kubectl -n argocd apply -f -
-	kubectl patch deployment -n argocd argocd-server --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args", "value": ["--application-namespaces=*"]}]'
-	kubectl patch statefulset -n argocd argocd-application-controller --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args", "value": ["--application-namespaces=*"]}]'
+
+	helm repo add argo https://argoproj.github.io/argo-helm
+	helm repo update
+	helm install --create-namespace --namespace argocd argocd -f argocd-values.yaml argo/argo-cd
 	kubectl -n argocd wait --for=condition=available --timeout=180s --all deployments
-	helm repo add accurate https://cybozu-go.github.io/accurate/
+
+	helm repo add accurate https://cybozu-go.github.io/accurate
 	helm repo update
 	helm install --create-namespace --namespace accurate accurate -f accurate-values.yaml accurate/accurate
 	kubectl -n accurate wait --for=condition=available --timeout=180s --all deployments
