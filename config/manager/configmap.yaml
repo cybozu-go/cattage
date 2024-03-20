@@ -65,3 +65,4 @@ data:
             {{- else }}
             - '*'
             {{- end }}
+      preventAppCreationInArgoCDNamespace: true

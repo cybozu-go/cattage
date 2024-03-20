@@ -613,7 +613,7 @@ func (r *TenantReconciler) updateConfigMap(ctx context.Context, controllerName s
 func (r *TenantReconciler) updateAllTenantNamespacesConfigMap(ctx context.Context) error {
 	logger := log.FromContext(ctx)
 
-	configMapName := "tenant-namespaces-cm"
+	configMapName := "all-tenant-namespaces-cm"
 	cm := &corev1.ConfigMap{}
 	cm.Name = configMapName
 	cm.Namespace = r.config.ArgoCD.Namespace

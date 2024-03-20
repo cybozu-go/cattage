@@ -82,6 +82,7 @@ func subMain(ns, addr string, port int) error {
 	}
 
 	hooks.SetupTenantWebhook(mgr, admission.NewDecoder(scheme), cfg)
+	hooks.SetupApplicationWebhook(mgr, admission.NewDecoder(scheme), cfg)
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

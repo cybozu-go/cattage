@@ -18,3 +18,4 @@ data:
     argocd:
       namespace: {{ required ".Values.controller.config.argocd.namespace required!" .Values.controller.config.argocd.namespace }}
       appProjectTemplate: {{ required ".Values.controller.config.argocd.appProjectTemplate required!" .Values.controller.config.argocd.appProjectTemplate | toYaml | nindent 8 }}
+      preventAppCreationInArgoCDNamespace: {{ required ".Values.controller.config.argocd.preventAppCreationInArgoCDNamespace required!" .Values.controller.config.argocd.preventAppCreationInArgoCDNamespace }} 

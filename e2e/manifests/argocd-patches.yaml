@@ -54,7 +54,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: application.namespaces
-                  name: tenant-namespaces-cm
+                  name: all-tenant-namespaces-cm
                   optional: true
           name: notifications-controller
 ---
@@ -74,6 +74,6 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: application.namespaces
-                  name: tenant-namespaces-cm
+                  name: all-tenant-namespaces-cm
                   optional: true
           name: server
