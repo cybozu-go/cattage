@@ -99,10 +99,12 @@ var _ = BeforeSuite(func() {
 	config := &config.Config{
 		Namespace: config.NamespaceConfig{},
 		ArgoCD: config.ArgoCDConfig{
-			Namespace: "argocd",
+			Namespace:                           "argocd",
+			PreventAppCreationInArgoCDNamespace: true,
 		},
 	}
 	SetupTenantWebhook(mgr, admission.NewDecoder(scheme), config)
+	SetupApplicationWebhook(mgr, admission.NewDecoder(scheme), config)
 
 	//+kubebuilder:scaffold:webhook
 

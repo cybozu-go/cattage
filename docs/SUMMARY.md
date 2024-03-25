@@ -7,6 +7,7 @@
 - [Overview](overview.md)
 - [Setup](setup.md)
 - [Usage](usage.md)
+- [Sharding](sharding.md)
 
 # References
 

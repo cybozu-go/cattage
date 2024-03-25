@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"errors"
+	"strings"
 	"time"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
@@ -30,7 +31,7 @@ var appProjectTemplate string
 //go:embed testdata/rolebindingtemplate.yaml
 var roleBindingTemplate string
 
-var _ = Describe("Tenant controller", func() {
+var _ = Describe("Tenant controller", Ordered, func() {
 	ctx := context.Background()
 	var stopFunc func()
 	var config *tenantconfig.Config
@@ -61,8 +62,9 @@ var _ = Describe("Tenant controller", func() {
 				RoleBindingTemplate: roleBindingTemplate,
 			},
 			ArgoCD: tenantconfig.ArgoCDConfig{
-				Namespace:          "argocd",
-				AppProjectTemplate: appProjectTemplate,
+				Namespace:                           "argocd",
+				AppProjectTemplate:                  appProjectTemplate,
+				PreventAppCreationInArgoCDNamespace: true,
 			},
 		}
 		tr := NewTenantReconciler(mgr.GetClient(), config)
@@ -203,6 +205,60 @@ var _ = Describe("Tenant controller", func() {
 			),
 			"sourceRepos": ConsistOf("https://github.com/cybozu-go/*"),
 		}))
+	})
+
+	It("should create configmaps for sharding", func() {
+		allNsCm := &corev1.ConfigMap{}
+		defaultCm := &corev1.ConfigMap{}
+		Eventually(func(g Gomega) {
+			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "all-tenant-namespaces-cm"}, allNsCm)
+			g.Expect(err).NotTo(HaveOccurred())
+			allNs := strings.Split(allNsCm.Data["application.namespaces"], ",")
+			g.Expect(allNs).Should(ConsistOf("app-x", "sub-4"))
+		}).Should(Succeed())
+
+		Eventually(func(g Gomega) {
+			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "default-application-controller-cm"}, defaultCm)
+			g.Expect(err).NotTo(HaveOccurred())
+			defaultNs := strings.Split(defaultCm.Data["application.namespaces"], ",")
+			g.Expect(defaultNs).Should(ConsistOf("app-x", "sub-4"))
+		}).Should(Succeed())
+
+		tenantS := &cattagev1beta1.Tenant{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "a-team",
+			},
+			Spec: cattagev1beta1.TenantSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
+					{
+						Name: "app-a",
+					},
+				},
+				ControllerName: "second",
+			},
+		}
+		err := k8sClient.Create(ctx, tenantS)
+		Expect(err).ToNot(HaveOccurred())
+
+		secondCm := &corev1.ConfigMap{}
+		Eventually(func(g Gomega) {
+			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "all-tenant-namespaces-cm"}, allNsCm)
+			g.Expect(err).NotTo(HaveOccurred())
+			allNs := strings.Split(allNsCm.Data["application.namespaces"], ",")
+			g.Expect(allNs).Should(ConsistOf("app-x", "sub-4", "app-a", "sub-1", "sub-2", "sub-3"))
+		}).Should(Succeed())
+		Eventually(func(g Gomega) {
+			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "default-application-controller-cm"}, defaultCm)
+			g.Expect(err).NotTo(HaveOccurred())
+			defaultNs := strings.Split(defaultCm.Data["application.namespaces"], ",")
+			g.Expect(defaultNs).Should(ConsistOf("app-x", "sub-4"))
+		}).Should(Succeed())
+		Eventually(func(g Gomega) {
+			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "second-application-controller-cm"}, secondCm)
+			g.Expect(err).NotTo(HaveOccurred())
+			secondNs := strings.Split(secondCm.Data["application.namespaces"], ",")
+			g.Expect(secondNs).Should(ConsistOf("app-a", "sub-1", "sub-2", "sub-3"))
+		}).Should(Succeed())
 	})
 
 	It("should disown root namespace", func() {

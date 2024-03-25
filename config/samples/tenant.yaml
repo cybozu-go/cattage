@@ -5,6 +5,7 @@ metadata:
 spec:
   rootNamespaces:
     - name: app-a
+  controllerName: second
 ---
 apiVersion: cattage.cybozu.io/v1beta1
 kind: Tenant

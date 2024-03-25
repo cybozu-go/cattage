@@ -11,3 +11,9 @@ const OwnerTenant = MetaPrefix + "tenant"
 const OwnerAppNamespace = MetaPrefix + "owner-namespace"
 
 const TenantFieldManager = MetaPrefix + "tenant-controller"
+
+const DefaultApplicationControllerName = "default"
+
+const ManagedByLabel = "app.kubernetes.io/managed-by"
+const PartOfLabel = "app.kubernetes.io/part-of"
+const ControllerNameLabel = MetaPrefix + "controller-name"

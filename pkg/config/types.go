@@ -37,6 +37,9 @@ type ArgoCDConfig struct {
 
 	// AppProjectTemplate is a template for AppProject resources that is created for each tenant
 	AppProjectTemplate string `json:"appProjectTemplate"`
+
+	// PreventAppCreationInArgoCDNamespace is a flag to prevent creating applications in the Argo CD namespace
+	PreventAppCreationInArgoCDNamespace bool `json:"preventAppCreationInArgoCDNamespace"`
 }
 
 // Validate validates the configurations.

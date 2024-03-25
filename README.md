@@ -12,6 +12,7 @@ Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][
 - Management of root-namespaces for tenants. Tenant users will be able to create sub-namespaces in those root-namespaces.
 - When a tenant user creates a sub-namespace, the AppProject will be automatically updated accordingly. Tenant users will be able to deploy applications with Argo CD to the namespaces.
 - The ownership of sub-namespaces can be changed between tenants.
+- Sharding application-controller instances.
 
 ## Supported Version
 

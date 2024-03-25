@@ -21,6 +21,11 @@ Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][
     Sometimes users may want to move the ownership of an application to another tenant.
     When the parent of a sub-namespace is changed, Cattage will automatically update the permissions.
 
+- Sharding application-controller instances
+
+    Cattage can shard application-controller instances by the tenant.
+    This feature is useful when you have a large number of tenants and want to avoid a single application-controller instance from being overloaded.
+
 [Accurate]: https://github.com/cybozu-go/accurate
 [Argo CD]: https://argo-cd.readthedocs.io/en/stable/
 [App Of Apps Pattern]: https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern
