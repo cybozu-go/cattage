@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded affix "><li class="part-title">User manual</li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded affix "><li class="part-title">References</li><li class="chapter-item expanded "><a href="crd_tenant.html" class="active"><strong aria-hidden="true">4.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">5.</strong> Configurations</a></li><li class="chapter-item expanded affix "><li class="part-title">Developer documents</li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">6.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">7.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">8.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">9.</strong> Maintenance</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded affix "><li class="part-title">User manual</li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded "><a href="sharding.html"><strong aria-hidden="true">4.</strong> Sharding</a></li><li class="chapter-item expanded affix "><li class="part-title">References</li><li class="chapter-item expanded "><a href="crd_tenant.html" class="active"><strong aria-hidden="true">5.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">6.</strong> Configurations</a></li><li class="chapter-item expanded affix "><li class="part-title">Developer documents</li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">7.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">8.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">9.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">10.</strong> Maintenance</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -239,6 +239,7 @@
 <tr><td>rootNamespaces</td><td>RootNamespaces are the list of root namespaces that belong to this tenant.</td><td>[]<a href="#rootnamespacespec">RootNamespaceSpec</a></td><td>true</td></tr>
 <tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant.</td><td><a href="#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
 <tr><td>delegates</td><td>Delegates is a list of other tenants that are delegated access to this tenant.</td><td>[]<a href="#delegatespec">DelegateSpec</a></td><td>false</td></tr>
+<tr><td>controllerName</td><td>ControllerName is the name of the application-controller that manages this tenant's applications. If not specified, the default controller is used.</td><td>string</td><td>false</td></tr>
 </tbody></table>
 </div>
 <p><a href="#custom-resources">Back to Custom Resources</a></p>
@@ -255,7 +256,7 @@
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="usage.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="sharding.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -269,7 +270,7 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="usage.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="sharding.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 

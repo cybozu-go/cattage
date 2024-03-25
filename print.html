@@ -89,7 +89,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded affix "><li class="part-title">User manual</li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded affix "><li class="part-title">References</li><li class="chapter-item expanded "><a href="crd_tenant.html"><strong aria-hidden="true">4.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">5.</strong> Configurations</a></li><li class="chapter-item expanded affix "><li class="part-title">Developer documents</li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">6.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">7.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">8.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">9.</strong> Maintenance</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded affix "><li class="part-title">User manual</li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded "><a href="sharding.html"><strong aria-hidden="true">4.</strong> Sharding</a></li><li class="chapter-item expanded affix "><li class="part-title">References</li><li class="chapter-item expanded "><a href="crd_tenant.html"><strong aria-hidden="true">5.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">6.</strong> Configurations</a></li><li class="chapter-item expanded affix "><li class="part-title">Developer documents</li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">7.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">8.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">9.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">10.</strong> Maintenance</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -201,6 +201,11 @@ Tenant users will be able to deploy applications with Argo CD to the namespaces.
 <p>The ownership of sub-namespaces can be changed between tenants</p>
 <p>Sometimes users may want to move the ownership of an application to another tenant.
 When the parent of a sub-namespace is changed, Cattage will automatically update the permissions.</p>
+</li>
+<li>
+<p>Sharding application-controller instances</p>
+<p>Cattage can shard application-controller instances by the tenant.
+This feature is useful when you have a large number of tenants and want to avoid a single application-controller instance from being overloaded.</p>
 </li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="setup"><a class="header" href="#setup">Setup</a></h1>
@@ -423,6 +428,134 @@ Please change the project of <code>application/testhttpd</code> correctly.</p>
 <li>Applications on the namespaces will be deleted</li>
 <li>AppProject for the tenant will be deleted</li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sharding"><a class="header" href="#sharding">Sharding</a></h1>
+<h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
+<p>In Argo CD, as the number of managed applications increases, the load on the Application Controller becomes significant.
+While Argo CD supports sharding, it can only shard controllers per Kubernetes cluster. (ref. https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/ )</p>
+<p>Cattage provides the capability to shard controllers on a per-tenant basis using <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/">applications in any namespace</a>.
+By specifying a controller name in the Tenant resource, you can designate which controller will process Applications created in that tenant's Namespaces.</p>
+<h2 id="how-to-use"><a class="header" href="#how-to-use">How to use</a></h2>
+<h3 id="setup-stakaterreloader"><a class="header" href="#setup-stakaterreloader">Setup stakater/Reloader</a></h3>
+<p><a href="https://github.com/stakater/Reloader">stakater/Reloader</a> is a Kubernetes controller that watches for changes in ConfigMaps and Secrets, executing rolling updates on Deployments and StatefulSets as needed.
+Cattage uses <code>stakater/Reloader</code> to roll out updates to the Argo CD Application Controller whenever a ConfigMap is modified.</p>
+<p>Follow these steps to set it up:</p>
+<pre><code class="language-bash">helm repo add stakater https://stakater.github.io/stakater-charts
+helm repo update
+helm install --create-namespace --namespace reloader reloader -f manifests/reloader-values.yaml stakater/reloader
+</code></pre>
+<h3 id="setup-argocd"><a class="header" href="#setup-argocd">Setup ArgoCD</a></h3>
+<p>Set up Argo CD with the following commands:</p>
+<pre><code class="language-bash">helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+helm install --create-namespace --namespace argocd argocd argo/argo-cd
+</code></pre>
+<p>Copy and rename the StatefulSet for the Application Controller, then deploy it.
+Repeat for as many controllers as required for sharding:</p>
+<pre><code class="language-bash">helm template argo/argo-cd | yq ea '. as $$i ireduce ([]; . + $$i) | .[] | select(.kind=="StatefulSet") | .metadata.name="second-application-controller"' | kubectl apply -f -
+</code></pre>
+<p>Apply patches to the Application Controllers, ArgoCD Server, and Notification Controller to use the ConfigMaps generated by Cattage, and add an annotation to enable <code>stakater/Reloader</code>.</p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: argocd-application-controller
+  namespace: argocd
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  template:
+    spec:
+      containers:
+        - env:
+            - name: ARGOCD_APPLICATION_NAMESPACES
+              valueFrom:
+                configMapKeyRef:
+                  key: application.namespaces
+                  name: default-application-controller-cm
+                  optional: true
+          name: application-controller
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: second-application-controller
+  namespace: argocd
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  template:
+    spec:
+      containers:
+        - env:
+            - name: ARGOCD_APPLICATION_NAMESPACES
+              valueFrom:
+                configMapKeyRef:
+                  key: application.namespaces
+                  name: second-application-controller-cm
+                  optional: true
+          name: application-controller
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-notifications-controller
+  namespace: argocd
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  template:
+    spec:
+      containers:
+        - env:
+            - name: ARGOCD_APPLICATION_NAMESPACES
+              valueFrom:
+                configMapKeyRef:
+                  key: application.namespaces
+                  name: all-tenant-namespaces-cm
+                  optional: true
+          name: notifications-controller
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-server
+  namespace: argocd
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  template:
+    spec:
+      containers:
+        - env:
+            - name: ARGOCD_APPLICATION_NAMESPACES
+              valueFrom:
+                configMapKeyRef:
+                  key: application.namespaces
+                  name: all-tenant-namespaces-cm
+                  optional: true
+          name: server
+</code></pre>
+<p>Cattage generates the following configmaps:</p>
+<ul>
+<li><code>all-tenant-namespaces-cm</code>: Lists namespaces belonging to all tenants</li>
+<li><code>default-application-controller-cm</code>: Lists namespaces for tenants without a specified controller</li>
+<li><code>&lt;controller name&gt;-application-controller-cm</code>: Lists namespaces for tenants with a specified controller</li>
+</ul>
+<h3 id="setup-cattage"><a class="header" href="#setup-cattage">Setup Cattage</a></h3>
+<p>Follow the <a href="./setup.html">setup instructions</a> to install Cattage.</p>
+<p>Ensure <code>controller.config.argocd.preventAppCreationInArgoCDNamespace</code> in values.yaml is enabled to avoid multiple controllers processing the same Application in argocd namespace.</p>
+<h3 id="creating-tenant-resources"><a class="header" href="#creating-tenant-resources">Creating Tenant Resources</a></h3>
+<p>When creating a Tenant resource, specify the controllerName.</p>
+<pre><code class="language-yaml">apiVersion: cattage.cybozu.io/v1beta1
+kind: Tenant
+metadata:
+  name: a-team
+spec:
+  rootNamespaces:
+    - name: app-a
+  controllerName: second
+</code></pre>
+<p>Applications created in the Namespace of that tenant will then be processed by the specified application controller.
+If no controller name is specified, it will be processed by the default application controller.</p>
 <div style="break-before: page; page-break-before: always;"></div><h3 id="custom-resources"><a class="header" href="#custom-resources">Custom Resources</a></h3>
 <ul>
 <li><a href="crd_tenant.html#tenant">Tenant</a></li>
@@ -483,6 +616,7 @@ Please change the project of <code>application/testhttpd</code> correctly.</p>
 <tr><td>rootNamespaces</td><td>RootNamespaces are the list of root namespaces that belong to this tenant.</td><td>[]<a href="crd_tenant.html#rootnamespacespec">RootNamespaceSpec</a></td><td>true</td></tr>
 <tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant.</td><td><a href="crd_tenant.html#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
 <tr><td>delegates</td><td>Delegates is a list of other tenants that are delegated access to this tenant.</td><td>[]<a href="crd_tenant.html#delegatespec">DelegateSpec</a></td><td>false</td></tr>
+<tr><td>controllerName</td><td>ControllerName is the name of the application-controller that manages this tenant's applications. If not specified, the default controller is used.</td><td>string</td><td>false</td></tr>
 </tbody></table>
 </div>
 <p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
@@ -505,6 +639,7 @@ The location can be changed with <code>--config-file</code> flag.</p>
 <tr><td><code>namespace.roleBindingTemplate</code></td><td><code>string</code></td><td>Template for RoleBinding resource that is created on all namespaces belonging to a tenant.</td></tr>
 <tr><td><code>argocd.namepsace</code></td><td><code>string</code></td><td>The name of namespace where Argo CD is running.</td></tr>
 <tr><td><code>argocd.appProjectTemplate</code></td><td><code>string</code></td><td>Template for AppProject resources that is created for each tenant.</td></tr>
+<tr><td><code>argocd.preventAppCreationInArgoCDNamespace</code></td><td><code>bool</code></td><td>If true, prevent creating applications in the Argo CD namespace. This is used to enable sharding.</td></tr>
 </tbody></table>
 </div>
 <p>The repository includes an example as follows:</p>
@@ -608,7 +743,7 @@ argocd:
       --zap-stacktrace-level level       Zap Level at and above which stacktraces are captured (one of 'info', 'error', 'panic').
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="design-notes"><a class="header" href="#design-notes">Design notes</a></h1>
-<h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
+<h2 id="overview-2"><a class="header" href="#overview-2">Overview</a></h2>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/">Argo CD</a> with <a href="https://cybozu-go.github.io/accurate/">Accurate</a>.</p>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
 <p>There is a known limitation for Argo CD to implement app-of-apps pattern in a multi-tenancy environment.</p>
