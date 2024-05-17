@@ -25,9 +25,9 @@ data:
           {{- range .Roles.admin }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
-            name: {{ . }}
+            name: {{ .Name }}
           - kind: ServiceAccount
-            name: node-{{ . }}
+            name: node-{{ .Name }}
             namespace: teleport
           {{- end }}
     argocd:
@@ -48,9 +48,9 @@ data:
               kind: LimitRange
           roles:
             - groups:
-                - cybozu-go:{{ .Name }}
+                - cybozu-go:{{with .Extras.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
                 {{- range .Roles.admin }}
-                - cybozu-go:{{ . }}
+                - cybozu-go:{{with .Extras.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
                 {{- end }}
               name: admin
               policies:

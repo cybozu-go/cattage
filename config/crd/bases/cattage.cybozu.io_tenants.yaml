@@ -79,6 +79,12 @@ spec:
                   - roles
                   type: object
                 type: array
+              extraParams:
+                additionalProperties:
+                  type: string
+                description: ExtraParams is a map of extra parameters that can be
+                  used in the templates.
+                type: object
               rootNamespaces:
                 description: RootNamespaces are the list of root namespaces that belong
                   to this tenant.
