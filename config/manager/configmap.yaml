@@ -48,9 +48,9 @@ data:
               kind: LimitRange
           roles:
             - groups:
-                - cybozu-go:{{with .Extras.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
+                - cybozu-go:{{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
                 {{- range .Roles.admin }}
-                - cybozu-go:{{with .Extras.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
+                - cybozu-go:{{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
                 {{- end }}
               name: admin
               policies:

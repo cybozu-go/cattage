@@ -38,7 +38,7 @@ namespace:
       {{- range .Roles.admin }}
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
-        name: {{ . }}
+        name: {{ .Name }}
       {{- end }}
 argocd:
   namespace: argocd
@@ -53,9 +53,10 @@ argocd:
       {{- end }}
       roles:
         - groups:
-            - {{ .Name }}
+            # If `GitHubName` is specified as `ExtraParams`, use it, otherwise use `Name`.
+            - {{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
             {{- range .Roles.admin }}
-            - {{ . }}
+            - {{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
             {{- end }}
           name: admin
           policies:
@@ -76,19 +77,26 @@ argocd:
 
 `roleBindingTemplate` can use the following variables:
 
-| Key     | Type                  | Description                                                                      |
-|---------|-----------------------|----------------------------------------------------------------------------------|
-| `Name`  | `string`              | The name of the tenant.                                                          |
-| `Roles` | `map[string][]string` | Map of other tenants that are accessible to this tenant. The key is a role name. |
+| Key           | Type                | Description                                                                      |
+|---------------|---------------------|----------------------------------------------------------------------------------|
+| `Name`        | `string`            | The name of the tenant.                                                          |
+| `Roles`       | `map[string]Role`   | Map of other tenants that are accessible to this tenant. The key is a role name. |
+| `ExtraParams` | `map[string]string` | Extra parameters specified per tenant.                                           |
 
 `appProjectTemplate` can use the following variables:
 
-| Key            | Type                  | Description                                                                      |
-|----------------|-----------------------|----------------------------------------------------------------------------------|
-| `Name`         | `string`              | The name of the tenant.                                                          |
-| `Namespaces`   | `[]string`            | List of namespaces belonging to a tenant (including sub-namespaces).             |
-| `Repositories` | `[]string`            | List of repository URLs which can be used by the tenant.                         |
-| `Roles`        | `map[string][]string` | Map of other tenants that are accessible to this tenant. The key is a role name. |
+| Key            | Type                | Description                                                                      |
+|----------------|---------------------|----------------------------------------------------------------------------------|
+| `Name`         | `string`            | The name of the tenant.                                                          |
+| `Namespaces`   | `[]string`          | List of namespaces belonging to a tenant (including sub-namespaces).             |
+| `Repositories` | `[]string`          | List of repository URLs which can be used by the tenant.                         |
+| `Roles`        | `map[string]Role`   | Map of other tenants that are accessible to this tenant. The key is a role name. |
+| `ExtraParams`  | `map[string]string` | Extra parameters specified per tenant.                                           |
+
+| Key           | Type                | Description                            |
+|---------------|---------------------|----------------------------------------|
+| `Name`        | `string`            | The name of the tenant.                |
+| `ExtraParams` | `map[string]string` | Extra parameters specified per tenant. |
 
 ## Environment variables
 
