@@ -111,7 +111,7 @@ controller:
           {{- range .Roles.admin }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
-            name: {{ . }}
+            name: {{ .Name }}
           {{- end }}
     argocd:
       namespace: argocd
@@ -128,7 +128,7 @@ controller:
             - groups:
                 - {{ .Name }}
                 {{- range .Roles.admin }}
-                - {{ . }}
+                - {{ .Name }}
                 {{- end }}
               name: admin
               policies:

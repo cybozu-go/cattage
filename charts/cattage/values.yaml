@@ -44,7 +44,7 @@ controller:
           {{- range .Roles.admin }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
-            name: {{ . }}
+            name: {{ .Name }}
           {{- end }}
     argocd:
       namespace: argocd
@@ -66,7 +66,7 @@ controller:
             - groups:
                 - cybozu-go:{{ .Name }}
                 {{- range .Roles.admin }}
-                - cybozu-go:{{ . }}
+                - cybozu-go:{{ .Name }}
                 {{- end }}
               name: admin
               policies:
