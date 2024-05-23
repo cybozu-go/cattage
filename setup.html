@@ -261,7 +261,7 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
           {{- range .Roles.admin }}
           - apiGroup: rbac.authorization.k8s.io
             kind: Group
-            name: {{ . }}
+            name: {{ .Name }}
           {{- end }}
     argocd:
       namespace: argocd
@@ -278,7 +278,7 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
             - groups:
                 - {{ .Name }}
                 {{- range .Roles.admin }}
-                - {{ . }}
+                - {{ .Name }}
                 {{- end }}
               name: admin
               policies:

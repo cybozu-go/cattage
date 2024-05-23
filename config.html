@@ -213,7 +213,7 @@ The location can be changed with <code>--config-file</code> flag.</p>
       {{- range .Roles.admin }}
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
-        name: {{ . }}
+        name: {{ .Name }}
       {{- end }}
 argocd:
   namespace: argocd
@@ -228,9 +228,10 @@ argocd:
       {{- end }}
       roles:
         - groups:
-            - {{ .Name }}
+            # If `GitHubName` is specified as `ExtraParams`, use it, otherwise use `Name`.
+            - {{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
             {{- range .Roles.admin }}
-            - {{ . }}
+            - {{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
             {{- end }}
           name: admin
           policies:
@@ -250,7 +251,8 @@ argocd:
 <p><code>roleBindingTemplate</code> can use the following variables:</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
-<tr><td><code>Roles</code></td><td><code>map[string][]string</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
+<tr><td><code>Roles</code></td><td><code>map[string]Role</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
+<tr><td><code>ExtraParams</code></td><td><code>map[string]string</code></td><td>Extra parameters specified per tenant.</td></tr>
 </tbody></table>
 </div>
 <p><code>appProjectTemplate</code> can use the following variables:</p>
@@ -258,7 +260,12 @@ argocd:
 <tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
 <tr><td><code>Namespaces</code></td><td><code>[]string</code></td><td>List of namespaces belonging to a tenant (including sub-namespaces).</td></tr>
 <tr><td><code>Repositories</code></td><td><code>[]string</code></td><td>List of repository URLs which can be used by the tenant.</td></tr>
-<tr><td><code>Roles</code></td><td><code>map[string][]string</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
+<tr><td><code>Roles</code></td><td><code>map[string]Role</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
+<tr><td><code>ExtraParams</code></td><td><code>map[string]string</code></td><td>Extra parameters specified per tenant.</td></tr>
+</tbody></table>
+</div><div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
+<tr><td><code>ExtraParams</code></td><td><code>map[string]string</code></td><td>Extra parameters specified per tenant.</td></tr>
 </tbody></table>
 </div>
 <h2 id="environment-variables"><a class="header" href="#environment-variables">Environment variables</a></h2>
