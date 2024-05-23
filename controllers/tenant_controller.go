@@ -354,15 +354,23 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 	})
 }
 
-func rolesMap(delegates []cattagev1beta1.DelegateSpec) map[string][]string {
-	result := make(map[string][]string)
+func (r *TenantReconciler) rolesMap(ctx context.Context, delegates []cattagev1beta1.DelegateSpec) (map[string][]Role, error) {
+	result := make(map[string][]Role)
 
 	for _, d := range delegates {
 		for _, role := range d.Roles {
-			result[role] = append(result[role], d.Name)
+			delegatedTenant := &cattagev1beta1.Tenant{}
+			err := r.client.Get(ctx, client.ObjectKey{Name: d.Name}, delegatedTenant)
+			if err != nil {
+				return nil, err
+			}
+			result[role] = append(result[role], Role{
+				Name:        delegatedTenant.Name,
+				ExtraParams: delegatedTenant.Spec.ExtraParams,
+			})
 		}
 	}
-	return result
+	return result, nil
 }
 
 func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
@@ -395,13 +403,20 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 		if err != nil {
 			return err
 		}
+		roles, err := r.rolesMap(ctx, tenant.Spec.Delegates)
+		if err != nil {
+			return err
+		}
+
 		var buf bytes.Buffer
 		err = tpl.Execute(&buf, struct {
-			Name  string
-			Roles map[string][]string
+			Name        string
+			Roles       map[string][]Role
+			ExtraParams map[string]string
 		}{
-			Name:  tenant.Name,
-			Roles: rolesMap(tenant.Spec.Delegates),
+			Name:        tenant.Name,
+			Roles:       roles,
+			ExtraParams: tenant.Spec.ExtraParams,
 		})
 		if err != nil {
 			return err
@@ -445,6 +460,11 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 	return nil
 }
 
+type Role struct {
+	Name        string
+	ExtraParams map[string]string
+}
+
 func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
 	logger := log.FromContext(ctx)
 
@@ -469,17 +489,24 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 		return err
 	}
 
+	roles, err := r.rolesMap(ctx, tenant.Spec.Delegates)
+	if err != nil {
+		return err
+	}
+
 	var buf bytes.Buffer
 	err = tpl.Execute(&buf, struct {
 		Name         string
 		Namespaces   []string
-		Roles        map[string][]string
+		Roles        map[string][]Role
 		Repositories []string
+		ExtraParams  map[string]string
 	}{
 		Name:         tenant.Name,
 		Namespaces:   namespaces,
-		Roles:        rolesMap(tenant.Spec.Delegates),
+		Roles:        roles,
 		Repositories: tenant.Spec.ArgoCD.Repositories,
+		ExtraParams:  tenant.Spec.ExtraParams,
 	})
 	if err != nil {
 		return err
@@ -489,6 +516,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 	_, _, err = dec.Decode(buf.Bytes(), nil, proj)
 	if err != nil {
+		logger.Error(err, "failed to decode", "yaml", buf.String())
 		return err
 	}
 

@@ -15,9 +15,9 @@ spec:
     warn: false
   roles:
     - groups:
-        - cybozu-go:{{ .Name }}
+        - cybozu-go:{{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
         {{- range .Roles.admin }}
-        - cybozu-go:{{ . }}
+        - cybozu-go:{{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
         {{- end }}
       name: admin
       policies:

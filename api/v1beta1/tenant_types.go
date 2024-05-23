@@ -23,6 +23,10 @@ type TenantSpec struct {
 	// If not specified, the default controller is used.
 	// +optional
 	ControllerName string `json:"controllerName,omitempty"`
+
+	// ExtraParams is a map of extra parameters that can be used in the templates.
+	// +optional
+	ExtraParams map[string]string `json:"extraParams,omitempty"`
 }
 
 // RootNamespaceSpec defines the desired state of Namespace.

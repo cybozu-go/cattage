@@ -6,6 +6,8 @@ spec:
   rootNamespaces:
     - name: app-a
   controllerName: second
+  extraParams:
+    GitHubTeam: a-team-gh
 ---
 apiVersion: cattage.cybozu.io/v1beta1
 kind: Tenant
@@ -21,3 +23,5 @@ spec:
     - name: a-team
       roles:
         - admin
+  extraParams:
+    GitHubTeam: b-team-gh

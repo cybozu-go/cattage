@@ -90,7 +90,29 @@ var _ = Describe("Tenant controller", Ordered, func() {
 	})
 
 	It("should create root namespaces, rolebindings and an appproject", func() {
-		tenant := &cattagev1beta1.Tenant{
+		cTeam := &cattagev1beta1.Tenant{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "c-team",
+			},
+			Spec: cattagev1beta1.TenantSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
+					{
+						Name: "app-c",
+					},
+				},
+				ArgoCD: cattagev1beta1.ArgoCDSpec{
+					Repositories: []string{
+						"https://github.com/cybozu-go/*",
+					},
+				},
+				ExtraParams: map[string]string{
+					"GitHubTeam": "c-team-gh",
+				},
+			},
+		}
+		err := k8sClient.Create(ctx, cTeam)
+		Expect(err).ToNot(HaveOccurred())
+		xTeam := &cattagev1beta1.Tenant{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "x-team",
 			},
@@ -119,9 +141,12 @@ var _ = Describe("Tenant controller", Ordered, func() {
 						},
 					},
 				},
+				ExtraParams: map[string]string{
+					"GitHubTeam": "x-team-gh",
+				},
 			},
 		}
-		err := k8sClient.Create(ctx, tenant)
+		err = k8sClient.Create(ctx, xTeam)
 		Expect(err).ToNot(HaveOccurred())
 
 		ns := &corev1.Namespace{}
@@ -198,7 +223,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			}),
 			"roles": ConsistOf(
 				MatchAllKeys(Keys{
-					"groups":   ConsistOf("cybozu-go:x-team", "cybozu-go:c-team"),
+					"groups":   ConsistOf("cybozu-go:x-team-gh", "cybozu-go:c-team-gh"),
 					"name":     Equal("admin"),
 					"policies": ConsistOf("p, proj:x-team:admin, applications, *, x-team/*, allow"),
 				}),
@@ -214,14 +239,14 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "all-tenant-namespaces-cm"}, allNsCm)
 			g.Expect(err).NotTo(HaveOccurred())
 			allNs := strings.Split(allNsCm.Data["application.namespaces"], ",")
-			g.Expect(allNs).Should(ConsistOf("app-x", "sub-4"))
+			g.Expect(allNs).Should(ConsistOf("app-x", "sub-4", "app-c"))
 		}).Should(Succeed())
 
 		Eventually(func(g Gomega) {
 			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "default-application-controller-cm"}, defaultCm)
 			g.Expect(err).NotTo(HaveOccurred())
 			defaultNs := strings.Split(defaultCm.Data["application.namespaces"], ",")
-			g.Expect(defaultNs).Should(ConsistOf("app-x", "sub-4"))
+			g.Expect(defaultNs).Should(ConsistOf("app-x", "sub-4", "app-c"))
 		}).Should(Succeed())
 
 		tenantS := &cattagev1beta1.Tenant{
@@ -245,13 +270,13 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "all-tenant-namespaces-cm"}, allNsCm)
 			g.Expect(err).NotTo(HaveOccurred())
 			allNs := strings.Split(allNsCm.Data["application.namespaces"], ",")
-			g.Expect(allNs).Should(ConsistOf("app-x", "sub-4", "app-a", "sub-1", "sub-2", "sub-3"))
+			g.Expect(allNs).Should(ConsistOf("app-x", "sub-4", "app-a", "sub-1", "sub-2", "sub-3", "app-c"))
 		}).Should(Succeed())
 		Eventually(func(g Gomega) {
 			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "default-application-controller-cm"}, defaultCm)
 			g.Expect(err).NotTo(HaveOccurred())
 			defaultNs := strings.Split(defaultCm.Data["application.namespaces"], ",")
-			g.Expect(defaultNs).Should(ConsistOf("app-x", "sub-4"))
+			g.Expect(defaultNs).Should(ConsistOf("app-x", "sub-4", "app-c"))
 		}).Should(Succeed())
 		Eventually(func(g Gomega) {
 			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "argocd", Name: "second-application-controller-cm"}, secondCm)
