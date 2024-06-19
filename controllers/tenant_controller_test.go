@@ -12,6 +12,7 @@ import (
 	"github.com/cybozu-go/cattage/pkg/argocd"
 	tenantconfig "github.com/cybozu-go/cattage/pkg/config"
 	"github.com/cybozu-go/cattage/pkg/constants"
+	"github.com/cybozu-go/cattage/pkg/metrics"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -22,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	k8smetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
@@ -68,6 +70,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			},
 		}
 		tr := NewTenantReconciler(mgr.GetClient(), config)
+		metrics.Register(k8smetrics.Registry)
 		err = tr.SetupWithManager(mgr)
 		Expect(err).ToNot(HaveOccurred())
 		err = SetupIndexForNamespace(ctx, mgr)

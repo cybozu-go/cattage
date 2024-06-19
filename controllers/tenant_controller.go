@@ -13,6 +13,7 @@ import (
 	extract "github.com/cybozu-go/cattage/pkg/client"
 	"github.com/cybozu-go/cattage/pkg/config"
 	"github.com/cybozu-go/cattage/pkg/constants"
+	"github.com/cybozu-go/cattage/pkg/metrics"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -89,6 +90,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 		if err := r.finalize(ctx, tenant); err != nil {
 			return ctrl.Result{}, fmt.Errorf("failed to finalize: %w", err)
 		}
+		r.removeMetrics(tenant)
 		return ctrl.Result{}, nil
 	}
 
@@ -100,6 +102,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 				err = err2
 			}
 		}
+		r.setMetrics(tenant)
 	}(tenant.Status)
 
 	err = r.reconcileNamespaces(ctx, tenant)
@@ -689,6 +692,22 @@ func (r *TenantReconciler) updateAllTenantNamespacesConfigMap(ctx context.Contex
 	}
 
 	return nil
+}
+
+func (r *TenantReconciler) setMetrics(tenant *cattagev1beta1.Tenant) {
+	switch tenant.Status.Health {
+	case cattagev1beta1.TenantHealthy:
+		metrics.HealthyVec.WithLabelValues(tenant.Name, tenant.Namespace).Set(1)
+		metrics.UnhealthyVec.WithLabelValues(tenant.Name, tenant.Namespace).Set(0)
+	case cattagev1beta1.TenantUnhealthy:
+		metrics.HealthyVec.WithLabelValues(tenant.Name, tenant.Namespace).Set(0)
+		metrics.UnhealthyVec.WithLabelValues(tenant.Name, tenant.Namespace).Set(1)
+	}
+}
+
+func (r *TenantReconciler) removeMetrics(tenant *cattagev1beta1.Tenant) {
+	metrics.HealthyVec.DeleteLabelValues(tenant.Name, tenant.Namespace)
+	metrics.UnhealthyVec.DeleteLabelValues(tenant.Name, tenant.Namespace)
 }
 
 // SetupWithManager sets up the controller with the Manager.
