@@ -12,10 +12,10 @@ import (
 	"github.com/cybozu-go/cattage/pkg/argocd"
 	tenantconfig "github.com/cybozu-go/cattage/pkg/config"
 	"github.com/cybozu-go/cattage/pkg/constants"
-	"github.com/cybozu-go/cattage/pkg/metrics"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -70,7 +70,6 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			},
 		}
 		tr := NewTenantReconciler(mgr.GetClient(), config)
-		metrics.Register(k8smetrics.Registry)
 		err = tr.SetupWithManager(mgr)
 		Expect(err).ToNot(HaveOccurred())
 		err = SetupIndexForNamespace(ctx, mgr)
@@ -600,6 +599,142 @@ var _ = Describe("Tenant controller", Ordered, func() {
 				return err
 			}
 			return errors.New("tenant still exists")
+		}).Should(Succeed())
+	})
+
+	It("should expose custom metrics", func() {
+		customMetricsNames := []string{"cattage_tenant_healthy", "cattage_tenant_unhealthy"}
+		tenant := &cattagev1beta1.Tenant{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:       "m-team",
+				Finalizers: []string{constants.Finalizer},
+			},
+			Spec: cattagev1beta1.TenantSpec{
+				RootNamespaces: []cattagev1beta1.RootNamespaceSpec{
+					{Name: "app-m"},
+				},
+				ArgoCD: cattagev1beta1.ArgoCDSpec{},
+			},
+		}
+		err := k8sClient.Create(ctx, tenant)
+		Expect(err).ToNot(HaveOccurred())
+
+		Eventually(func() error {
+			expected := `
+			# HELP cattage_tenant_healthy The tenant status about healthy condition
+			# TYPE cattage_tenant_healthy gauge
+			cattage_tenant_healthy{name="a-team",namespace=""} 1
+			cattage_tenant_healthy{name="c-team",namespace=""} 1
+			cattage_tenant_healthy{name="m-team",namespace=""} 1
+			cattage_tenant_healthy{name="x-team",namespace=""} 1
+			cattage_tenant_healthy{name="y-team",namespace=""} 1
+			# HELP cattage_tenant_unhealthy The tenant status about unhealthy condition
+			# TYPE cattage_tenant_unhealthy gauge
+			cattage_tenant_unhealthy{name="a-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="c-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="m-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="x-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="y-team",namespace=""} 0
+			`
+			expectedReader := strings.NewReader(expected)
+			if err := testutil.GatherAndCompare(k8smetrics.Registry, expectedReader, customMetricsNames...); err != nil {
+				return err
+			}
+
+			return nil
+		}).Should(Succeed())
+
+		By("injecting invalid delegates config")
+		err = k8sClient.Get(ctx, client.ObjectKey{Name: tenant.Name}, tenant)
+		Expect(err).ToNot(HaveOccurred())
+		tenant.Spec.Delegates = []cattagev1beta1.DelegateSpec{
+			{
+				Name: "team-does-not-exist",
+				Roles: []string{
+					"admin",
+				},
+			},
+		}
+		err = k8sClient.Update(ctx, tenant)
+		Expect(err).ToNot(HaveOccurred())
+		Eventually(func() error {
+			expected := `
+			# HELP cattage_tenant_healthy The tenant status about healthy condition
+			# TYPE cattage_tenant_healthy gauge
+			cattage_tenant_healthy{name="a-team",namespace=""} 1
+			cattage_tenant_healthy{name="c-team",namespace=""} 1
+			cattage_tenant_healthy{name="m-team",namespace=""} 0
+			cattage_tenant_healthy{name="x-team",namespace=""} 1
+			cattage_tenant_healthy{name="y-team",namespace=""} 1
+			# HELP cattage_tenant_unhealthy The tenant status about unhealthy condition
+			# TYPE cattage_tenant_unhealthy gauge
+			cattage_tenant_unhealthy{name="a-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="c-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="m-team",namespace=""} 1
+			cattage_tenant_unhealthy{name="x-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="y-team",namespace=""} 0
+			`
+			expectedReader := strings.NewReader(expected)
+			if err := testutil.GatherAndCompare(k8smetrics.Registry, expectedReader, customMetricsNames...); err != nil {
+				return err
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("removing invalid delegates config")
+		err = k8sClient.Get(ctx, client.ObjectKey{Name: tenant.Name}, tenant)
+		Expect(err).ToNot(HaveOccurred())
+		tenant.Spec.Delegates = []cattagev1beta1.DelegateSpec{}
+		err = k8sClient.Update(ctx, tenant)
+		Expect(err).ToNot(HaveOccurred())
+		Eventually(func() error {
+			expected := `
+			# HELP cattage_tenant_healthy The tenant status about healthy condition
+			# TYPE cattage_tenant_healthy gauge
+			cattage_tenant_healthy{name="a-team",namespace=""} 1
+			cattage_tenant_healthy{name="c-team",namespace=""} 1
+			cattage_tenant_healthy{name="m-team",namespace=""} 1
+			cattage_tenant_healthy{name="x-team",namespace=""} 1
+			cattage_tenant_healthy{name="y-team",namespace=""} 1
+			# HELP cattage_tenant_unhealthy The tenant status about unhealthy condition
+			# TYPE cattage_tenant_unhealthy gauge
+			cattage_tenant_unhealthy{name="a-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="c-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="m-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="x-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="y-team",namespace=""} 0
+			`
+			expectedReader := strings.NewReader(expected)
+			if err := testutil.GatherAndCompare(k8smetrics.Registry, expectedReader, customMetricsNames...); err != nil {
+				return err
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("removing tenant")
+		err = k8sClient.Delete(ctx, tenant)
+		Expect(err).ToNot(HaveOccurred())
+
+		Eventually(func() error {
+			expected := `
+			# HELP cattage_tenant_healthy The tenant status about healthy condition
+			# TYPE cattage_tenant_healthy gauge
+			cattage_tenant_healthy{name="a-team",namespace=""} 1
+			cattage_tenant_healthy{name="c-team",namespace=""} 1
+			cattage_tenant_healthy{name="x-team",namespace=""} 1
+			cattage_tenant_healthy{name="y-team",namespace=""} 1
+			# HELP cattage_tenant_unhealthy The tenant status about unhealthy condition
+			# TYPE cattage_tenant_unhealthy gauge
+			cattage_tenant_unhealthy{name="a-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="c-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="x-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="y-team",namespace=""} 0
+			`
+			expectedReader := strings.NewReader(expected)
+			if err := testutil.GatherAndCompare(k8smetrics.Registry, expectedReader, customMetricsNames...); err != nil {
+				return err
+			}
+			return nil
 		}).Should(Succeed())
 	})
 
