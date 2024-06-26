@@ -90,7 +90,6 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 		if err := r.finalize(ctx, tenant); err != nil {
 			return ctrl.Result{}, fmt.Errorf("failed to finalize: %w", err)
 		}
-		r.removeMetrics(tenant)
 		return ctrl.Result{}, nil
 	}
 
@@ -287,6 +286,7 @@ func (r *TenantReconciler) finalize(ctx context.Context, tenant *cattagev1beta1.
 		return err
 	}
 
+	r.removeMetrics(tenant)
 	controllerutil.RemoveFinalizer(tenant, constants.Finalizer)
 	err = r.client.Update(ctx, tenant)
 	if err != nil {
