@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -611,6 +612,7 @@ func (r *TenantReconciler) updateConfigMap(ctx context.Context, controllerName s
 			namespaces = append(namespaces, ns.Name)
 		}
 	}
+	slices.Sort(namespaces)
 
 	op, err := ctrl.CreateOrUpdate(ctx, r.client, cm, func() error {
 		cm.Labels = map[string]string{
@@ -635,7 +637,7 @@ func (r *TenantReconciler) updateConfigMap(ctx context.Context, controllerName s
 		return err
 	}
 	if op != controllerutil.OperationResultNone {
-		logger.Info("ConfigMap successfully reconciled")
+		logger.Info("ConfigMap successfully reconciled", "namespaces", namespaces)
 	}
 
 	return nil
@@ -665,6 +667,7 @@ func (r *TenantReconciler) updateAllTenantNamespacesConfigMap(ctx context.Contex
 			allNamespaces = append(allNamespaces, ns.Name)
 		}
 	}
+	slices.Sort(allNamespaces)
 
 	op, err := ctrl.CreateOrUpdate(ctx, r.client, cm, func() error {
 		cm.Labels = map[string]string{
@@ -688,7 +691,7 @@ func (r *TenantReconciler) updateAllTenantNamespacesConfigMap(ctx context.Contex
 		return err
 	}
 	if op != controllerutil.OperationResultNone {
-		logger.Info("ConfigMap successfully reconciled")
+		logger.Info("ConfigMap successfully reconciled", "allNamespaces", allNamespaces)
 	}
 
 	return nil
