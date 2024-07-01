@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"fmt"
 	"slices"
@@ -592,18 +593,23 @@ func (r *TenantReconciler) updateConfigMap(ctx context.Context, controllerName s
 	cm.Name = configMapName
 	cm.Namespace = r.config.ArgoCD.Namespace
 
-	tenants := &cattagev1beta1.TenantList{}
-	if err := r.client.List(ctx, tenants, client.MatchingFields{constants.ControllerNameIndex: controllerName}); err != nil {
+	tenantList := &cattagev1beta1.TenantList{}
+	if err := r.client.List(ctx, tenantList, client.MatchingFields{constants.ControllerNameIndex: controllerName}); err != nil {
 		return fmt.Errorf("failed to list tenants: %w", err)
 	}
 
-	if len(tenants.Items) == 0 {
+	tenants := tenantList.Items
+	slices.SortFunc(tenants, func(x, y cattagev1beta1.Tenant) int {
+		return cmp.Compare(x.Name, y.Name)
+	})
+
+	if len(tenants) == 0 {
 		err := r.client.Delete(ctx, cm)
 		return err
 	}
 
 	namespaces := make([]string, 0)
-	for _, t := range tenants.Items {
+	for _, t := range tenants {
 		nss := &corev1.NamespaceList{}
 		if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: t.Name}); err != nil {
 			return fmt.Errorf("failed to list namespaces: %w", err)
@@ -624,7 +630,7 @@ func (r *TenantReconciler) updateConfigMap(ctx context.Context, controllerName s
 			"application.namespaces": strings.Join(namespaces, ","),
 		}
 		cm.OwnerReferences = nil
-		for _, tenant := range tenants.Items {
+		for _, tenant := range tenants {
 			err := controllerutil.SetOwnerReference(&tenant, cm, r.client.Scheme())
 			if err != nil {
 				return err
@@ -637,7 +643,11 @@ func (r *TenantReconciler) updateConfigMap(ctx context.Context, controllerName s
 		return err
 	}
 	if op != controllerutil.OperationResultNone {
-		logger.Info("ConfigMap successfully reconciled", "namespaces", namespaces)
+		tenantNames := make([]string, len(tenants))
+		for i, t := range tenants {
+			tenantNames[i] = t.Name
+		}
+		logger.Info("ConfigMap successfully reconciled", "namespaces", namespaces, "tenants", tenantNames)
 	}
 
 	return nil
@@ -656,9 +666,13 @@ func (r *TenantReconciler) updateAllTenantNamespacesConfigMap(ctx context.Contex
 	if err != nil {
 		return err
 	}
+	tenants := tenantList.Items
+	slices.SortFunc(tenants, func(x, y cattagev1beta1.Tenant) int {
+		return cmp.Compare(x.Name, y.Name)
+	})
 
 	allNamespaces := make([]string, 0)
-	for _, tenant := range tenantList.Items {
+	for _, tenant := range tenants {
 		nss := &corev1.NamespaceList{}
 		if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: tenant.Name}); err != nil {
 			return fmt.Errorf("failed to list namespaces: %w", err)
@@ -678,7 +692,7 @@ func (r *TenantReconciler) updateAllTenantNamespacesConfigMap(ctx context.Contex
 			"application.namespaces": strings.Join(allNamespaces, ","),
 		}
 		cm.OwnerReferences = nil
-		for _, tenant := range tenantList.Items {
+		for _, tenant := range tenants {
 			err := controllerutil.SetOwnerReference(&tenant, cm, r.client.Scheme())
 			if err != nil {
 				return err
@@ -691,7 +705,11 @@ func (r *TenantReconciler) updateAllTenantNamespacesConfigMap(ctx context.Contex
 		return err
 	}
 	if op != controllerutil.OperationResultNone {
-		logger.Info("ConfigMap successfully reconciled", "allNamespaces", allNamespaces)
+		tenantNames := make([]string, len(tenants))
+		for i, t := range tenants {
+			tenantNames[i] = t.Name
+		}
+		logger.Info("ConfigMap successfully reconciled", "allNamespaces", allNamespaces, "tenants", tenantNames)
 	}
 
 	return nil
