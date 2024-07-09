@@ -623,18 +623,18 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			expected := `
 			# HELP cattage_tenant_healthy The tenant status about healthy condition
 			# TYPE cattage_tenant_healthy gauge
-			cattage_tenant_healthy{name="a-team",namespace=""} 1
-			cattage_tenant_healthy{name="c-team",namespace=""} 1
-			cattage_tenant_healthy{name="m-team",namespace=""} 1
-			cattage_tenant_healthy{name="x-team",namespace=""} 1
-			cattage_tenant_healthy{name="y-team",namespace=""} 1
+			cattage_tenant_healthy{name="a-team"} 1
+			cattage_tenant_healthy{name="c-team"} 1
+			cattage_tenant_healthy{name="m-team"} 1
+			cattage_tenant_healthy{name="x-team"} 1
+			cattage_tenant_healthy{name="y-team"} 1
 			# HELP cattage_tenant_unhealthy The tenant status about unhealthy condition
 			# TYPE cattage_tenant_unhealthy gauge
-			cattage_tenant_unhealthy{name="a-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="c-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="m-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="x-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="y-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="a-team"} 0
+			cattage_tenant_unhealthy{name="c-team"} 0
+			cattage_tenant_unhealthy{name="m-team"} 0
+			cattage_tenant_unhealthy{name="x-team"} 0
+			cattage_tenant_unhealthy{name="y-team"} 0
 			`
 			expectedReader := strings.NewReader(expected)
 			if err := testutil.GatherAndCompare(k8smetrics.Registry, expectedReader, customMetricsNames...); err != nil {
@@ -661,18 +661,18 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			expected := `
 			# HELP cattage_tenant_healthy The tenant status about healthy condition
 			# TYPE cattage_tenant_healthy gauge
-			cattage_tenant_healthy{name="a-team",namespace=""} 1
-			cattage_tenant_healthy{name="c-team",namespace=""} 1
-			cattage_tenant_healthy{name="m-team",namespace=""} 0
-			cattage_tenant_healthy{name="x-team",namespace=""} 1
-			cattage_tenant_healthy{name="y-team",namespace=""} 1
+			cattage_tenant_healthy{name="a-team"} 1
+			cattage_tenant_healthy{name="c-team"} 1
+			cattage_tenant_healthy{name="m-team"} 0
+			cattage_tenant_healthy{name="x-team"} 1
+			cattage_tenant_healthy{name="y-team"} 1
 			# HELP cattage_tenant_unhealthy The tenant status about unhealthy condition
 			# TYPE cattage_tenant_unhealthy gauge
-			cattage_tenant_unhealthy{name="a-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="c-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="m-team",namespace=""} 1
-			cattage_tenant_unhealthy{name="x-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="y-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="a-team"} 0
+			cattage_tenant_unhealthy{name="c-team"} 0
+			cattage_tenant_unhealthy{name="m-team"} 1
+			cattage_tenant_unhealthy{name="x-team"} 0
+			cattage_tenant_unhealthy{name="y-team"} 0
 			`
 			expectedReader := strings.NewReader(expected)
 			if err := testutil.GatherAndCompare(k8smetrics.Registry, expectedReader, customMetricsNames...); err != nil {
@@ -691,18 +691,18 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			expected := `
 			# HELP cattage_tenant_healthy The tenant status about healthy condition
 			# TYPE cattage_tenant_healthy gauge
-			cattage_tenant_healthy{name="a-team",namespace=""} 1
-			cattage_tenant_healthy{name="c-team",namespace=""} 1
-			cattage_tenant_healthy{name="m-team",namespace=""} 1
-			cattage_tenant_healthy{name="x-team",namespace=""} 1
-			cattage_tenant_healthy{name="y-team",namespace=""} 1
+			cattage_tenant_healthy{name="a-team"} 1
+			cattage_tenant_healthy{name="c-team"} 1
+			cattage_tenant_healthy{name="m-team"} 1
+			cattage_tenant_healthy{name="x-team"} 1
+			cattage_tenant_healthy{name="y-team"} 1
 			# HELP cattage_tenant_unhealthy The tenant status about unhealthy condition
 			# TYPE cattage_tenant_unhealthy gauge
-			cattage_tenant_unhealthy{name="a-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="c-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="m-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="x-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="y-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="a-team"} 0
+			cattage_tenant_unhealthy{name="c-team"} 0
+			cattage_tenant_unhealthy{name="m-team"} 0
+			cattage_tenant_unhealthy{name="x-team"} 0
+			cattage_tenant_unhealthy{name="y-team"} 0
 			`
 			expectedReader := strings.NewReader(expected)
 			if err := testutil.GatherAndCompare(k8smetrics.Registry, expectedReader, customMetricsNames...); err != nil {
@@ -719,16 +719,16 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			expected := `
 			# HELP cattage_tenant_healthy The tenant status about healthy condition
 			# TYPE cattage_tenant_healthy gauge
-			cattage_tenant_healthy{name="a-team",namespace=""} 1
-			cattage_tenant_healthy{name="c-team",namespace=""} 1
-			cattage_tenant_healthy{name="x-team",namespace=""} 1
-			cattage_tenant_healthy{name="y-team",namespace=""} 1
+			cattage_tenant_healthy{name="a-team"} 1
+			cattage_tenant_healthy{name="c-team"} 1
+			cattage_tenant_healthy{name="x-team"} 1
+			cattage_tenant_healthy{name="y-team"} 1
 			# HELP cattage_tenant_unhealthy The tenant status about unhealthy condition
 			# TYPE cattage_tenant_unhealthy gauge
-			cattage_tenant_unhealthy{name="a-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="c-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="x-team",namespace=""} 0
-			cattage_tenant_unhealthy{name="y-team",namespace=""} 0
+			cattage_tenant_unhealthy{name="a-team"} 0
+			cattage_tenant_unhealthy{name="c-team"} 0
+			cattage_tenant_unhealthy{name="x-team"} 0
+			cattage_tenant_unhealthy{name="y-team"} 0
 			`
 			expectedReader := strings.NewReader(expected)
 			if err := testutil.GatherAndCompare(k8smetrics.Registry, expectedReader, customMetricsNames...); err != nil {

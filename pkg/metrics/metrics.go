@@ -16,14 +16,14 @@ var (
 		Subsystem: tenantSubsystem,
 		Name:      "healthy",
 		Help:      "The tenant status about healthy condition",
-	}, []string{"name", "namespace"})
+	}, []string{"name"})
 
 	UnhealthyVec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: metricsNameSpace,
 		Subsystem: tenantSubsystem,
 		Name:      "unhealthy",
 		Help:      "The tenant status about unhealthy condition",
-	}, []string{"name", "namespace"})
+	}, []string{"name"})
 )
 
 func init() {
