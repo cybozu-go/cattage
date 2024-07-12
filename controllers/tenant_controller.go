@@ -718,17 +718,17 @@ func (r *TenantReconciler) updateAllTenantNamespacesConfigMap(ctx context.Contex
 func (r *TenantReconciler) setMetrics(tenant *cattagev1beta1.Tenant) {
 	switch tenant.Status.Health {
 	case cattagev1beta1.TenantHealthy:
-		metrics.HealthyVec.WithLabelValues(tenant.Name, tenant.Namespace).Set(1)
-		metrics.UnhealthyVec.WithLabelValues(tenant.Name, tenant.Namespace).Set(0)
+		metrics.HealthyVec.WithLabelValues(tenant.Name).Set(1)
+		metrics.UnhealthyVec.WithLabelValues(tenant.Name).Set(0)
 	case cattagev1beta1.TenantUnhealthy:
-		metrics.HealthyVec.WithLabelValues(tenant.Name, tenant.Namespace).Set(0)
-		metrics.UnhealthyVec.WithLabelValues(tenant.Name, tenant.Namespace).Set(1)
+		metrics.HealthyVec.WithLabelValues(tenant.Name).Set(0)
+		metrics.UnhealthyVec.WithLabelValues(tenant.Name).Set(1)
 	}
 }
 
 func (r *TenantReconciler) removeMetrics(tenant *cattagev1beta1.Tenant) {
-	metrics.HealthyVec.DeleteLabelValues(tenant.Name, tenant.Namespace)
-	metrics.UnhealthyVec.DeleteLabelValues(tenant.Name, tenant.Namespace)
+	metrics.HealthyVec.DeleteLabelValues(tenant.Name)
+	metrics.UnhealthyVec.DeleteLabelValues(tenant.Name)
 }
 
 // SetupWithManager sets up the controller with the Manager.
