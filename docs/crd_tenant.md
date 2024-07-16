@@ -78,7 +78,7 @@ TenantSpec defines the desired state of Tenant.
 | argocd | ArgoCD is the settings of Argo CD for this tenant. | [ArgoCDSpec](#argocdspec) | false |
 | delegates | Delegates is a list of other tenants that are delegated access to this tenant. | [][DelegateSpec](#delegatespec) | false |
 | controllerName | ControllerName is the name of the application-controller that manages this tenant's applications. If not specified, the default controller is used. | string | false |
-| extraParams | ExtraParams is a map of extra parameters that can be used in the templates. | map[string]string | false |
+| extraParams | ExtraParams is a map of extra parameters that can be used in the templates. | *Params | false |
 
 [Back to Custom Resources](#custom-resources)
 

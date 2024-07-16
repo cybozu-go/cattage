@@ -371,7 +371,7 @@ func (r *TenantReconciler) rolesMap(ctx context.Context, delegates []cattagev1be
 			}
 			result[role] = append(result[role], Role{
 				Name:        delegatedTenant.Name,
-				ExtraParams: delegatedTenant.Spec.ExtraParams,
+				ExtraParams: delegatedTenant.Spec.ExtraParams.ToMap(),
 			})
 		}
 	}
@@ -417,11 +417,11 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 		err = tpl.Execute(&buf, struct {
 			Name        string
 			Roles       map[string][]Role
-			ExtraParams map[string]string
+			ExtraParams map[string]interface{}
 		}{
 			Name:        tenant.Name,
 			Roles:       roles,
-			ExtraParams: tenant.Spec.ExtraParams,
+			ExtraParams: tenant.Spec.ExtraParams.ToMap(),
 		})
 		if err != nil {
 			return err
@@ -467,7 +467,7 @@ func (r *TenantReconciler) reconcileNamespaces(ctx context.Context, tenant *catt
 
 type Role struct {
 	Name        string
-	ExtraParams map[string]string
+	ExtraParams map[string]interface{}
 }
 
 func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
@@ -505,13 +505,13 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 		Namespaces   []string
 		Roles        map[string][]Role
 		Repositories []string
-		ExtraParams  map[string]string
+		ExtraParams  map[string]interface{}
 	}{
 		Name:         tenant.Name,
 		Namespaces:   namespaces,
 		Roles:        roles,
 		Repositories: tenant.Spec.ArgoCD.Repositories,
-		ExtraParams:  tenant.Spec.ExtraParams,
+		ExtraParams:  tenant.Spec.ExtraParams.ToMap(),
 	})
 	if err != nil {
 		return err

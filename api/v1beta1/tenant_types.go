@@ -25,8 +25,9 @@ type TenantSpec struct {
 	ControllerName string `json:"controllerName,omitempty"`
 
 	// ExtraParams is a map of extra parameters that can be used in the templates.
+	// +kubebuilder:pruning:PreserveUnknownFields
 	// +optional
-	ExtraParams map[string]string `json:"extraParams,omitempty"`
+	ExtraParams *Params `json:"extraParams,omitempty"`
 }
 
 // RootNamespaceSpec defines the desired state of Namespace.

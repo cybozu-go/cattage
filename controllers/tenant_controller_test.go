@@ -107,9 +107,9 @@ var _ = Describe("Tenant controller", Ordered, func() {
 						"https://github.com/cybozu-go/*",
 					},
 				},
-				ExtraParams: map[string]string{
+				ExtraParams: &cattagev1beta1.Params{Data: map[string]interface{}{
 					"GitHubTeam": "c-team-gh",
-				},
+				}},
 			},
 		}
 		err := k8sClient.Create(ctx, cTeam)
@@ -143,9 +143,13 @@ var _ = Describe("Tenant controller", Ordered, func() {
 						},
 					},
 				},
-				ExtraParams: map[string]string{
+				ExtraParams: &cattagev1beta1.Params{Data: map[string]interface{}{
 					"GitHubTeam": "x-team-gh",
-				},
+					"Destinations": []string{
+						"extra-namespace-x",
+						"extra-namespace-y",
+					},
+				}},
 			},
 		}
 		err = k8sClient.Create(ctx, xTeam)
@@ -207,6 +211,14 @@ var _ = Describe("Tenant controller", Ordered, func() {
 				}),
 				MatchAllKeys(Keys{
 					"namespace": Equal("sub-4"),
+					"server":    Equal("*"),
+				}),
+				MatchAllKeys(Keys{
+					"namespace": Equal("extra-namespace-x"),
+					"server":    Equal("*"),
+				}),
+				MatchAllKeys(Keys{
+					"namespace": Equal("extra-namespace-y"),
 					"server":    Equal("*"),
 				}),
 			),
