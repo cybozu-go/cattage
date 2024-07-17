@@ -617,7 +617,7 @@ If no controller name is specified, it will be processed by the default applicat
 <tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant.</td><td><a href="crd_tenant.html#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
 <tr><td>delegates</td><td>Delegates is a list of other tenants that are delegated access to this tenant.</td><td>[]<a href="crd_tenant.html#delegatespec">DelegateSpec</a></td><td>false</td></tr>
 <tr><td>controllerName</td><td>ControllerName is the name of the application-controller that manages this tenant's applications. If not specified, the default controller is used.</td><td>string</td><td>false</td></tr>
-<tr><td>extraParams</td><td>ExtraParams is a map of extra parameters that can be used in the templates.</td><td>map[string]string</td><td>false</td></tr>
+<tr><td>extraParams</td><td>ExtraParams is a map of extra parameters that can be used in the templates.</td><td>*Params</td><td>false</td></tr>
 </tbody></table>
 </div>
 <p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
