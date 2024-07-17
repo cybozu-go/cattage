@@ -24,4 +24,6 @@ spec:
       roles:
         - admin
   extraParams:
-    GitHubTeam: b-team-gh
+    Destinations:
+      - "extra-namespace-x"
+      - "extra-namespace-y"

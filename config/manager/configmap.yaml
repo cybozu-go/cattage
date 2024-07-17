@@ -41,6 +41,10 @@ data:
             - namespace: {{ . }}
               server: '*'
           {{- end }}
+          {{- range .ExtraParams.Destinations }}
+            - namespace: {{ . }}
+              server: '*'
+          {{- end }}
           namespaceResourceBlacklist:
             - group: ""
               kind: ResourceQuota
