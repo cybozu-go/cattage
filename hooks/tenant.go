@@ -21,7 +21,7 @@ import (
 //+kubebuilder:webhook:path=/mutate-cattage-cybozu-io-v1beta1-tenant,mutating=true,failurePolicy=fail,sideEffects=None,groups=cattage.cybozu.io,resources=tenants,verbs=create;update,versions=v1beta1,name=mtenant.kb.io,admissionReviewVersions={v1}
 
 type tenantMutator struct {
-	dec *admission.Decoder
+	dec admission.Decoder
 }
 
 var _ admission.Handler = &tenantMutator{}
@@ -49,7 +49,7 @@ func (m *tenantMutator) Handle(ctx context.Context, req admission.Request) admis
 
 type tenantValidator struct {
 	client client.Client
-	dec    *admission.Decoder
+	dec    admission.Decoder
 	config *config.Config
 }
 
@@ -107,7 +107,7 @@ func (v *tenantValidator) Handle(ctx context.Context, req admission.Request) adm
 }
 
 // SetupTenantWebhook registers the webhooks for Tenant
-func SetupTenantWebhook(mgr manager.Manager, dec *admission.Decoder, config *config.Config) {
+func SetupTenantWebhook(mgr manager.Manager, dec admission.Decoder, config *config.Config) {
 	serv := mgr.GetWebhookServer()
 
 	m := &tenantMutator{

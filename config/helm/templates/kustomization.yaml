@@ -1,16 +1,20 @@
 resources:
-  - ../../rbac
-  - ../../webhook
+- ../../rbac
+- ../../webhook
 
 namespace: '{{ .Release.Namespace }}'
 
 namePrefix: '{{ template "cattage.fullname" . }}-'
 
-commonLabels:
-  app.kubernetes.io/name: '{{ include "cattage.name" . }}'
 
-patchesStrategicMerge:
-  - webhookcainjection_patch.yaml
 
 transformers:
-  - label-transformer.yaml
+- label-transformer.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
+patches:
+- path: webhookcainjection_patch.yaml

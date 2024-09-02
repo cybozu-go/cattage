@@ -18,7 +18,7 @@ import (
 
 type applicationValidator struct {
 	client client.Client
-	dec    *admission.Decoder
+	dec    admission.Decoder
 	config *config.Config
 }
 
@@ -45,7 +45,7 @@ func (v *applicationValidator) Handle(ctx context.Context, req admission.Request
 }
 
 // SetupApplicationWebhook registers the webhooks for Application
-func SetupApplicationWebhook(mgr manager.Manager, dec *admission.Decoder, config *config.Config) {
+func SetupApplicationWebhook(mgr manager.Manager, dec admission.Decoder, config *config.Config) {
 	serv := mgr.GetWebhookServer()
 
 	v := &applicationValidator{
