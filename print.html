@@ -871,7 +871,7 @@ $ echo $VERSION
 </li>
 <li>
 <p>Add a git tag to the main HEAD, then push it.</p>
-<pre><code class="language-console">$ git checkout main
+<pre><code class="language-console">$ git switch main
 $ git tag -a -m "Release v$VERSION" "v$VERSION"
 $ git tag -ln | grep $VERSION
 $ git push origin v$VERSION
