@@ -26,7 +26,7 @@ Follow [semantic versioning 2.0.0][semver] to choose the new version number.
 2. Add a git tag to the main HEAD, then push it.
 
     ```console
-    $ git checkout main
+    $ git switch main
     $ git tag -a -m "Release v$VERSION" "v$VERSION"
     $ git tag -ln | grep $VERSION
     $ git push origin v$VERSION
