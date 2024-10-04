@@ -488,6 +488,11 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	for i, ns := range nss.Items {
 		namespaces[i] = ns.Name
 	}
+	delegatedNamespaces, err := r.getDelegatedNamespaces(ctx, tenant.Spec.Delegates)
+	if err != nil {
+		return err
+	}
+	namespaces = append(namespaces, delegatedNamespaces...)
 
 	tpl, err := template.New("AppProject Template").Parse(r.config.ArgoCD.AppProjectTemplate)
 	if err != nil {
@@ -550,6 +555,21 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	logger.Info("AppProject successfully reconciled")
 
 	return nil
+}
+
+func (r *TenantReconciler) getDelegatedNamespaces(ctx context.Context, delegates []cattagev1beta1.DelegateSpec) ([]string, error) {
+	result := make([]string, 0)
+
+	for _, d := range delegates {
+		nss := &corev1.NamespaceList{}
+		if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: d.Name}); err != nil {
+			return nil, err
+		}
+		for _, ns := range nss.Items {
+			result = append(result, ns.Name)
+		}
+	}
+	return result, nil
 }
 
 func (r *TenantReconciler) reconcileConfigMapForApplicationController(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
