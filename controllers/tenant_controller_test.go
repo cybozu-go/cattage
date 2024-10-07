@@ -221,6 +221,10 @@ var _ = Describe("Tenant controller", Ordered, func() {
 					"namespace": Equal("extra-namespace-y"),
 					"server":    Equal("*"),
 				}),
+				MatchAllKeys(Keys{
+					"namespace": Equal("app-c"),
+					"server":    Equal("*"),
+				}),
 			),
 			"namespaceResourceBlacklist": ConsistOf(
 				MatchAllKeys(Keys{
