@@ -2,19 +2,19 @@
 
 [Cattage](README.md)
 
-# User manual
+## User manual
 
 - [Overview](overview.md)
 - [Setup](setup.md)
 - [Usage](usage.md)
 - [Sharding](sharding.md)
 
-# References
+## References
 
 - [Tenant custom resource](crd_tenant.md)
 - [Configurations](config.md)
 
-# Developer documents
+## Developer documents
 
 - [Design notes](design.md)
 - [Development](development.md)

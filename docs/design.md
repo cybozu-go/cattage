@@ -8,11 +8,11 @@ Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][
 
 There is a known limitation for Argo CD to implement app-of-apps pattern in a multi-tenancy environment.
 
-https://github.com/argoproj/argo-cd/issues/2785
+<https://github.com/argoproj/argo-cd/issues/2785>
 
 We have developed the following mechanism to resolve the problem.
 
-https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy
+<https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy>
 
 However, the mechanism still has the following problems:
 
@@ -48,7 +48,7 @@ No more deploying to another tenant's namespace by mistake.
 There are cases where you want to move ownership of an application between tenants.
 Accurate supports `kubectl accurate sub move` command to change the parent of a sub-namespace.
 
-https://cybozu-go.github.io/accurate/subnamespaces.html#changing-the-parent-of-a-sub-namespace
+<https://cybozu-go.github.io/accurate/subnamespaces.html#changing-the-parent-of-a-sub-namespace>
 
 An administrators can use this command to move the sub-namespace to another tenant.
 The permission of AppProjects, Applications and Namespaces will be updated automatically.
@@ -59,7 +59,7 @@ The permission of AppProjects, Applications and Namespaces will be updated autom
 
 ApplicationSet is one of the features of Argo CD which generates Application resources based on user input.
 
-https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/
+<https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/>
 
 However, this feature does not give tenant users enough flexibility in their settings.
 
@@ -67,7 +67,7 @@ However, this feature does not give tenant users enough flexibility in their set
 
 AppSource controller is similar to our proposal.
 
-https://github.com/argoproj-labs/appsource
+<https://github.com/argoproj-labs/appsource>
 
 But AppSource is still not production-ready.
 Also, it does not solve our some problems.
@@ -80,8 +80,8 @@ We considered having an Argo CD instance for each tenant team, but it turned out
 
 Other Continuous Delivery tools support multi-tenancy.
 
-- https://github.com/fluxcd/flux2
-- https://github.com/pipe-cd/pipe
+- <https://github.com/fluxcd/flux2>
+- <https://github.com/pipe-cd/pipe>
 
 However, we love Argo CD (the many features and the useful UI).
 We already have a lot of manifests managed by Argo CD. It's hard to switch to another tool now.
