@@ -16,7 +16,7 @@ If Kubernetes or controller-runtime API has changed, please fix the relevant sou
 Cattage supports one Argo CD version.
 If a new Argo CD is released, please update the following files.
 
-- Update Argo CD Version in `aqua.yaml`, `e2e/Makefile` and `Makefile`.
+- Update Argo CD Version in `aqua.yaml` and `Makefile`.
 - Run `make crds`.
 
 If Argo CD API has changed, please fix the relevant source code.
