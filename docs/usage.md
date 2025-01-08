@@ -41,8 +41,8 @@ your-team   2m
 
 Tenant users can create a SubNamespace on their namespaces.
 
-```console
-$ kubectl accurate sub create your-sub your-root
+```sh
+kubectl accurate sub create your-sub your-root
 ```
 
 Tenant users can create an Application resource in the sub-namespace.
@@ -74,8 +74,8 @@ spec:
 
 Apply the resource:
 
-```console
-$ kubectl apply -f application.yaml
+```sh
+kubectl apply -f application.yaml
 ```
 
 Make sure that the Application resource is synchronized.

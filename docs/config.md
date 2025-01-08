@@ -106,7 +106,7 @@ argocd:
 
 ## Command-line flags
 
-```
+```txt
 Flags:
       --add_dir_header                   If true, adds the file directory to the header
       --alsologtostderr                  log to standard error as well as files

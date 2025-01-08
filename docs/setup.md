@@ -13,14 +13,14 @@ For on-premises, [Teleport](https://goteleport.com) and [Loft](https://loft.sh) 
 
 Install Argo CD as shown in the following page:
 
-https://argo-cd.readthedocs.io/en/stable/getting_started/
+<https://argo-cd.readthedocs.io/en/stable/getting_started/>
 
 Cattage isolates AppProject resource for each tenant.
 
 So, please refer to the following page to enable user management.
 Argo CD supports a lot of authentication methods.
 
-https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/
+<https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/>
 
 Cattage expects tenant users to be able to create Application resources.
 Apply the following manifest:
@@ -53,12 +53,12 @@ In order to enable the feature, add `--application-namespace="*"` parameter to `
 
 ## cert-manager
 
-Cattage and Accurate depend on [cert-manager][] to issue TLS certificate for admission webhooks.
+Cattage and Accurate depend on [cert-manager](https://cert-manager.io/) to issue TLS certificate for admission webhooks.
 If cert-manager is not installed on your cluster, install it as follows:
 
-```console
-$ curl -fsLO https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
-$ kubectl apply -f cert-manager.yaml
+```sh
+curl -fsLO https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+kubectl apply -f cert-manager.yaml
 ```
 
 ## Accurate
@@ -81,13 +81,13 @@ controller:
 
 Install Accurate with the values.yaml as follows:
 
-```console
-$ helm install --create-namespace --namespace accurate accurate -f values.yaml accurate/accurate
+```sh
+helm install --create-namespace --namespace accurate accurate -f values.yaml accurate/accurate
 ```
 
 For more information, see the following page:
 
-https://cybozu-go.github.io/accurate/helm.html
+<https://cybozu-go.github.io/accurate/helm.html>
 
 ## Cattage
 
@@ -150,13 +150,13 @@ Read [Configurations](config.md) for details.
 
 Setup Helm repository:
 
- ```console
- $ helm repo add cattage https://cybozu-go.github.io/cattage
- $ helm repo update
-   ```
+ ```sh
+ helm repo add cattage https://cybozu-go.github.io/cattage
+ helm repo update
+ ```
 
 Install the Helm chart with your values.yaml:
 
-```console
-$ helm install --create-namespace --namespace cattage cattage cattage/cattage -f values.yaml
+```sh
+helm install --create-namespace --namespace cattage cattage cattage/cattage -f values.yaml
 ```

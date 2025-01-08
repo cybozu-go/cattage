@@ -8,6 +8,7 @@ rules:
   - ""
   resources:
   - configmaps
+  - namespaces
   verbs:
   - create
   - delete
@@ -63,18 +64,6 @@ rules:
   - get
   - patch
   - update
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
