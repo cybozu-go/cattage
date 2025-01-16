@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded affix "><li class="part-title">User manual</li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html" class="active"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded "><a href="sharding.html"><strong aria-hidden="true">4.</strong> Sharding</a></li><li class="chapter-item expanded affix "><li class="part-title">References</li><li class="chapter-item expanded "><a href="crd_tenant.html"><strong aria-hidden="true">5.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">6.</strong> Configurations</a></li><li class="chapter-item expanded affix "><li class="part-title">Developer documents</li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">7.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">8.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">9.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">10.</strong> Maintenance</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html" class="active"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded "><a href="sharding.html"><strong aria-hidden="true">4.</strong> Sharding</a></li><li class="chapter-item expanded "><a href="crd_tenant.html"><strong aria-hidden="true">5.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">6.</strong> Configurations</a></li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">7.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">8.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">9.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">10.</strong> Maintenance</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -188,11 +188,11 @@ In EKS and GKE, you can integrate RBAC with IAM.
 For on-premises, <a href="https://goteleport.com">Teleport</a> and <a href="https://loft.sh">Loft</a> may help you.</p>
 <h2 id="argo-cd"><a class="header" href="#argo-cd">Argo CD</a></h2>
 <p>Install Argo CD as shown in the following page:</p>
-<p>https://argo-cd.readthedocs.io/en/stable/getting_started/</p>
+<p><a href="https://argo-cd.readthedocs.io/en/stable/getting_started/">https://argo-cd.readthedocs.io/en/stable/getting_started/</a></p>
 <p>Cattage isolates AppProject resource for each tenant.</p>
 <p>So, please refer to the following page to enable user management.
 Argo CD supports a lot of authentication methods.</p>
-<p>https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/</p>
+<p><a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/">https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/</a></p>
 <p>Cattage expects tenant users to be able to create Application resources.
 Apply the following manifest:</p>
 <pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1
@@ -219,10 +219,10 @@ rules:
 <p>Cattage requires Argo CD's <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/">Applications in any namespace</a> is enabled.
 In order to enable the feature, add <code>--application-namespace="*"</code> parameter to <code>argocd-server</code> and <code>argocd-application-controller</code>.</p>
 <h2 id="cert-manager"><a class="header" href="#cert-manager">cert-manager</a></h2>
-<p>Cattage and Accurate depend on [cert-manager][] to issue TLS certificate for admission webhooks.
+<p>Cattage and Accurate depend on <a href="https://cert-manager.io/">cert-manager</a> to issue TLS certificate for admission webhooks.
 If cert-manager is not installed on your cluster, install it as follows:</p>
-<pre><code class="language-console">$ curl -fsLO https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
-$ kubectl apply -f cert-manager.yaml
+<pre><code class="language-sh">curl -fsLO https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+kubectl apply -f cert-manager.yaml
 </code></pre>
 <h2 id="accurate"><a class="header" href="#accurate">Accurate</a></h2>
 <p>Cattage depends on Accurate.
@@ -238,10 +238,10 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
         kind: RoleBinding
 </code></pre>
 <p>Install Accurate with the values.yaml as follows:</p>
-<pre><code class="language-console">$ helm install --create-namespace --namespace accurate accurate -f values.yaml accurate/accurate
+<pre><code class="language-sh">helm install --create-namespace --namespace accurate accurate -f values.yaml accurate/accurate
 </code></pre>
 <p>For more information, see the following page:</p>
-<p>https://cybozu-go.github.io/accurate/helm.html</p>
+<p><a href="https://cybozu-go.github.io/accurate/helm.html">https://cybozu-go.github.io/accurate/helm.html</a></p>
 <h2 id="cattage"><a class="header" href="#cattage">Cattage</a></h2>
 <p>Prepare values.yaml as follows:</p>
 <pre><code class="language-yaml">controller:
@@ -297,11 +297,11 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
 <p><code>appProjectTemplate</code> and <code>roleBindingTemplate</code> should be configured appropriately for your multi-tenancy environment.
 Read <a href="config.html">Configurations</a> for details.</p>
 <p>Setup Helm repository:</p>
-<pre><code class="language-console">$ helm repo add cattage https://cybozu-go.github.io/cattage
-$ helm repo update
+<pre><code class="language-sh">helm repo add cattage https://cybozu-go.github.io/cattage
+helm repo update
 </code></pre>
 <p>Install the Helm chart with your values.yaml:</p>
-<pre><code class="language-console">$ helm install --create-namespace --namespace cattage cattage cattage/cattage -f values.yaml
+<pre><code class="language-sh">helm install --create-namespace --namespace cattage cattage cattage/cattage -f values.yaml
 </code></pre>
 
                     </main>

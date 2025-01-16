@@ -89,7 +89,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded affix "><li class="part-title">User manual</li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded "><a href="sharding.html"><strong aria-hidden="true">4.</strong> Sharding</a></li><li class="chapter-item expanded affix "><li class="part-title">References</li><li class="chapter-item expanded "><a href="crd_tenant.html"><strong aria-hidden="true">5.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">6.</strong> Configurations</a></li><li class="chapter-item expanded affix "><li class="part-title">Developer documents</li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">7.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">8.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">9.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">10.</strong> Maintenance</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded "><a href="sharding.html"><strong aria-hidden="true">4.</strong> Sharding</a></li><li class="chapter-item expanded "><a href="crd_tenant.html"><strong aria-hidden="true">5.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">6.</strong> Configurations</a></li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">7.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">8.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">9.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">10.</strong> Maintenance</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -180,7 +180,7 @@
                         <h1 id="cattage-documentation"><a class="header" href="#cattage-documentation">Cattage documentation</a></h1>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/en/stable/">Argo CD</a> with <a href="https://github.com/cybozu-go/accurate">Accurate</a>.
 It is currently developed and maintained by <a href="https://cybozu-global.com/">Cybozu</a>.</p>
-<p>The repository is at https://github.com/cybozu-go/cattage .</p>
+<p>The repository is at <a href="https://github.com/cybozu-go/cattage">https://github.com/cybozu-go/cattage</a> .</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/en/stable/">Argo CD</a> with <a href="https://github.com/cybozu-go/accurate">Accurate</a>.</p>
 <h2 id="features"><a class="header" href="#features">Features</a></h2>
@@ -217,11 +217,11 @@ In EKS and GKE, you can integrate RBAC with IAM.
 For on-premises, <a href="https://goteleport.com">Teleport</a> and <a href="https://loft.sh">Loft</a> may help you.</p>
 <h2 id="argo-cd"><a class="header" href="#argo-cd">Argo CD</a></h2>
 <p>Install Argo CD as shown in the following page:</p>
-<p>https://argo-cd.readthedocs.io/en/stable/getting_started/</p>
+<p><a href="https://argo-cd.readthedocs.io/en/stable/getting_started/">https://argo-cd.readthedocs.io/en/stable/getting_started/</a></p>
 <p>Cattage isolates AppProject resource for each tenant.</p>
 <p>So, please refer to the following page to enable user management.
 Argo CD supports a lot of authentication methods.</p>
-<p>https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/</p>
+<p><a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/">https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/</a></p>
 <p>Cattage expects tenant users to be able to create Application resources.
 Apply the following manifest:</p>
 <pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1
@@ -248,10 +248,10 @@ rules:
 <p>Cattage requires Argo CD's <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/">Applications in any namespace</a> is enabled.
 In order to enable the feature, add <code>--application-namespace="*"</code> parameter to <code>argocd-server</code> and <code>argocd-application-controller</code>.</p>
 <h2 id="cert-manager"><a class="header" href="#cert-manager">cert-manager</a></h2>
-<p>Cattage and Accurate depend on [cert-manager][] to issue TLS certificate for admission webhooks.
+<p>Cattage and Accurate depend on <a href="https://cert-manager.io/">cert-manager</a> to issue TLS certificate for admission webhooks.
 If cert-manager is not installed on your cluster, install it as follows:</p>
-<pre><code class="language-console">$ curl -fsLO https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
-$ kubectl apply -f cert-manager.yaml
+<pre><code class="language-sh">curl -fsLO https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+kubectl apply -f cert-manager.yaml
 </code></pre>
 <h2 id="accurate"><a class="header" href="#accurate">Accurate</a></h2>
 <p>Cattage depends on Accurate.
@@ -267,10 +267,10 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
         kind: RoleBinding
 </code></pre>
 <p>Install Accurate with the values.yaml as follows:</p>
-<pre><code class="language-console">$ helm install --create-namespace --namespace accurate accurate -f values.yaml accurate/accurate
+<pre><code class="language-sh">helm install --create-namespace --namespace accurate accurate -f values.yaml accurate/accurate
 </code></pre>
 <p>For more information, see the following page:</p>
-<p>https://cybozu-go.github.io/accurate/helm.html</p>
+<p><a href="https://cybozu-go.github.io/accurate/helm.html">https://cybozu-go.github.io/accurate/helm.html</a></p>
 <h2 id="cattage"><a class="header" href="#cattage">Cattage</a></h2>
 <p>Prepare values.yaml as follows:</p>
 <pre><code class="language-yaml">controller:
@@ -326,11 +326,11 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
 <p><code>appProjectTemplate</code> and <code>roleBindingTemplate</code> should be configured appropriately for your multi-tenancy environment.
 Read <a href="config.html">Configurations</a> for details.</p>
 <p>Setup Helm repository:</p>
-<pre><code class="language-console">$ helm repo add cattage https://cybozu-go.github.io/cattage
-$ helm repo update
+<pre><code class="language-sh">helm repo add cattage https://cybozu-go.github.io/cattage
+helm repo update
 </code></pre>
 <p>Install the Helm chart with your values.yaml:</p>
-<pre><code class="language-console">$ helm install --create-namespace --namespace cattage cattage cattage/cattage -f values.yaml
+<pre><code class="language-sh">helm install --create-namespace --namespace cattage cattage cattage/cattage -f values.yaml
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="usage"><a class="header" href="#usage">Usage</a></h1>
 <h2 id="create-a-tenant-resource"><a class="header" href="#create-a-tenant-resource">Create a Tenant resource</a></h2>
@@ -360,7 +360,7 @@ your-team   2m
 </code></pre>
 <h2 id="create-an-application-resource"><a class="header" href="#create-an-application-resource">Create an Application resource</a></h2>
 <p>Tenant users can create a SubNamespace on their namespaces.</p>
-<pre><code class="language-console">$ kubectl accurate sub create your-sub your-root
+<pre><code class="language-sh">kubectl accurate sub create your-sub your-root
 </code></pre>
 <p>Tenant users can create an Application resource in the sub-namespace.</p>
 <p>Prepare an Application resource as follows:</p>
@@ -386,7 +386,7 @@ spec:
       selfHeal: true
 </code></pre>
 <p>Apply the resource:</p>
-<pre><code class="language-console">$ kubectl apply -f application.yaml
+<pre><code class="language-sh">kubectl apply -f application.yaml
 </code></pre>
 <p>Make sure that the Application resource is synchronized.</p>
 <pre><code class="language-console">$ kubectl get application -n your-sub
@@ -431,7 +431,7 @@ Please change the project of <code>application/testhttpd</code> correctly.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sharding"><a class="header" href="#sharding">Sharding</a></h1>
 <h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
 <p>In Argo CD, as the number of managed applications increases, the load on the Application Controller becomes significant.
-While Argo CD supports sharding, it can only shard controllers per Kubernetes cluster. (ref. https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/ )</p>
+While Argo CD supports sharding, it can only shard controllers per Kubernetes cluster. (ref. <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/">https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/</a> )</p>
 <p>Cattage provides the capability to shard controllers on a per-tenant basis using <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/">applications in any namespace</a>.
 By specifying a controller name in the Tenant resource, you can designate which controller will process Applications created in that tenant's Namespaces.</p>
 <h2 id="how-to-use"><a class="header" href="#how-to-use">How to use</a></h2>
@@ -724,7 +724,7 @@ argocd:
 </tbody></table>
 </div>
 <h2 id="command-line-flags"><a class="header" href="#command-line-flags">Command-line flags</a></h2>
-<pre><code>Flags:
+<pre><code class="language-txt">Flags:
       --add_dir_header                   If true, adds the file directory to the header
       --alsologtostderr                  log to standard error as well as files
       --cert-dir string                  webhook certificate directory
@@ -755,9 +755,9 @@ argocd:
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/">Argo CD</a> with <a href="https://cybozu-go.github.io/accurate/">Accurate</a>.</p>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
 <p>There is a known limitation for Argo CD to implement app-of-apps pattern in a multi-tenancy environment.</p>
-<p>https://github.com/argoproj/argo-cd/issues/2785</p>
+<p><a href="https://github.com/argoproj/argo-cd/issues/2785">https://github.com/argoproj/argo-cd/issues/2785</a></p>
 <p>We have developed the following mechanism to resolve the problem.</p>
-<p>https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy</p>
+<p><a href="https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy">https://blog.kintone.io/entry/production-grade-delivery-workflow-using-argocd#Multi-tenancy</a></p>
 <p>However, the mechanism still has the following problems:</p>
 <ul>
 <li>When a SubNamespace is created in <a href="https://github.com/kubernetes-sigs/hierarchical-namespaces">HNC</a> or <a href="https://cybozu-go.github.io/accurate/">Accurate</a>, an administrator needs to add it to the destinations of the Application resource.
@@ -783,17 +783,17 @@ No more deploying to another tenant's namespace by mistake.</p>
 <h3 id="changing-ownership"><a class="header" href="#changing-ownership">Changing ownership</a></h3>
 <p>There are cases where you want to move ownership of an application between tenants.
 Accurate supports <code>kubectl accurate sub move</code> command to change the parent of a sub-namespace.</p>
-<p>https://cybozu-go.github.io/accurate/subnamespaces.html#changing-the-parent-of-a-sub-namespace</p>
+<p><a href="https://cybozu-go.github.io/accurate/subnamespaces.html#changing-the-parent-of-a-sub-namespace">https://cybozu-go.github.io/accurate/subnamespaces.html#changing-the-parent-of-a-sub-namespace</a></p>
 <p>An administrators can use this command to move the sub-namespace to another tenant.
 The permission of AppProjects, Applications and Namespaces will be updated automatically.</p>
 <h2 id="alternatives"><a class="header" href="#alternatives">Alternatives</a></h2>
 <h3 id="applicationset"><a class="header" href="#applicationset">ApplicationSet</a></h3>
 <p>ApplicationSet is one of the features of Argo CD which generates Application resources based on user input.</p>
-<p>https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/</p>
+<p><a href="https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/">https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/</a></p>
 <p>However, this feature does not give tenant users enough flexibility in their settings.</p>
 <h3 id="appsource-controller"><a class="header" href="#appsource-controller">AppSource Controller</a></h3>
 <p>AppSource controller is similar to our proposal.</p>
-<p>https://github.com/argoproj-labs/appsource</p>
+<p><a href="https://github.com/argoproj-labs/appsource">https://github.com/argoproj-labs/appsource</a></p>
 <p>But AppSource is still not production-ready.
 Also, it does not solve our some problems.</p>
 <h3 id="multiple-argo-cd-instance-argocd-operator"><a class="header" href="#multiple-argo-cd-instance-argocd-operator">Multiple Argo CD instance (argocd-operator)</a></h3>
@@ -801,8 +801,8 @@ Also, it does not solve our some problems.</p>
 <h3 id="other-continuous-delivery-tools"><a class="header" href="#other-continuous-delivery-tools">Other Continuous Delivery tools</a></h3>
 <p>Other Continuous Delivery tools support multi-tenancy.</p>
 <ul>
-<li>https://github.com/fluxcd/flux2</li>
-<li>https://github.com/pipe-cd/pipe</li>
+<li><a href="https://github.com/fluxcd/flux2">https://github.com/fluxcd/flux2</a></li>
+<li><a href="https://github.com/pipe-cd/pipe">https://github.com/pipe-cd/pipe</a></li>
 </ul>
 <p>However, we love Argo CD (the many features and the useful UI).
 We already have a lot of manifests managed by Argo CD. It's hard to switch to another tool now.</p>
@@ -813,7 +813,7 @@ We already have a lot of manifests managed by Argo CD. It's hard to switch to an
 </li>
 <li>
 <p>Checkout this repository.</p>
-<pre><code class="language-console">$ git clone https://github.com/cybozu-go/cattage
+<pre><code class="language-sh">git clone https://github.com/cybozu-go/cattage
 </code></pre>
 </li>
 </ol>
@@ -821,12 +821,12 @@ We already have a lot of manifests managed by Argo CD. It's hard to switch to an
 <ol>
 <li>
 <p>Install <a href="https://aquaproj.github.io">aqua</a>.</p>
-<p>https://aquaproj.github.io/docs/tutorial-basics/quick-start</p>
+<p><a href="https://aquaproj.github.io/docs/tutorial-basics/quick-start">https://aquaproj.github.io/docs/tutorial-basics/quick-start</a></p>
 </li>
 <li>
 <p>Install CLI tools.</p>
-<pre><code class="language-console">$ cd cybozu-go/cattage
-$ aqua i -l
+<pre><code class="language-sh">cd cybozu-go/cattage
+aqua i -l
 </code></pre>
 </li>
 </ol>
@@ -834,21 +834,21 @@ $ aqua i -l
 <ol>
 <li>
 <p>Launch local Kubernetes cluster.</p>
-<pre><code class="language-console">$ cd cybozu-go/cattage
-$ make dev
+<pre><code class="language-sh">cd cybozu-go/cattage
+make dev
 </code></pre>
 </li>
 <li>
 <p>Start <a href="https://tilt.dev">Tilt</a>.</p>
-<pre><code class="language-console">$ tilt up
+<pre><code class="language-sh">tilt up
 </code></pre>
 </li>
 <li>
-<p>Access: http://localhost:10350/</p>
+<p>Access: <code>http://localhost:10350/</code></p>
 </li>
 <li>
 <p>Stop the Kubernetes cluster.</p>
-<pre><code class="language-console">$ make stop-dev
+<pre><code class="language-sh">make stop-dev
 </code></pre>
 </li>
 </ol>
@@ -864,17 +864,17 @@ Please refer to <code>.github/release.yml</code> for the kind of labels.</p>
 <ol>
 <li>
 <p>Determine a new version number. Then set <code>VERSION</code> variable.</p>
-<pre><code class="language-console"># Set VERSION and confirm it. It should not have "v" prefix.
-$ VERSION=x.y.z
-$ echo $VERSION
+<pre><code class="language-sh"># Set VERSION and confirm it. It should not have "v" prefix.
+VERSION=x.y.z
+echo $VERSION
 </code></pre>
 </li>
 <li>
 <p>Add a git tag to the main HEAD, then push it.</p>
-<pre><code class="language-console">$ git switch main
-$ git tag -a -m "Release v$VERSION" "v$VERSION"
-$ git tag -ln | grep $VERSION
-$ git push origin v$VERSION
+<pre><code class="language-sh">git switch main
+git tag -a -m "Release v$VERSION" "v$VERSION"
+git tag -ln | grep $VERSION
+git push origin v$VERSION
 </code></pre>
 </li>
 </ol>
@@ -892,7 +892,7 @@ If a new Kubernetes is released, please update the following files.</p>
 <p>Cattage supports one Argo CD version.
 If a new Argo CD is released, please update the following files.</p>
 <ul>
-<li>Update Argo CD Version in <code>aqua.yaml</code>, <code>e2e/Makefile</code> and <code>Makefile</code>.</li>
+<li>Update Argo CD Version in <code>aqua.yaml</code> and <code>Makefile</code>.</li>
 <li>Run <code>make crds</code>.</li>
 </ul>
 <p>If Argo CD API has changed, please fix the relevant source code.</p>
