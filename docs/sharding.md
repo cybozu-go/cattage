@@ -3,9 +3,9 @@
 ## Overview
 
 In Argo CD, as the number of managed applications increases, the load on the Application Controller becomes significant.
-While Argo CD supports sharding, it can only shard controllers per Kubernetes cluster. (ref. https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/ )
+While Argo CD supports sharding, it can only shard controllers per Kubernetes cluster. (ref. <https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/> )
 
-Cattage provides the capability to shard controllers on a per-tenant basis using [applications in any namespace](https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/). 
+Cattage provides the capability to shard controllers on a per-tenant basis using [applications in any namespace](https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/).
 By specifying a controller name in the Tenant resource, you can designate which controller will process Applications created in that tenant's Namespaces.
 
 ## How to use
@@ -13,7 +13,7 @@ By specifying a controller name in the Tenant resource, you can designate which 
 ### Setup stakater/Reloader
 
 [stakater/Reloader](https://github.com/stakater/Reloader) is a Kubernetes controller that watches for changes in ConfigMaps and Secrets, executing rolling updates on Deployments and StatefulSets as needed.
-Cattage uses `stakater/Reloader` to roll out updates to the Argo CD Application Controller whenever a ConfigMap is modified. 
+Cattage uses `stakater/Reloader` to roll out updates to the Argo CD Application Controller whenever a ConfigMap is modified.
 
 Follow these steps to set it up:
 
@@ -130,7 +130,7 @@ Cattage generates the following configmaps:
 - `default-application-controller-cm`: Lists namespaces for tenants without a specified controller
 - `<controller name>-application-controller-cm`: Lists namespaces for tenants with a specified controller
 
-### Setup Cattage 
+### Setup Cattage
 
 Follow the [setup instructions](./setup.md) to install Cattage.
 

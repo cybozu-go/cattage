@@ -28,4 +28,3 @@ Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][
 
 [Accurate]: https://github.com/cybozu-go/accurate
 [Argo CD]: https://argo-cd.readthedocs.io/en/stable/
-[App Of Apps Pattern]: https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern
