@@ -21,8 +21,10 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/config"
 	k8smetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
@@ -36,7 +38,7 @@ var roleBindingTemplate string
 var _ = Describe("Tenant controller", Ordered, func() {
 	ctx := context.Background()
 	var stopFunc func()
-	var config *tenantconfig.Config
+	var tenantCfg *tenantconfig.Config
 
 	BeforeEach(func() {
 		mgr, err := ctrl.NewManager(k8sCfg, ctrl.Options{
@@ -44,6 +46,9 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			LeaderElection: false,
 			Metrics: metricsserver.Options{
 				BindAddress: "0",
+			},
+			Controller: config.Controller{
+				SkipNameValidation: ptr.To(true),
 			},
 			Client: client.Options{
 				Cache: &client.CacheOptions{
@@ -53,7 +58,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 		})
 		Expect(err).ToNot(HaveOccurred())
 
-		config = &tenantconfig.Config{
+		tenantCfg = &tenantconfig.Config{
 			Namespace: tenantconfig.NamespaceConfig{
 				CommonLabels: map[string]string{
 					accurate.LabelTemplate: "init-template",
@@ -69,7 +74,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 				PreventAppCreationInArgoCDNamespace: true,
 			},
 		}
-		tr := NewTenantReconciler(mgr.GetClient(), config)
+		tr := NewTenantReconciler(mgr.GetClient(), tenantCfg)
 		err = tr.SetupWithManager(mgr)
 		Expect(err).ToNot(HaveOccurred())
 		err = SetupIndexForNamespace(ctx, mgr)
@@ -198,7 +203,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 
 		proj := argocd.AppProject()
 		Eventually(func() error {
-			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: "x-team"}, proj); err != nil {
+			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantCfg.ArgoCD.Namespace, Name: "x-team"}, proj); err != nil {
 				return err
 			}
 			return nil
@@ -381,7 +386,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 
 		proj := argocd.AppProject()
 		Eventually(func() error {
-			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: "y-team"}, proj); err != nil {
+			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantCfg.ArgoCD.Namespace, Name: "y-team"}, proj); err != nil {
 				return err
 			}
 			return nil
@@ -455,7 +460,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 		}).Should(Succeed())
 
 		Eventually(func() error {
-			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: "y-team"}, proj)
+			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantCfg.ArgoCD.Namespace, Name: "y-team"}, proj)
 			if err != nil {
 				return err
 			}
@@ -531,7 +536,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 
 		proj := argocd.AppProject()
 		Eventually(func() error {
-			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: "z-team"}, proj); err != nil {
+			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantCfg.ArgoCD.Namespace, Name: "z-team"}, proj); err != nil {
 				return err
 			}
 			return nil
@@ -596,7 +601,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 		}).Should(Succeed())
 
 		Eventually(func() error {
-			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: "z-team"}, proj)
+			err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantCfg.ArgoCD.Namespace, Name: "z-team"}, proj)
 			if apierrors.IsNotFound(err) {
 				return nil
 			}
@@ -756,7 +761,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 
 	Context("Migration to Argo CD 2.5", func() {
 		It("should remove old applications", func() {
-			oldApp, err := fillApplication("app", config.ArgoCD.Namespace, "a-team")
+			oldApp, err := fillApplication("app", tenantCfg.ArgoCD.Namespace, "a-team")
 			Expect(err).ToNot(HaveOccurred())
 			oldApp.SetLabels(map[string]string{
 				constants.OwnerAppNamespace: "sub-1",
@@ -769,13 +774,13 @@ var _ = Describe("Tenant controller", Ordered, func() {
 
 			app := argocd.Application()
 			Eventually(func(g Gomega) {
-				err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: oldApp.GetName()}, app)
+				err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantCfg.ArgoCD.Namespace, Name: oldApp.GetName()}, app)
 				g.Expect(apierrors.IsNotFound(err)).Should(BeTrue())
 			}).Should(Succeed())
 		})
 
 		It("should not remove normal applications", func() {
-			normalApp, err := fillApplication("normal", config.ArgoCD.Namespace, "default")
+			normalApp, err := fillApplication("normal", tenantCfg.ArgoCD.Namespace, "default")
 			Expect(err).ToNot(HaveOccurred())
 			normalApp.SetFinalizers([]string{
 				"resources-finalizer.argocd.argoproj.io",
@@ -785,7 +790,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 
 			app := argocd.Application()
 			Consistently(func(g Gomega) {
-				err := k8sClient.Get(ctx, client.ObjectKey{Namespace: config.ArgoCD.Namespace, Name: normalApp.GetName()}, app)
+				err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantCfg.ArgoCD.Namespace, Name: normalApp.GetName()}, app)
 				g.Expect(err).ShouldNot(HaveOccurred())
 			}).Should(Succeed())
 		})
