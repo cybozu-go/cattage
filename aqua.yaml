@@ -7,7 +7,7 @@ registries:
 packages:
   - name: argoproj/argo-cd@v2.13.2
   - name: kubernetes/kubectl@v1.31.6
-  - name: kubernetes-sigs/kubebuilder@v3.14.2
+  - name: kubernetes-sigs/kubebuilder@v3.15.1
   - name: kubernetes-sigs/kustomize@kustomize/v5.6.0
   - name: kubernetes-sigs/kind@v0.26.0
   - name: rust-lang/mdBook@v0.4.45
