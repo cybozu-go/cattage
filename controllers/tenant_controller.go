@@ -222,6 +222,7 @@ func (r *TenantReconciler) disownNamespace(ctx context.Context, ns *corev1.Names
 }
 
 func (r *TenantReconciler) removeRoleBinding(ctx context.Context, tenant *cattagev1beta1.Tenant, ns *corev1.Namespace) error {
+	logger := log.FromContext(ctx)
 	rb := &rbacv1.RoleBinding{}
 	err := r.client.Get(ctx, client.ObjectKey{Namespace: ns.Name, Name: tenant.Name + "-admin"}, rb)
 	if apierrors.IsNotFound(err) {
@@ -241,10 +242,12 @@ func (r *TenantReconciler) removeRoleBinding(ctx context.Context, tenant *cattag
 	if err != nil {
 		return err
 	}
+	logger.Info("RoleBinding deleted", "rolebinding", rb.Name)
 	return nil
 }
 
 func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
+	logger := log.FromContext(ctx)
 	proj := argocd.AppProject()
 	err := r.client.Get(ctx, client.ObjectKey{Namespace: r.config.ArgoCD.Namespace, Name: tenant.Name}, proj)
 	if apierrors.IsNotFound(err) {
@@ -260,7 +263,12 @@ func (r *TenantReconciler) removeAppProject(ctx context.Context, tenant *cattage
 	if labels == nil || labels[constants.OwnerTenant] != tenant.Name {
 		return nil
 	}
-	return r.client.Delete(ctx, proj)
+	err = r.client.Delete(ctx, proj)
+	if err != nil {
+		return err
+	}
+	logger.Info("AppProject deleted", "project", proj.GetName())
+	return nil
 }
 
 func (r *TenantReconciler) finalize(ctx context.Context, tenant *cattagev1beta1.Tenant) error {
@@ -300,6 +308,7 @@ func (r *TenantReconciler) finalize(ctx context.Context, tenant *cattagev1beta1.
 }
 
 func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.NamespaceApplyConfiguration) error {
+	logger := log.FromContext(ctx)
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(ns)
 	if err != nil {
 		return err
@@ -323,6 +332,7 @@ func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.Name
 		return nil
 	}
 
+	logger.Info("patching namespace", "namespace", ns, "managed", managed)
 	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
 		FieldManager: constants.TenantFieldManager,
 		Force:        ptr.To(true),
@@ -330,6 +340,7 @@ func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.Name
 }
 
 func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.RoleBindingApplyConfiguration) error {
+	logger := log.FromContext(ctx)
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(rb)
 	if err != nil {
 		return err
@@ -353,6 +364,7 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 		return nil
 	}
 
+	logger.Info("patching RoleBinding", "rolebinding", rb, "managed", managed)
 	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
 		FieldManager: constants.TenantFieldManager,
 		Force:        ptr.To(true),
@@ -363,17 +375,22 @@ func (r *TenantReconciler) rolesMap(ctx context.Context, delegates []cattagev1be
 	result := make(map[string][]Role)
 
 	for _, d := range delegates {
+		delegatedTenant := &cattagev1beta1.Tenant{}
+		err := r.client.Get(ctx, client.ObjectKey{Name: d.Name}, delegatedTenant)
+		if err != nil {
+			return nil, err
+		}
 		for _, role := range d.Roles {
-			delegatedTenant := &cattagev1beta1.Tenant{}
-			err := r.client.Get(ctx, client.ObjectKey{Name: d.Name}, delegatedTenant)
-			if err != nil {
-				return nil, err
-			}
 			result[role] = append(result[role], Role{
 				Name:        delegatedTenant.Name,
 				ExtraParams: delegatedTenant.Spec.ExtraParams.ToMap(),
 			})
 		}
+	}
+	for _, roles := range result {
+		slices.SortFunc(roles, func(x, y Role) int {
+			return cmp.Compare(x.Name, y.Name)
+		})
 	}
 	return result, nil
 }
@@ -493,6 +510,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 		return err
 	}
 	namespaces = append(namespaces, delegatedNamespaces...)
+	slices.Sort(namespaces)
 
 	tpl, err := template.New("AppProject Template").Parse(r.config.ArgoCD.AppProjectTemplate)
 	if err != nil {
@@ -503,6 +521,10 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	if err != nil {
 		return err
 	}
+
+	repos := tenant.Spec.ArgoCD.Repositories
+	slices.Sort(repos)
+	params := tenant.Spec.ExtraParams.ToMap()
 
 	var buf bytes.Buffer
 	err = tpl.Execute(&buf, struct {
@@ -515,8 +537,8 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 		Name:         tenant.Name,
 		Namespaces:   namespaces,
 		Roles:        roles,
-		Repositories: tenant.Spec.ArgoCD.Repositories,
-		ExtraParams:  tenant.Spec.ExtraParams.ToMap(),
+		Repositories: repos,
+		ExtraParams:  params,
 	})
 	if err != nil {
 		return err
@@ -544,6 +566,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 		return nil
 	}
 
+	logger.Info("patching AppProject", "namespaces", namespaces, "roles", roles, "repositories", repos, "extraParams", params)
 	err = r.client.Patch(ctx, proj, client.Apply, &client.PatchOptions{
 		Force:        ptr.To(true),
 		FieldManager: constants.TenantFieldManager,
