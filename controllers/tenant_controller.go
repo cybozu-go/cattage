@@ -375,12 +375,12 @@ func (r *TenantReconciler) rolesMap(ctx context.Context, delegates []cattagev1be
 	result := make(map[string][]Role)
 
 	for _, d := range delegates {
+		delegatedTenant := &cattagev1beta1.Tenant{}
+		err := r.client.Get(ctx, client.ObjectKey{Name: d.Name}, delegatedTenant)
+		if err != nil {
+			return nil, err
+		}
 		for _, role := range d.Roles {
-			delegatedTenant := &cattagev1beta1.Tenant{}
-			err := r.client.Get(ctx, client.ObjectKey{Name: d.Name}, delegatedTenant)
-			if err != nil {
-				return nil, err
-			}
 			result[role] = append(result[role], Role{
 				Name:        delegatedTenant.Name,
 				ExtraParams: delegatedTenant.Spec.ExtraParams.ToMap(),
