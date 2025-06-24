@@ -53,19 +53,19 @@ jobs:
         run: |
           helm repo add cattage https://cybozu-go.github.io/cattage
           helm repo update
-          
+
           # get the release tag version
           tag_version=${GITHUB_REF##*/v}
-          
+
           # get the latest chart version
           chart_version=$(helm search repo cattage -o json | jq -r 'sort_by(.version) | .[-1].version')
           chart_patch_version=${chart_version##*.}
           new_patch_version=$(($chart_patch_version+1))
-          
+
           # if minor or major version changed, reset new patch version
           local_version=$(cat charts/cattage/Chart.yaml | yq .version | sed "s/0-chart-patch-version-placeholder/$chart_patch_version/g")
           [ "$local_version" != "$chart_version" ] && new_patch_version=0
-          
+
           # replace placeholder with new version
           sed --in-place "s/app-version-placeholder/$tag_version/g" charts/cattage/Chart.yaml
           sed --in-place "s/0-chart-patch-version-placeholder/$new_patch_version/g" charts/cattage/Chart.yaml
@@ -75,14 +75,14 @@ jobs:
           tag_version=${GITHUB_REF##*/}
           cat <<EOF > ./charts/cattage/RELEASE.md
           Helm chart for cattage [$tag_version](https://github.com/cybozu-go/cattage/releases/tag/$tag_version)
-          
+
           EOF
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # v1.5.0
+        uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
           config: cr.yaml
         env:
