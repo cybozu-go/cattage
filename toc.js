@@ -10,7 +10,7 @@ class MDBookSidebarScrollbox extends HTMLElement {
     connectedCallback() {
         this.innerHTML = '<ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Cattage</a></li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.</strong> Setup</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">3.</strong> Usage</a></li><li class="chapter-item expanded "><a href="sharding.html"><strong aria-hidden="true">4.</strong> Sharding</a></li><li class="chapter-item expanded "><a href="crd_tenant.html"><strong aria-hidden="true">5.</strong> Tenant custom resource</a></li><li class="chapter-item expanded "><a href="config.html"><strong aria-hidden="true">6.</strong> Configurations</a></li><li class="chapter-item expanded "><a href="design.html"><strong aria-hidden="true">7.</strong> Design notes</a></li><li class="chapter-item expanded "><a href="development.html"><strong aria-hidden="true">8.</strong> Development</a></li><li class="chapter-item expanded "><a href="release.html"><strong aria-hidden="true">9.</strong> Release procedure</a></li><li class="chapter-item expanded "><a href="maintenance.html"><strong aria-hidden="true">10.</strong> Maintenance</a></li></ol>';
         // Set the current, active page, and reveal it if it's hidden
-        let current_page = document.location.href.toString().split("#")[0];
+        let current_page = document.location.href.toString().split("#")[0].split("?")[0];
         if (current_page.endsWith("/")) {
             current_page += "index.html";
         }
