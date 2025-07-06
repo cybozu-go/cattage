@@ -8,7 +8,7 @@
     "cybozu-go/cattage"
   ],
   "extends": [
-    "config:base",
+    "config:recommended",
     "github>aquaproj/aqua-renovate-config#2.8.2",
     ":semanticCommitTypeAll(chore)",
     ":timezone(Asia/Tokyo)"
@@ -23,10 +23,10 @@
       "matchDatasources": [
         "go"
       ],
+      "separateMinorPatch": true,
       "matchPackagePatterns": [
         "^k8s\\.io\\/.*"
-      ],
-      "separateMinorPatch": true
+      ]
     },
     {
       "description": "Disable major updates for k8s.io/client-go",
@@ -88,11 +88,12 @@
   "postUpdateOptions": [
     "gomodTidy"
   ],
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "datasourceTemplate": "docker",
       "depNameTemplate": "kindest/node",
-      "fileMatch": [
+      "managerFilePatterns": [
         "^\\.github\\/workflows\\/.+\\.ya?ml$"
       ],
       "matchStrings": [
@@ -100,9 +101,10 @@
       ]
     },
     {
+      "customType": "regex",
       "datasourceTemplate": "docker",
       "depNameTemplate": "kindest/node",
-      "fileMatch": [
+      "managerFilePatterns": [
         "^e2e\\/Makefile$"
       ],
       "matchStrings": [
@@ -110,9 +112,10 @@
       ]
     },
     {
+      "customType": "regex",
       "datasourceTemplate": "docker",
       "depNameTemplate": "kindest/node",
-      "fileMatch": [
+      "managerFilePatterns": [
         "^cluster.yaml$"
       ],
       "matchStrings": [
