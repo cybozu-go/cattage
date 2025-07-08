@@ -12,4 +12,4 @@ jobs:
         uses: renovatebot/github-action@248bf5a619694187930adc80b9343c37761c173f # renovate v43.0.1
         with:
           configurationFile: renovate.json
-          token: ${{ secrets.RENOVATE_TOKEN }}
+          token: ${{ secrets.RENOVATE_TOKEN_PUBLIC }}
