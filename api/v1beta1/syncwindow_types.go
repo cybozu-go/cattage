@@ -11,7 +11,6 @@ import (
 type SyncWindowSpec struct {
 	// SyncWindows is a list of sync windows
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinItems=1
 	SyncWindows SyncWindows `json:"syncWindows"`
 }
 

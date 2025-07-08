@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cmp"
 	"context"
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strings"
@@ -55,6 +56,9 @@ type TenantReconciler struct {
 //+kubebuilder:rbac:groups=cattage.cybozu.io,resources=tenants,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=cattage.cybozu.io,resources=tenants/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=cattage.cybozu.io,resources=tenants/finalizers,verbs=update
+//+kubebuilder:rbac:groups=cattage.cybozu.io,resources=syncwindows,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=cattage.cybozu.io,resources=syncwindows/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=cattage.cybozu.io,resources=syncwindows/finalizers,verbs=update
 //+kubebuilder:rbac:groups=argoproj.io,resources=appprojects,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
@@ -557,6 +561,34 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	proj.SetLabels(map[string]string{
 		constants.OwnerTenant: tenant.Name,
 	})
+	val, found, err := unstructured.NestedSlice(proj.UnstructuredContent(), "spec", "syncWindows")
+	if err != nil {
+		return err
+	}
+	var syncWindows cattagev1beta1.SyncWindows
+	if !found {
+		syncWindows = cattagev1beta1.SyncWindows{}
+	} else {
+		syncWindows, err = FromUnstructuredSlice[cattagev1beta1.SyncWindows](val)
+		if err != nil {
+			return err
+		}
+	}
+	sws, err := r.getSyncWindows(ctx, tenant.Name)
+	if err != nil {
+		return fmt.Errorf("failed to get sync windows: %w", err)
+	}
+	syncWindows = append(syncWindows, sws...)
+	if len(syncWindows) != 0 {
+		ret, err := ToUnstructuredSlice[cattagev1beta1.SyncWindows](syncWindows)
+		if err != nil {
+			return err
+		}
+		err = unstructured.SetNestedSlice(proj.UnstructuredContent(), ret, "spec", "syncWindows")
+		if err != nil {
+			return err
+		}
+	}
 
 	managed, err := extract.ExtractManagedFields(orig, constants.TenantFieldManager)
 	if err != nil {
@@ -578,6 +610,57 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	logger.Info("AppProject successfully reconciled")
 
 	return nil
+}
+func (r *TenantReconciler) getSyncWindows(ctx context.Context, tenantOwner string) (cattagev1beta1.SyncWindows, error) {
+	nss := &corev1.NamespaceList{}
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: tenantOwner}); err != nil {
+		return nil, fmt.Errorf("failed to list namespaces: %w", err)
+	}
+
+	resources := make([]cattagev1beta1.SyncWindow, 0)
+	for _, ns := range nss.Items {
+		sws := &cattagev1beta1.SyncWindowList{}
+		err := r.client.List(ctx, sws, client.InNamespace(ns.Name))
+		if err != nil {
+			return nil, fmt.Errorf("failed to list sync windows in namespace %s: %w", ns.Name, err)
+		}
+		resources = append(resources, sws.Items...)
+	}
+
+	slices.SortFunc(resources, func(x, y cattagev1beta1.SyncWindow) int {
+		if x.Namespace != y.Namespace {
+			return cmp.Compare(x.Namespace, y.Namespace)
+		}
+		return cmp.Compare(x.Name, y.Name)
+	})
+
+	syncWindows := cattagev1beta1.SyncWindows{}
+
+	for _, res := range resources {
+		syncWindows = append(syncWindows, res.Spec.SyncWindows...)
+	}
+
+	return syncWindows, nil
+}
+
+func FromUnstructuredSlice[T any](data []interface{}) (T, error) {
+	var t T
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return t, err
+	}
+	err = json.Unmarshal(bytes, &t)
+	return t, err
+}
+
+func ToUnstructuredSlice[T any](obj T) ([]interface{}, error) {
+	bytes, err := json.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+	var m []interface{}
+	err = json.Unmarshal(bytes, &m)
+	return m, err
 }
 
 func (r *TenantReconciler) getDelegatedNamespaces(ctx context.Context, delegates []cattagev1beta1.DelegateSpec) ([]string, error) {
@@ -783,12 +866,28 @@ func (r *TenantReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		}
 		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: owner}}}
 	}
+	nsHandler := func(ctx context.Context, o client.Object) []reconcile.Request {
+		ns := &corev1.Namespace{}
+		err := r.client.Get(ctx, client.ObjectKey{Name: o.GetNamespace()}, ns)
+		if err != nil {
+			logger := log.FromContext(ctx)
+			logger.Error(err, "failed to get namespace", "namespace", o.GetNamespace())
+			return nil
+		}
+
+		owner := ns.GetLabels()[constants.OwnerTenant]
+		if owner == "" {
+			return nil
+		}
+		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: owner}}}
+	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cattagev1beta1.Tenant{}).
 		Watches(&corev1.Namespace{}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
 		Watches(&rbacv1.RoleBinding{}, handler.EnqueueRequestsFromMapFunc(tenantHandler)).
 		Watches(argocd.AppProject(), handler.EnqueueRequestsFromMapFunc(tenantHandler)).
+		Watches(&cattagev1beta1.SyncWindow{}, handler.EnqueueRequestsFromMapFunc(nsHandler)).
 		Complete(r)
 }
 

@@ -83,13 +83,13 @@ crds:
 .PHONY: envtest
 envtest: setup-envtest crds
 	source <($(SETUP_ENVTEST) use -p env); \
-		go test -v -count 1 -race ./controllers -ginkgo.v -ginkgo.fail-fast
+		go test -v -count 1 -race ./internal/controller -ginkgo.v -ginkgo.fail-fast
 	source <($(SETUP_ENVTEST) use -p env); \
-		go test -v -count 1 -race ./hooks -ginkgo.v -ginkgo.fail-fast
+		go test -v -count 1 -race ./internal/hooks -ginkgo.v -ginkgo.fail-fast
 
 .PHONY: test
 test: test-tools
-	go test -v -count 1 -race ./pkg/...
+	go test -v -count 1 -race ./internal/config
 	go install ./...
 	go vet ./...
 	test -z $$(gofmt -s -l . | tee /dev/stderr)
