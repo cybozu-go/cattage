@@ -1,4 +1,4 @@
-package controllers
+package controller
 
 import (
 	"context"
@@ -8,10 +8,10 @@ import (
 	"time"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
-	"github.com/cybozu-go/cattage/pkg/accurate"
-	"github.com/cybozu-go/cattage/pkg/argocd"
-	tenantconfig "github.com/cybozu-go/cattage/pkg/config"
-	"github.com/cybozu-go/cattage/pkg/constants"
+	"github.com/cybozu-go/cattage/internal/accurate"
+	"github.com/cybozu-go/cattage/internal/argocd"
+	tenantconfig "github.com/cybozu-go/cattage/internal/config"
+	"github.com/cybozu-go/cattage/internal/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"

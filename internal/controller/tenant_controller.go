@@ -1,4 +1,4 @@
-package controllers
+package controller
 
 import (
 	"bytes"
@@ -10,12 +10,12 @@ import (
 	"text/template"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
-	"github.com/cybozu-go/cattage/pkg/accurate"
-	"github.com/cybozu-go/cattage/pkg/argocd"
-	extract "github.com/cybozu-go/cattage/pkg/client"
-	"github.com/cybozu-go/cattage/pkg/config"
-	"github.com/cybozu-go/cattage/pkg/constants"
-	"github.com/cybozu-go/cattage/pkg/metrics"
+	"github.com/cybozu-go/cattage/internal/accurate"
+	"github.com/cybozu-go/cattage/internal/argocd"
+	extract "github.com/cybozu-go/cattage/internal/client"
+	"github.com/cybozu-go/cattage/internal/config"
+	"github.com/cybozu-go/cattage/internal/constants"
+	"github.com/cybozu-go/cattage/internal/metrics"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
