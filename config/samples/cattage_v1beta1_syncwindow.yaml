@@ -1,0 +1,9 @@
+apiVersion: cattage.cybozu.io/v1beta1
+kind: SyncWindow
+metadata:
+  labels:
+    app.kubernetes.io/name: cattage
+    app.kubernetes.io/managed-by: kustomize
+  name: syncwindow-sample
+spec:
+  # TODO(user): Add fields here
