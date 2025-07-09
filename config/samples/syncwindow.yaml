@@ -4,7 +4,7 @@ metadata:
   labels:
     app.kubernetes.io/name: cattage
     app.kubernetes.io/managed-by: kustomize
-  name: syncwindow-sample
+  name: syncwindow-sample1
   namespace: sub-1
 spec:
   syncWindows:
@@ -14,15 +14,20 @@ spec:
     applications:
     - '*-prod'
     manualSync: true
+---
+apiVersion: cattage.cybozu.io/v1beta1
+kind: SyncWindow
+metadata:
+  labels:
+    app.kubernetes.io/name: cattage
+    app.kubernetes.io/managed-by: kustomize
+  name: syncwindow-sample2
+  namespace: app-a
+spec:
+  syncWindows:
   - kind: deny
     schedule: '0 22 * * *'
     timeZone: "Europe/Amsterdam"
     duration: 1h
     namespaces:
     - default
-  - kind: allow
-    schedule: '0 23 * * *'
-    duration: 1h
-    clusters:
-    - in-cluster
-    - cluster1

@@ -14,7 +14,11 @@ spec:
     singular: syncwindow
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=="Synced")].status
+      name: Synced
+      type: string
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: SyncWindow is the Schema for the syncwindows API
