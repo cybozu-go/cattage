@@ -63,6 +63,7 @@ uninstall: manifests ## Uninstall CRDs from the K8s cluster specified in ~/.kube
 .PHONY: apidoc
 apidoc: $(wildcard api/*/*_types.go)
 	crd-to-markdown --links docs/links.csv -f api/v1beta1/tenant_types.go -n Tenant > docs/crd_tenant.md
+	crd-to-markdown --links docs/links.csv -f api/v1beta1/syncwindow_types.go -n SyncWindow > docs/crd_syncwindow.md
 
 .PHONY: book
 book:
