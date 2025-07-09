@@ -501,22 +501,12 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 		return err
 	}
 
-	nss := &corev1.NamespaceList{}
-	if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: tenant.Name}); err != nil {
-		return fmt.Errorf("failed to list namespaces: %w", err)
-	}
-	namespaces := make([]string, len(nss.Items))
-	for i, ns := range nss.Items {
-		namespaces[i] = ns.Name
-	}
-	delegatedNamespaces, err := r.getDelegatedNamespaces(ctx, tenant.Spec.Delegates)
+	tpl, err := template.New("AppProject Template").Parse(r.config.ArgoCD.AppProjectTemplate)
 	if err != nil {
 		return err
 	}
-	namespaces = append(namespaces, delegatedNamespaces...)
-	slices.Sort(namespaces)
 
-	tpl, err := template.New("AppProject Template").Parse(r.config.ArgoCD.AppProjectTemplate)
+	namespaces, err := r.getTenantNamespaces(ctx, tenant)
 	if err != nil {
 		return err
 	}
@@ -569,18 +559,18 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	if !found {
 		syncWindows = cattagev1beta1.SyncWindows{}
 	} else {
-		syncWindows, err = FromUnstructuredSlice[cattagev1beta1.SyncWindows](val)
+		syncWindows, err = fromUnstructuredSlice[cattagev1beta1.SyncWindows](val)
 		if err != nil {
 			return err
 		}
 	}
-	sws, err := r.getSyncWindows(ctx, tenant.Name)
+	swResources, sws, err := r.getSyncWindows(ctx, tenant.Name)
 	if err != nil {
 		return fmt.Errorf("failed to get sync windows: %w", err)
 	}
 	syncWindows = append(syncWindows, sws...)
 	if len(syncWindows) != 0 {
-		ret, err := ToUnstructuredSlice[cattagev1beta1.SyncWindows](syncWindows)
+		ret, err := toUnstructuredSlice[cattagev1beta1.SyncWindows](syncWindows)
 		if err != nil {
 			return err
 		}
@@ -594,7 +584,7 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	if err != nil {
 		return err
 	}
-	if equality.Semantic.DeepEqual(proj, managed) {
+	if equality.Semantic.DeepEqual(proj, managed) && allSyncWindowsAreSynced(swResources) {
 		return nil
 	}
 
@@ -607,14 +597,39 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 		logger.Error(err, "failed to patch AppProject")
 		return err
 	}
+
+	err = r.updateSyncWindowStatus(ctx, swResources)
+	if err != nil {
+		return err
+	}
+
 	logger.Info("AppProject successfully reconciled")
 
 	return nil
 }
-func (r *TenantReconciler) getSyncWindows(ctx context.Context, tenantOwner string) (cattagev1beta1.SyncWindows, error) {
+
+func (r *TenantReconciler) getTenantNamespaces(ctx context.Context, tenant *cattagev1beta1.Tenant) ([]string, error) {
+	nss := &corev1.NamespaceList{}
+	if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: tenant.Name}); err != nil {
+		return nil, fmt.Errorf("failed to list namespaces: %w", err)
+	}
+	namespaces := make([]string, len(nss.Items))
+	for i, ns := range nss.Items {
+		namespaces[i] = ns.Name
+	}
+	delegatedNamespaces, err := r.getDelegatedNamespaces(ctx, tenant.Spec.Delegates)
+	if err != nil {
+		return nil, err
+	}
+	namespaces = append(namespaces, delegatedNamespaces...)
+	slices.Sort(namespaces)
+	return namespaces, nil
+}
+
+func (r *TenantReconciler) getSyncWindows(ctx context.Context, tenantOwner string) ([]cattagev1beta1.SyncWindow, cattagev1beta1.SyncWindows, error) {
 	nss := &corev1.NamespaceList{}
 	if err := r.client.List(ctx, nss, client.MatchingFields{constants.TenantNamespaceIndex: tenantOwner}); err != nil {
-		return nil, fmt.Errorf("failed to list namespaces: %w", err)
+		return nil, nil, fmt.Errorf("failed to list namespaces: %w", err)
 	}
 
 	resources := make([]cattagev1beta1.SyncWindow, 0)
@@ -622,7 +637,7 @@ func (r *TenantReconciler) getSyncWindows(ctx context.Context, tenantOwner strin
 		sws := &cattagev1beta1.SyncWindowList{}
 		err := r.client.List(ctx, sws, client.InNamespace(ns.Name))
 		if err != nil {
-			return nil, fmt.Errorf("failed to list sync windows in namespace %s: %w", ns.Name, err)
+			return nil, nil, fmt.Errorf("failed to list sync windows in namespace %s: %w", ns.Name, err)
 		}
 		resources = append(resources, sws.Items...)
 	}
@@ -640,26 +655,54 @@ func (r *TenantReconciler) getSyncWindows(ctx context.Context, tenantOwner strin
 		syncWindows = append(syncWindows, res.Spec.SyncWindows...)
 	}
 
-	return syncWindows, nil
+	return resources, syncWindows, nil
 }
 
-func FromUnstructuredSlice[T any](data []interface{}) (T, error) {
+func (r *TenantReconciler) updateSyncWindowStatus(ctx context.Context, resources []cattagev1beta1.SyncWindow) error {
+	errs := make([]error, 0)
+	for _, res := range resources {
+		meta.SetStatusCondition(&res.Status.Conditions, metav1.Condition{
+			Type:   cattagev1beta1.ConditionSynced,
+			Status: metav1.ConditionTrue,
+			Reason: "OK",
+		})
+		err := r.client.Status().Update(ctx, &res)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to update sync window status: %v", errs)
+	}
+	return nil
+}
+
+func allSyncWindowsAreSynced(resources []cattagev1beta1.SyncWindow) bool {
+	for _, res := range resources {
+		if !meta.IsStatusConditionTrue(res.Status.Conditions, cattagev1beta1.ConditionSynced) {
+			return false
+		}
+	}
+	return true
+}
+
+func fromUnstructuredSlice[T any](data []interface{}) (T, error) {
 	var t T
-	bytes, err := json.Marshal(data)
+	b, err := json.Marshal(data)
 	if err != nil {
 		return t, err
 	}
-	err = json.Unmarshal(bytes, &t)
+	err = json.Unmarshal(b, &t)
 	return t, err
 }
 
-func ToUnstructuredSlice[T any](obj T) ([]interface{}, error) {
-	bytes, err := json.Marshal(obj)
+func toUnstructuredSlice[T any](obj T) ([]interface{}, error) {
+	b, err := json.Marshal(obj)
 	if err != nil {
 		return nil, err
 	}
 	var m []interface{}
-	err = json.Unmarshal(bytes, &m)
+	err = json.Unmarshal(b, &m)
 	return m, err
 }
 

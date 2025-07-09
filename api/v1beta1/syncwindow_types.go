@@ -51,8 +51,13 @@ type SyncWindowStatus struct {
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
+const (
+	ConditionSynced string = "Synced"
+)
+
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Synced",type="string",JSONPath=".status.conditions[?(@.type==\"Synced\")].status"
 
 // SyncWindow is the Schema for the syncwindows API
 type SyncWindow struct {
