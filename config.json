@@ -1,0 +1,6 @@
+{
+  "username": "renovate[bot]",
+  "platform": "github",
+  "onboarding": false,
+  "repositories": ["cybozu-go/cattage"]
+}
