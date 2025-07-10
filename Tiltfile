@@ -7,8 +7,8 @@ CMD ["/cattage-controller"]
 '''
 
 # Generate manifests and go files
-local_resource('make manifests', "make manifests", deps=["api", "controllers", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
-local_resource('make generate', "make generate", deps=["api", "controllers", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
+local_resource('make manifests', "make manifests", deps=["api", "internal"], ignore=['*/*/zz_generated.deepcopy.go'])
+local_resource('make generate', "make generate", deps=["api", "internal"], ignore=['*/*/zz_generated.deepcopy.go'])
 
 # Deploy CRD
 local_resource(
@@ -38,7 +38,7 @@ k8s_resource(new_name='Cattage Resources', objects=[
 
 k8s_resource(workload='cattage-controller-manager', labels=['cattage'])
 local_resource(
-    'Watch & Compile', 'make build', deps=['controllers', 'pkg', 'hooks', 'cmd', 'version.go', 'api'],
+    'Watch & Compile', 'make build', deps=['internal', 'cmd', 'version.go', 'api'],
     ignore=['*/*/zz_generated.deepcopy.go'],
     labels=['cattage'])
 
@@ -69,3 +69,6 @@ local_resource(
 local_resource(
     'Sample: Application', 'kubectl apply -f ./config/samples/application.yaml',
     deps=["./config/samples/application.yaml"], resource_deps=["Wait for SubNamespace"], labels=['sample'])
+local_resource(
+    'Sample: SyncWindow', 'kubectl apply -f ./config/samples/syncwindow.yaml', deps=["./config/samples/syncwindow.yaml"],
+    resource_deps=["cattage-controller-manager"], labels=['sample'])

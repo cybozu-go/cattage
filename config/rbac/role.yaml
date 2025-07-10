@@ -41,6 +41,7 @@ rules:
 - apiGroups:
   - cattage.cybozu.io
   resources:
+  - syncwindows
   - tenants
   verbs:
   - create
@@ -53,12 +54,14 @@ rules:
 - apiGroups:
   - cattage.cybozu.io
   resources:
+  - syncwindows/finalizers
   - tenants/finalizers
   verbs:
   - update
 - apiGroups:
   - cattage.cybozu.io
   resources:
+  - syncwindows/status
   - tenants/status
   verbs:
   - get
