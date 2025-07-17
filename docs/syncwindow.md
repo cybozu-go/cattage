@@ -13,7 +13,7 @@ Therefore, when operating Argo CD in a multi-tenant environment, tenant users ca
 Similar concerns have been raised in Argo CD Issues as well.  
 https://github.com/argoproj/argo-cd/issues/11755
 
-Therefore, Cattage provides a [`SyncWindow` custom resource](crd_syncwindow.yaml) that allows tenant users to create it freely.
+Therefore, Cattage provides a [`SyncWindow` custom resource](crd_syncwindow.md) that allows tenant users to create it freely.
 Cattage identifies the tenant to which the namespace where the `SyncWindow` resource is created belongs, and configures syncWindows field in the `AppProject` resource associated with that tenant.
 
 When multiple `SyncWindow` resources are created within the same tenant, their contents are merged and reflected in the `AppProject` resource.
