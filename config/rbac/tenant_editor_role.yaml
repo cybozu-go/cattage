@@ -4,6 +4,7 @@ kind: ClusterRole
 metadata:
   name: tenant-editor-role
   labels:
+    app.kubernetes.io/name: cattage
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
 rules:

@@ -4,7 +4,7 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: cattage
-    app.kubernetes.io/managed-by: kustomize
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
   name: syncwindow-viewer-role
 rules:
 - apiGroups:

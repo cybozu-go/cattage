@@ -4,7 +4,8 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: cattage
-    app.kubernetes.io/managed-by: kustomize
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
   name: syncwindow-editor-role
 rules:
 - apiGroups:
