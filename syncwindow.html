@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Configurations - Cattage Documentation</title>
+        <title>SyncWindow - Cattage Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -143,7 +143,7 @@
                         <a href="https://github.com/cybozu-go/cattage" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/cybozu-go/cattage/edit/main/docs/./config.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/cybozu-go/cattage/edit/main/docs/./syncwindow.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -172,137 +172,88 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="configurations"><a class="header" href="#configurations">Configurations</a></h1>
-<h2 id="configuration-file"><a class="header" href="#configuration-file">Configuration file</a></h2>
-<p><code>cattage-controller</code> reads a configuration file on startup. The default location is <code>/etc/cattage/config.yaml</code>.
-The location can be changed with <code>--config-file</code> flag.</p>
-<p>The configuration file should be a JSON or YAML file having the following keys:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>namespace.commonLabels</code></td><td><code>map[string]string</code></td><td>Labels to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.labels</code> of a tenant resource.</td></tr>
-<tr><td><code>namespace.commonAnnotations</code></td><td><code>map[string]string</code></td><td>Annotations to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.annotations</code> of a tenant resource.</td></tr>
-<tr><td><code>namespace.roleBindingTemplate</code></td><td><code>string</code></td><td>Template for RoleBinding resource that is created on all namespaces belonging to a tenant.</td></tr>
-<tr><td><code>argocd.namepsace</code></td><td><code>string</code></td><td>The name of namespace where Argo CD is running.</td></tr>
-<tr><td><code>argocd.appProjectTemplate</code></td><td><code>string</code></td><td>Template for AppProject resources that is created for each tenant.</td></tr>
-<tr><td><code>argocd.preventAppCreationInArgoCDNamespace</code></td><td><code>bool</code></td><td>If true, prevent creating applications in the Argo CD namespace. This is used to enable sharding.</td></tr>
-</tbody></table>
-</div>
-<p>The repository includes an example as follows:</p>
-<pre><code class="language-yaml">namespace:
-  commonLabels:
-    accurate.cybozu.com/template: init-template
-  commonAnnotations:
-    foo: bar
-  roleBindingTemplate: |
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: RoleBinding
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: admin
-    subjects:
-      - apiGroup: rbac.authorization.k8s.io
-        kind: Group
-        name: {{ .Name }}
-      {{- range .Roles.admin }}
-      - apiGroup: rbac.authorization.k8s.io
-        kind: Group
-        name: {{ .Name }}
-      {{- end }}
-argocd:
-  namespace: argocd
-  appProjectTemplate: |
-    apiVersion: argoproj.io/v1alpha1
-    kind: AppProject
-    spec:
-      destinations:
-      {{- range .Namespaces }}
-        - namespace: {{ . }}
-          server: '*'
-      {{- end }}
-      roles:
-        - groups:
-            # If `GitHubName` is specified as `ExtraParams`, use it, otherwise use `Name`.
-            - {{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
-            {{- range .Roles.admin }}
-            - {{with .ExtraParams.GitHubTeam}}{{ . }}{{else}}{{ .Name }}{{end}}
-            {{- end }}
-          name: admin
-          policies:
-            - p, proj:{{ .Name }}:admin, applications, *, {{ .Name }}/*, allow
-      sourceNamespaces:
-        {{- range .Namespaces }}
-        - {{ . }}
-        {{- end }}
-      sourceRepos:
-        {{- range .Repositories }}
-        - '{{ . }}'
-        {{- else }}
-        - '*'
-        {{- end }}
+                        <h1 id="syncwindow"><a class="header" href="#syncwindow">SyncWindow</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Argo CD has a feature called Sync Windows.
+This is a functionality to restrict application synchronization during specific time periods.<br />
+https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/</p>
+<p>However, to configure Sync Windows, you need to modify the <code>AppProject</code> resource.
+Modifying the <code>AppProject</code> resource is essentially equivalent to having administrator privileges.
+Therefore, when operating Argo CD in a multi-tenant environment, tenant users cannot freely configure Sync Windows.</p>
+<p>Similar concerns have been raised in Argo CD Issues as well.<br />
+https://github.com/argoproj/argo-cd/issues/11755</p>
+<p>Therefore, Cattage provides a <a href="crd_syncwindow.html"><code>SyncWindow</code> custom resource</a> that allows tenant users to create it freely.
+Cattage identifies the tenant to which the namespace where the <code>SyncWindow</code> resource is created belongs, and configures syncWindows field in the <code>AppProject</code> resource associated with that tenant.</p>
+<p>When multiple <code>SyncWindow</code> resources are created within the same tenant, their contents are merged and reflected in the <code>AppProject</code> resource.</p>
+<h2 id="how-to-use"><a class="header" href="#how-to-use">How to use</a></h2>
+<p>Create a <code>SyncWindow</code> resource as follows:</p>
+<pre><code class="language-yaml">apiVersion: cattage.cybozu.io/v1beta1
+kind: SyncWindow
+metadata:
+  name: syncwindow-sample
+  namespace: sub-1
+spec:
+  syncWindows:
+  - kind: allow
+    schedule: '10 1 * * *'
+    duration: 1h
+    applications:
+    - '*-prod'
+    manualSync: true
+  - kind: deny
+    schedule: '0 22 * * *'
+    timeZone: "Europe/Amsterdam"
+    duration: 1h
+    namespaces:
+    - default
 </code></pre>
-<p><code>roleBindingTemplate</code> and <code>appProjectTemplate</code> can be written in go-template format.</p>
-<p><code>roleBindingTemplate</code> can use the following variables:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
-<tr><td><code>Roles</code></td><td><code>map[string]Role</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
-<tr><td><code>ExtraParams</code></td><td><code>map[string]string</code></td><td>Extra parameters specified per tenant.</td></tr>
-</tbody></table>
-</div>
-<p><code>appProjectTemplate</code> can use the following variables:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
-<tr><td><code>Namespaces</code></td><td><code>[]string</code></td><td>List of namespaces belonging to a tenant (including sub-namespaces).</td></tr>
-<tr><td><code>Repositories</code></td><td><code>[]string</code></td><td>List of repository URLs which can be used by the tenant.</td></tr>
-<tr><td><code>Roles</code></td><td><code>map[string]Role</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
-<tr><td><code>ExtraParams</code></td><td><code>map[string]string</code></td><td>Extra parameters specified per tenant.</td></tr>
-</tbody></table>
-</div><div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
-<tr><td><code>ExtraParams</code></td><td><code>map[string]string</code></td><td>Extra parameters specified per tenant.</td></tr>
-</tbody></table>
-</div>
-<h2 id="environment-variables"><a class="header" href="#environment-variables">Environment variables</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Required</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>POD_NAMESPACE</code></td><td>Yes</td><td>The namespace name where <code>cattage</code> is running.</td></tr>
-</tbody></table>
-</div>
-<h2 id="command-line-flags"><a class="header" href="#command-line-flags">Command-line flags</a></h2>
-<pre><code class="language-txt">Flags:
-      --add_dir_header                   If true, adds the file directory to the header
-      --alsologtostderr                  log to standard error as well as files
-      --cert-dir string                  webhook certificate directory
-      --config-file string               Configuration file path (default "/etc/cattage/config.yaml")
-      --health-probe-addr string         Listen address for health probes (default ":8081")
-  -h, --help                             help for cattage-controller
-      --leader-election-id string        ID for leader election by controller-runtime (default "cattage")
-      --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
-      --log_dir string                   If non-empty, write log files in this directory
-      --log_file string                  If non-empty, use this log file
-      --log_file_max_size uint           Defines the maximum size a log file can grow to. Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
-      --logtostderr                      log to standard error instead of files (default true)
-      --metrics-addr string              The address the metric endpoint binds to (default ":8080")
-      --skip_headers                     If true, avoid header prefixes in the log messages
-      --skip_log_headers                 If true, avoid headers when opening log files
-      --stderrthreshold severity         logs at or above this threshold go to stderr (default 2)
-  -v, --v Level                          number for the log level verbosity
-      --version                          version for cattage-controller
-      --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
-      --webhook-addr string              Listen address for the webhook endpoint (default ":9443")
-      --zap-devel                        Development Mode defaults(encoder=consoleEncoder,logLevel=Debug,stackTraceLevel=Warn). Production Mode defaults(encoder=jsonEncoder,logLevel=Info,stackTraceLevel=Error)
-      --zap-encoder encoder              Zap log encoding (one of 'json' or 'console')
-      --zap-log-level level              Zap Level to configure the verbosity of logging. Can be one of 'debug', 'info', 'error', or any integer value &gt; 0 which corresponds to custom debug levels of increasing verbosity
-      --zap-stacktrace-level level       Zap Level at and above which stacktraces are captured (one of 'info', 'error', 'panic').
+<p><code>SYNCED</code> status will be <code>True</code> as shown below:</p>
+<pre><code class="language-console">$ kubectl get syncwindow -n sub-1
+NAME                 SYNCED
+syncwindow-sample    True
+</code></pre>
+<p>Then, <code>syncWindows</code> field will be reflected in the <code>AppProject</code>:</p>
+<pre><code class="language-console">$ kubectl get appproject -n argocd a-team -o yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  labels:
+    cattage.cybozu.io/tenant: a-team
+  name: a-team
+  namespace: argocd
+spec:
+  destinations:
+  - namespace: app-a
+    server: '*'
+  - namespace: sub-1
+    server: '*'
+  sourceNamespaces:
+  - app-a
+  - sub-1
+  syncWindows:
+  - kind: allow
+    schedule: '10 1 * * *'
+    duration: 1h
+    applications:
+    - '*-prod'
+    manualSync: true
+  - kind: deny
+    schedule: '0 22 * * *'
+    timeZone: "Europe/Amsterdam"
+    duration: 1h
+    namespaces:
+    - default
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="crd_syncwindow.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="sharding.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="design.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="crd_tenant.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -312,11 +263,11 @@ argocd:
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="crd_syncwindow.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="sharding.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="design.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="crd_tenant.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

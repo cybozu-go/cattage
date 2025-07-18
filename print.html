@@ -549,6 +549,78 @@ spec:
 </code></pre>
 <p>Applications created in the Namespace of that tenant will then be processed by the specified application controller.
 If no controller name is specified, it will be processed by the default application controller.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="syncwindow"><a class="header" href="#syncwindow">SyncWindow</a></h1>
+<h2 id="overview-2"><a class="header" href="#overview-2">Overview</a></h2>
+<p>Argo CD has a feature called Sync Windows.
+This is a functionality to restrict application synchronization during specific time periods.<br />
+https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/</p>
+<p>However, to configure Sync Windows, you need to modify the <code>AppProject</code> resource.
+Modifying the <code>AppProject</code> resource is essentially equivalent to having administrator privileges.
+Therefore, when operating Argo CD in a multi-tenant environment, tenant users cannot freely configure Sync Windows.</p>
+<p>Similar concerns have been raised in Argo CD Issues as well.<br />
+https://github.com/argoproj/argo-cd/issues/11755</p>
+<p>Therefore, Cattage provides a <a href="crd_syncwindow.html"><code>SyncWindow</code> custom resource</a> that allows tenant users to create it freely.
+Cattage identifies the tenant to which the namespace where the <code>SyncWindow</code> resource is created belongs, and configures syncWindows field in the <code>AppProject</code> resource associated with that tenant.</p>
+<p>When multiple <code>SyncWindow</code> resources are created within the same tenant, their contents are merged and reflected in the <code>AppProject</code> resource.</p>
+<h2 id="how-to-use-1"><a class="header" href="#how-to-use-1">How to use</a></h2>
+<p>Create a <code>SyncWindow</code> resource as follows:</p>
+<pre><code class="language-yaml">apiVersion: cattage.cybozu.io/v1beta1
+kind: SyncWindow
+metadata:
+  name: syncwindow-sample
+  namespace: sub-1
+spec:
+  syncWindows:
+  - kind: allow
+    schedule: '10 1 * * *'
+    duration: 1h
+    applications:
+    - '*-prod'
+    manualSync: true
+  - kind: deny
+    schedule: '0 22 * * *'
+    timeZone: "Europe/Amsterdam"
+    duration: 1h
+    namespaces:
+    - default
+</code></pre>
+<p><code>SYNCED</code> status will be <code>True</code> as shown below:</p>
+<pre><code class="language-console">$ kubectl get syncwindow -n sub-1
+NAME                 SYNCED
+syncwindow-sample    True
+</code></pre>
+<p>Then, <code>syncWindows</code> field will be reflected in the <code>AppProject</code>:</p>
+<pre><code class="language-console">$ kubectl get appproject -n argocd a-team -o yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  labels:
+    cattage.cybozu.io/tenant: a-team
+  name: a-team
+  namespace: argocd
+spec:
+  destinations:
+  - namespace: app-a
+    server: '*'
+  - namespace: sub-1
+    server: '*'
+  sourceNamespaces:
+  - app-a
+  - sub-1
+  syncWindows:
+  - kind: allow
+    schedule: '10 1 * * *'
+    duration: 1h
+    applications:
+    - '*-prod'
+    manualSync: true
+  - kind: deny
+    schedule: '0 22 * * *'
+    timeZone: "Europe/Amsterdam"
+    duration: 1h
+    namespaces:
+    - default
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h3 id="custom-resources"><a class="header" href="#custom-resources">Custom Resources</a></h3>
 <ul>
 <li><a href="crd_tenant.html#tenant">Tenant</a></li>
@@ -622,6 +694,64 @@ If no controller name is specified, it will be processed by the default applicat
 </tbody></table>
 </div>
 <p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="custom-resources-1"><a class="header" href="#custom-resources-1">Custom Resources</a></h3>
+<ul>
+<li><a href="crd_syncwindow.html#syncwindow">SyncWindow</a></li>
+</ul>
+<h3 id="sub-resources-1"><a class="header" href="#sub-resources-1">Sub Resources</a></h3>
+<ul>
+<li><a href="crd_syncwindow.html#syncwindowlist">SyncWindowList</a></li>
+<li><a href="crd_syncwindow.html#syncwindowsetting">SyncWindowSetting</a></li>
+<li><a href="crd_syncwindow.html#syncwindowspec">SyncWindowSpec</a></li>
+<li><a href="crd_syncwindow.html#syncwindowstatus">SyncWindowStatus</a></li>
+</ul>
+<h4 id="syncwindow-1"><a class="header" href="#syncwindow-1">SyncWindow</a></h4>
+<p>SyncWindow is the Schema for the syncwindows API</p>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<tr><td>metadata</td><td></td><td>metav1.ObjectMeta</td><td>false</td></tr>
+<tr><td>spec</td><td></td><td><a href="crd_syncwindow.html#syncwindowspec">SyncWindowSpec</a></td><td>false</td></tr>
+<tr><td>status</td><td></td><td><a href="crd_syncwindow.html#syncwindowstatus">SyncWindowStatus</a></td><td>false</td></tr>
+</tbody></table>
+</div>
+<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
+<h4 id="syncwindowlist"><a class="header" href="#syncwindowlist">SyncWindowList</a></h4>
+<p>SyncWindowList contains a list of SyncWindow</p>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<tr><td>metadata</td><td></td><td>metav1.ListMeta</td><td>false</td></tr>
+<tr><td>items</td><td></td><td>[]<a href="crd_syncwindow.html#syncwindow">SyncWindow</a></td><td>true</td></tr>
+</tbody></table>
+</div>
+<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
+<h4 id="syncwindowsetting"><a class="header" href="#syncwindowsetting">SyncWindowSetting</a></h4>
+<p>SyncWindowSetting contains the kind, time, duration and attributes that are used to assign the syncWindows to apps</p>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<tr><td>kind</td><td>Kind defines if the window allows or blocks syncs</td><td>string</td><td>false</td></tr>
+<tr><td>schedule</td><td>Schedule is the time the window will begin, specified in cron format</td><td>string</td><td>false</td></tr>
+<tr><td>duration</td><td>Duration is the amount of time the sync window will be open</td><td>string</td><td>false</td></tr>
+<tr><td>applications</td><td>Applications contains a list of applications that the window will apply to</td><td>[]string</td><td>false</td></tr>
+<tr><td>namespaces</td><td>Namespaces contains a list of namespaces that the window will apply to</td><td>[]string</td><td>false</td></tr>
+<tr><td>clusters</td><td>Clusters contains a list of clusters that the window will apply to</td><td>[]string</td><td>false</td></tr>
+<tr><td>manualSync</td><td>ManualSync enables manual syncs when they would otherwise be blocked</td><td>bool</td><td>false</td></tr>
+<tr><td>timeZone</td><td>TimeZone of the sync that will be applied to the schedule</td><td>string</td><td>false</td></tr>
+<tr><td>andOperator</td><td>UseAndOperator use AND operator for matching applications, namespaces and clusters instead of the default OR operator</td><td>bool</td><td>false</td></tr>
+<tr><td>description</td><td>Description of the sync that will be applied to the schedule, can be used to add any information such as a ticket number for example</td><td>string</td><td>false</td></tr>
+</tbody></table>
+</div>
+<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
+<h4 id="syncwindowspec"><a class="header" href="#syncwindowspec">SyncWindowSpec</a></h4>
+<p>SyncWindowSpec defines the desired state of SyncWindow</p>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<tr><td>syncWindows</td><td>SyncWindows is a list of sync windows</td><td>SyncWindows</td><td>true</td></tr>
+</tbody></table>
+</div>
+<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
+<h4 id="syncwindowstatus"><a class="header" href="#syncwindowstatus">SyncWindowStatus</a></h4>
+<p>SyncWindowStatus defines the observed state of SyncWindow</p>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<tr><td>conditions</td><td>Conditions is an array of conditions.</td><td>[]metav1.Condition</td><td>false</td></tr>
+</tbody></table>
+</div>
+<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="configurations"><a class="header" href="#configurations">Configurations</a></h1>
 <h2 id="configuration-file"><a class="header" href="#configuration-file">Configuration file</a></h2>
 <p><code>cattage-controller</code> reads a configuration file on startup. The default location is <code>/etc/cattage/config.yaml</code>.
@@ -744,7 +874,7 @@ argocd:
       --zap-stacktrace-level level       Zap Level at and above which stacktraces are captured (one of 'info', 'error', 'panic').
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="design-notes"><a class="header" href="#design-notes">Design notes</a></h1>
-<h2 id="overview-2"><a class="header" href="#overview-2">Overview</a></h2>
+<h2 id="overview-3"><a class="header" href="#overview-3">Overview</a></h2>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/">Argo CD</a> with <a href="https://cybozu-go.github.io/accurate/">Accurate</a>.</p>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
 <p>There is a known limitation for Argo CD to implement app-of-apps pattern in a multi-tenancy environment.</p>
