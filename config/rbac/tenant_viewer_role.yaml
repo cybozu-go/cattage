@@ -4,6 +4,7 @@ kind: ClusterRole
 metadata:
   name: tenant-viewer-role
   labels:
+    app.kubernetes.io/name: cattage
     rbac.authorization.k8s.io/aggregate-to-view: "true"
 rules:
 - apiGroups:
