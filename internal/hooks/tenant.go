@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
-	"github.com/cybozu-go/cattage/pkg/accurate"
-	"github.com/cybozu-go/cattage/pkg/config"
-	"github.com/cybozu-go/cattage/pkg/constants"
+	"github.com/cybozu-go/cattage/internal/accurate"
+	"github.com/cybozu-go/cattage/internal/config"
+	"github.com/cybozu-go/cattage/internal/constants"
 	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

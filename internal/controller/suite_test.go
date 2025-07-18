@@ -1,17 +1,19 @@
-package controllers
+package controller
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
-	"github.com/cybozu-go/cattage/pkg/constants"
+	"github.com/cybozu-go/cattage/internal/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -26,10 +28,10 @@ import (
 
 var k8sCfg *rest.Config
 var k8sClient client.Client
-var scheme *runtime.Scheme
+var scheme *k8sruntime.Scheme
 var testEnv *envtest.Environment
 
-func TestAPIs(t *testing.T) {
+func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	SetDefaultEventuallyTimeout(20 * time.Second)
@@ -46,10 +48,18 @@ var _ = BeforeSuite(func() {
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "config", "crd", "bases"),
-			filepath.Join("..", "test", "crd"),
+			filepath.Join("..", "..", "config", "crd", "bases"),
+			filepath.Join("..", "..", "test", "crd"),
 		},
 		ErrorIfCRDPathMissing: true,
+
+		// The BinaryAssetsDirectory is only required if you want to run the tests directly
+		// without call the makefile target test. If not informed it will look for the
+		// default path defined in controller-runtime which is /usr/local/kubebuilder/.
+		// Note that you must have the required binaries setup under the bin directory to perform
+		// the tests directly. When we run make test it will be setup and used automatically.
+		BinaryAssetsDirectory: filepath.Join("..", "..", "bin", "k8s",
+			fmt.Sprintf("1.32.0-%s-%s", runtime.GOOS, runtime.GOARCH)),
 	}
 
 	cfg, err := testEnv.Start()
@@ -57,7 +67,7 @@ var _ = BeforeSuite(func() {
 	Expect(cfg).NotTo(BeNil())
 	k8sCfg = cfg
 
-	scheme = runtime.NewScheme()
+	scheme = k8sruntime.NewScheme()
 	err = clientgoscheme.AddToScheme(scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = cattagev1beta1.AddToScheme(scheme)

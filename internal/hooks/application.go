@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cybozu-go/cattage/pkg/argocd"
-	"github.com/cybozu-go/cattage/pkg/config"
+	"github.com/cybozu-go/cattage/internal/argocd"
+	"github.com/cybozu-go/cattage/internal/config"
 	admissionv1 "k8s.io/api/admission/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"

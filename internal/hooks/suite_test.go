@@ -6,15 +6,13 @@ import (
 	"fmt"
 	"net"
 	"path/filepath"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"testing"
 	"time"
 
-	//+kubebuilder:scaffold:imports
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
-	"github.com/cybozu-go/cattage/pkg/accurate"
-	"github.com/cybozu-go/cattage/pkg/config"
-	"github.com/cybozu-go/cattage/pkg/constants"
+	"github.com/cybozu-go/cattage/internal/accurate"
+	"github.com/cybozu-go/cattage/internal/config"
+	"github.com/cybozu-go/cattage/internal/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
@@ -27,7 +25,9 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+	//+kubebuilder:scaffold:imports
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -52,12 +52,12 @@ var _ = BeforeSuite(func() {
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "config", "crd", "bases"),
-			filepath.Join("..", "test", "crd"),
+			filepath.Join("..", "..", "config", "crd", "bases"),
+			filepath.Join("..", "..", "test", "crd"),
 		},
 		ErrorIfCRDPathMissing: false,
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
-			Paths: []string{filepath.Join("..", "config", "webhook")},
+			Paths: []string{filepath.Join("..", "..", "config", "webhook")},
 		},
 	}
 

@@ -32,3 +32,9 @@ spec:
     {{- else }}
     - '*'
     {{- end }}
+  syncWindows:
+  - kind: allow
+    schedule: '0 23 * * *'
+    duration: 1h
+    namespaces:
+      - '*-stage'

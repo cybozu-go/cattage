@@ -1,17 +1,18 @@
-package controllers
+package controller
 
 import (
 	"context"
 	_ "embed"
 	"errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"strings"
 	"time"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
-	"github.com/cybozu-go/cattage/pkg/accurate"
-	"github.com/cybozu-go/cattage/pkg/argocd"
-	tenantconfig "github.com/cybozu-go/cattage/pkg/config"
-	"github.com/cybozu-go/cattage/pkg/constants"
+	"github.com/cybozu-go/cattage/internal/accurate"
+	"github.com/cybozu-go/cattage/internal/argocd"
+	tenantconfig "github.com/cybozu-go/cattage/internal/config"
+	"github.com/cybozu-go/cattage/internal/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -201,6 +202,63 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			},
 		}))
 
+		sw1 := &cattagev1beta1.SyncWindow{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "sync-window-1",
+				Namespace: "app-x",
+			},
+			Spec: cattagev1beta1.SyncWindowSpec{
+				SyncWindows: cattagev1beta1.SyncWindows{
+					{
+						Kind:         "allow",
+						Schedule:     "0 0 * * *",
+						Duration:     "1h",
+						Applications: []string{"app-c"},
+					},
+				},
+			},
+		}
+		err = k8sClient.Create(ctx, sw1)
+		Expect(err).ToNot(HaveOccurred())
+
+		sw2 := &cattagev1beta1.SyncWindow{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "sync-window-2",
+				Namespace: "sub-4",
+			},
+			Spec: cattagev1beta1.SyncWindowSpec{
+				SyncWindows: cattagev1beta1.SyncWindows{
+					{
+						Kind:         "deny",
+						Schedule:     "0 0 * * *",
+						Duration:     "1h",
+						Applications: []string{"app-x"},
+					},
+				},
+			},
+		}
+		err = k8sClient.Create(ctx, sw2)
+		Expect(err).ToNot(HaveOccurred())
+
+		Eventually(func() error {
+			sw1 := &cattagev1beta1.SyncWindow{}
+			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "app-x", Name: "sync-window-1"}, sw1); err != nil {
+				return err
+			}
+			if !meta.IsStatusConditionTrue(sw1.Status.Conditions, cattagev1beta1.ConditionSynced) {
+				return errors.New("sync-window-1 status condition is not true")
+			}
+
+			sw2 := &cattagev1beta1.SyncWindow{}
+			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: "sub-4", Name: "sync-window-2"}, sw2); err != nil {
+				return err
+			}
+			if !meta.IsStatusConditionTrue(sw2.Status.Conditions, cattagev1beta1.ConditionSynced) {
+				return errors.New("sync-window-2 status condition is not true")
+			}
+			return nil
+		}).Should(Succeed())
+
 		proj := argocd.AppProject()
 		Eventually(func() error {
 			if err := k8sClient.Get(ctx, client.ObjectKey{Namespace: tenantCfg.ArgoCD.Namespace, Name: "x-team"}, proj); err != nil {
@@ -208,6 +266,7 @@ var _ = Describe("Tenant controller", Ordered, func() {
 			}
 			return nil
 		}).Should(Succeed())
+
 		Expect(proj.UnstructuredContent()["spec"]).Should(MatchAllKeys(Keys{
 			"destinations": ConsistOf(
 				MatchAllKeys(Keys{
@@ -252,6 +311,26 @@ var _ = Describe("Tenant controller", Ordered, func() {
 				}),
 			),
 			"sourceRepos": ConsistOf("https://github.com/cybozu-go/*"),
+			"syncWindows": ConsistOf(
+				MatchAllKeys(Keys{
+					"kind":       Equal("allow"),
+					"schedule":   Equal("0 23 * * *"),
+					"duration":   Equal("1h"),
+					"namespaces": ConsistOf("*-stage"),
+				}),
+				MatchAllKeys(Keys{
+					"kind":         Equal("allow"),
+					"schedule":     Equal("0 0 * * *"),
+					"duration":     Equal("1h"),
+					"applications": ConsistOf("app-c"),
+				}),
+				MatchAllKeys(Keys{
+					"kind":         Equal("deny"),
+					"schedule":     Equal("0 0 * * *"),
+					"duration":     Equal("1h"),
+					"applications": ConsistOf("app-x"),
+				}),
+			),
 		}))
 	})
 
@@ -423,6 +502,14 @@ var _ = Describe("Tenant controller", Ordered, func() {
 				}),
 			),
 			"sourceRepos": ConsistOf("*"),
+			"syncWindows": ConsistOf(
+				MatchAllKeys(Keys{
+					"kind":       Equal("allow"),
+					"schedule":   Equal("0 23 * * *"),
+					"duration":   Equal("1h"),
+					"namespaces": ConsistOf("*-stage"),
+				}),
+			),
 		}))
 
 		By("removing app-y2")
@@ -569,6 +656,14 @@ var _ = Describe("Tenant controller", Ordered, func() {
 				}),
 			),
 			"sourceRepos": ConsistOf("*"),
+			"syncWindows": ConsistOf(
+				MatchAllKeys(Keys{
+					"kind":       Equal("allow"),
+					"schedule":   Equal("0 23 * * *"),
+					"duration":   Equal("1h"),
+					"namespaces": ConsistOf("*-stage"),
+				}),
+			),
 		}))
 
 		By("removing tenant")

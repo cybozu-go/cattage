@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/cybozu-go/cattage/pkg/argocd"
+	"github.com/cybozu-go/cattage/internal/argocd"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -27,6 +27,10 @@ var _ = Describe("Cattage", func() {
 		}).Should(Succeed())
 		Eventually(func() error {
 			_, err := kubectl(nil, "apply", "-f", "../config/samples/application.yaml")
+			return err
+		}).Should(Succeed())
+		Eventually(func() error {
+			_, err := kubectl(nil, "apply", "-f", "../config/samples/syncwindow.yaml")
 			return err
 		}).Should(Succeed())
 	})
@@ -64,6 +68,17 @@ var _ = Describe("Cattage", func() {
 			}
 
 			return nil
+		}).Should(Succeed())
+	})
+	It("should sync syncWindows", func() {
+		Eventually(func(g Gomega) {
+			out, err := kubectl(nil, "get", "syncwindow", "-n", "sub-1", "syncwindow-sample1", "-o", "jsonpath=\"{.status.conditions[?(@.type=='Synced')].status}\"")
+			g.Expect(err).NotTo(HaveOccurred())
+			g.Expect(string(out)).To(Equal(`"True"`))
+
+			out, err = kubectl(nil, "get", "syncwindow", "-n", "app-a", "syncwindow-sample2", "-o", "jsonpath=\"{.status.conditions[?(@.type=='Synced')].status}\"")
+			g.Expect(err).NotTo(HaveOccurred())
+			g.Expect(string(out)).To(Equal(`"True"`))
 		}).Should(Succeed())
 	})
 })

@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- cattage_v1beta1_syncwindow.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

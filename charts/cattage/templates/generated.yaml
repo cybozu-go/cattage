@@ -99,6 +99,7 @@ rules:
   - apiGroups:
       - cattage.cybozu.io
     resources:
+      - syncwindows
       - tenants
     verbs:
       - create
@@ -111,12 +112,14 @@ rules:
   - apiGroups:
       - cattage.cybozu.io
     resources:
+      - syncwindows/finalizers
       - tenants/finalizers
     verbs:
       - update
   - apiGroups:
       - cattage.cybozu.io
     resources:
+      - syncwindows/status
       - tenants/status
     verbs:
       - get
@@ -144,6 +147,60 @@ rules:
       - patch
       - update
       - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: '{{ .Release.Service }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
+    app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-syncwindow-editor-role'
+rules:
+  - apiGroups:
+      - cattage.cybozu.io
+    resources:
+      - syncwindows
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - cattage.cybozu.io
+    resources:
+      - syncwindows/status
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: '{{ .Release.Service }}'
+    app.kubernetes.io/name: '{{ include "cattage.name" . }}'
+    app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
+    helm.sh/chart: '{{ include "cattage.chart" . }}'
+  name: '{{ template "cattage.fullname" . }}-syncwindow-viewer-role'
+rules:
+  - apiGroups:
+      - cattage.cybozu.io
+    resources:
+      - syncwindows
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - cattage.cybozu.io
+    resources:
+      - syncwindows/status
+    verbs:
+      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

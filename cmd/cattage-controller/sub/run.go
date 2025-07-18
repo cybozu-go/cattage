@@ -4,21 +4,22 @@ import (
 	"fmt"
 	"os"
 
-	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
-	"github.com/cybozu-go/cattage/controllers"
-	"github.com/cybozu-go/cattage/hooks"
-	"github.com/cybozu-go/cattage/pkg/config"
-	"k8s.io/apimachinery/pkg/runtime"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+
+	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
+	"github.com/cybozu-go/cattage/internal/config"
+	"github.com/cybozu-go/cattage/internal/controller"
+	"github.com/cybozu-go/cattage/internal/hooks"
+	"k8s.io/apimachinery/pkg/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -71,10 +72,10 @@ func subMain(ns, addr string, port int) error {
 		return fmt.Errorf("invalid configurations: %w", err)
 	}
 	ctx := ctrl.SetupSignalHandler()
-	if err := controllers.SetupIndexForNamespace(ctx, mgr); err != nil {
+	if err := controller.SetupIndexForNamespace(ctx, mgr); err != nil {
 		return fmt.Errorf("failed to setup indexer for namespaces: %w", err)
 	}
-	if err := controllers.NewTenantReconciler(
+	if err := controller.NewTenantReconciler(
 		mgr.GetClient(),
 		cfg,
 	).SetupWithManager(mgr); err != nil {
