@@ -7,7 +7,7 @@ helmCharts:
   releaseName: argocd
   repo: https://argoproj.github.io/argo-helm
   valuesFile: argocd-values.yaml
-  version: 6.6.0
+  version: 8.2.5
 namespace: argocd
 resources:
   - second-application-controller.yaml
