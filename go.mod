@@ -8,9 +8,9 @@ require (
 	github.com/onsi/gomega v1.36.1
 	github.com/prometheus/client_golang v1.21.0
 	github.com/spf13/cobra v1.9.1
-	k8s.io/api v0.32.6
-	k8s.io/apimachinery v0.32.6
-	k8s.io/client-go v0.32.6
+	k8s.io/api v0.32.7
+	k8s.io/apimachinery v0.32.7
+	k8s.io/client-go v0.32.7
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
 	sigs.k8s.io/controller-runtime v0.20.4
