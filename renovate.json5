@@ -110,6 +110,7 @@
       description: "Disable updates for argo-cd",
       enabled: false,
       matchPackageNames: [
+        "argoproj/argo-cd",
         "argo-cd"
       ],
     },
