@@ -15,7 +15,7 @@
   ],
   packageRules: [
     {
-      description: "Group all minor and patch updates",
+      description: "Group all minor and patch updates except Kubernetes and argo-cd packages",
       matchUpdateTypes: [
         "minor",
         "patch"
