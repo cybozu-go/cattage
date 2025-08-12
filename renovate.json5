@@ -39,7 +39,8 @@
         "go"
       ],
       matchPackagePatterns: [
-        "^k8s\\.io\\/.*"
+        "^k8s\\.io\\/.*",
+        "^sigs\\.k8s\\.io\\/.*"
       ],
       separateMinorPatch: true
     },
@@ -50,7 +51,8 @@
         "go"
       ],
       matchPackagePatterns: [
-        "^k8s\\.io\\/.*"
+        "^k8s\\.io\\/.*",
+        "^sigs\\.k8s\\.io\\/.*"
       ],
       matchUpdateTypes: [
         "major",
@@ -63,7 +65,8 @@
         "go"
       ],
       matchPackagePatterns: [
-        "^k8s\\.io\\/.*"
+        "^k8s\\.io\\/.*",
+        "^sigs\\.k8s\\.io\\/.*"
       ],
       matchUpdateTypes: [
         "patch"
@@ -82,16 +85,6 @@
       ],
       matchUpdateTypes: [
         "major"
-      ]
-    },
-    {
-      dependencyDashboardApproval: true,
-      description: "Require approval for sigs.k8s.io packages",
-      matchDatasources: [
-        "go"
-      ],
-      matchPackagePatterns: [
-        "^sigs\\.k8s\\.io\\/.*"
       ]
     },
     {
