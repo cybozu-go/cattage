@@ -5,7 +5,7 @@
     "config:recommended",
     "github>aquaproj/aqua-renovate-config#2.8.2",
     ":semanticCommitTypeAll(chore)",
-    ":timezone(Asia/Tokyo)",
+    ":timezone(Asia/Tokyo)"
   ],
   ignorePresets: [
     ":prHourlyLimit2"
@@ -13,6 +13,7 @@
   labels: [
     "dependencies"
   ],
+  minimumReleaseAge: "14 days",
   packageRules: [
     {
       description: "Group all minor and patch updates except Kubernetes and argo-cd packages",
@@ -28,7 +29,11 @@
         "kubernetes/kubectl",
         "kindest/node",
         "argoproj/argo-cd",
-        "argo-cd"
+        "argo-cd",
+        "kubernetes-sigs/controller-tools/controller-gen",
+        "aquaproj/aqua-installer",
+        "helm/chart-releaser-action",
+        "renovatebot/github-action"
       ],
       groupName: "all minor and patch updates",
       groupSlug: "all-minor-patch"
@@ -117,6 +122,13 @@
       groupSlug: "all-minor-patch"
     },
     {
+      dependencyDashboardApproval: true,
+      description: "Require approval for controller-gen updates",
+      matchPackageNames: [
+        "kubernetes-sigs/controller-tools/controller-gen"
+      ]
+    },
+    {
       description: "Separate minor and patch update for Kubernetes",
       matchPackageNames: [
         "kindest/node"
@@ -151,8 +163,20 @@
       matchPackageNames: [
         "argoproj/argo-cd",
         "argo-cd"
-      ],
+      ]
     },
+    {
+      dependencyDashboardApproval: true,
+      description: "Require approval for GitHub Action updates",
+      matchDatasources: [
+        "github-tags"
+      ],
+      matchPackageNames: [
+        "aquaproj/aqua-installer",
+        "helm/chart-releaser-action",
+        "renovatebot/github-action"
+      ]
+    }
   ],
   postUpdateOptions: [
     "gomodTidy"
@@ -167,7 +191,7 @@
       ],
       matchStrings: [
         "- (?<currentValue>.+?) # renovate: kindest\\/node"
-      ],
+      ]
     },
     {
       customType: "regex",
@@ -177,8 +201,8 @@
         "^e2e\\/Makefile$"
       ],
       matchStrings: [
-        "KUBERNETES_VERSION := (?<currentValue>.*?) # renovate: kindest\\/node",
-      ],
+        "KUBERNETES_VERSION := (?<currentValue>.*?) # renovate: kindest\\/node"
+      ]
     },
     {
       customType: "regex",
@@ -188,8 +212,8 @@
         "^cluster.yaml$"
       ],
       matchStrings: [
-        "kubernetesVersion: (?<currentValue>.*?) # renovate: kindest\\/node",
-      ],
-    },
-  ],
+        "kubernetesVersion: (?<currentValue>.*?) # renovate: kindest\\/node"
+      ]
+    }
+  ]
 }
