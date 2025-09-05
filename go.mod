@@ -4,7 +4,7 @@ go 1.23.6
 
 require (
 	github.com/google/go-cmp v0.7.0
-	github.com/onsi/ginkgo/v2 v2.24.0
+	github.com/onsi/ginkgo/v2 v2.25.0
 	github.com/onsi/gomega v1.38.0
 	github.com/prometheus/client_golang v1.23.0
 	github.com/spf13/cobra v1.9.1
