@@ -2,12 +2,12 @@ module github.com/cybozu-go/cattage
 
 go 1.24.0
 
-toolchain go1.24.7
+toolchain go1.25.0
 
 require (
 	github.com/google/go-cmp v0.7.0
-	github.com/onsi/ginkgo/v2 v2.25.1
-	github.com/onsi/gomega v1.38.1
+	github.com/onsi/ginkgo/v2 v2.25.2
+	github.com/onsi/gomega v1.38.2
 	github.com/prometheus/client_golang v1.23.0
 	github.com/spf13/cobra v1.9.1
 	k8s.io/api v0.32.8
