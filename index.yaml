@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   cattage:
   - apiVersion: v2
+    appVersion: 1.7.0
+    created: "2025-09-19T06:12:48.322520191Z"
+    description: A Helm chart for cattage
+    digest: 6b06010d30ba49786391663cdce74ef4cb8d6235f65d09ba5a21f19253d861f8
+    name: cattage
+    type: application
+    urls:
+    - https://github.com/cybozu-go/cattage/releases/download/cattage-chart-0.7.1/cattage-0.7.1.tgz
+    version: 0.7.1
+  - apiVersion: v2
     appVersion: 1.6.1
     created: "2025-07-23T06:55:32.104136767Z"
     description: A Helm chart for cattage
@@ -251,4 +261,4 @@ entries:
     urls:
     - https://cybozu-go.github.io/cattage/cattage-0.1.0.tgz
     version: 0.1.0
-generated: "2025-07-23T06:55:32.104338794Z"
+generated: "2025-09-19T06:12:48.322684077Z"
