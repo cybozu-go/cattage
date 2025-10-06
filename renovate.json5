@@ -30,7 +30,7 @@
         "kindest/node",
         "argoproj/argo-cd",
         "argo-cd",
-        "kubernetes-sigs/controller-tools/controller-gen",
+        "kubernetes-sigs/controller-tools",
         "aquaproj/aqua-installer",
         "helm/chart-releaser-action",
         "renovatebot/github-action"
@@ -125,7 +125,7 @@
       dependencyDashboardApproval: true,
       description: "Require approval for controller-gen updates",
       matchPackageNames: [
-        "kubernetes-sigs/controller-tools/controller-gen"
+        "kubernetes-sigs/controller-tools"
       ]
     },
     {
