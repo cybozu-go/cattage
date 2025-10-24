@@ -26,6 +26,7 @@ Follow [semantic versioning 2.0.0][semver] to choose the new version number.
 
     ```sh
     git switch main
+    git pull
     git tag -a -m "Release v$VERSION" "v$VERSION"
     git tag -ln | grep $VERSION
     git push origin v$VERSION
