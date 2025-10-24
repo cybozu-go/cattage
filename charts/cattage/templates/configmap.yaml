@@ -11,7 +11,7 @@ data:
       {{- with .Values.controller.config.namespace.commonLabels }}
       commonLabels: {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.controller.config.namespace.commonAnntations }}
+      {{- with .Values.controller.config.namespace.commonAnnotations }}
       commonAnnotations: {{ toYaml . | nindent 8 }}
       {{- end }}
       roleBindingTemplate: {{ required ".Values.controller.config.namespace.roleBindingTemplate required!" .Values.controller.config.namespace.roleBindingTemplate | toYaml | nindent 8 }}
