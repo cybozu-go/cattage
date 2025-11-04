@@ -26,7 +26,7 @@ your-root   Active   1m
 RoleBinding and AppProject resource are also automatically created.
 
 ```console
-$ kubeclt get rolebinding -n your-root
+$ kubectl get rolebinding -n your-root
 NAME              ROLE                AGE
 your-team-admin   ClusterRole/admin   2m
 ```
@@ -117,15 +117,15 @@ spec:
 
 Use `kubectl accurate sub move` command to change the parent of your-sub namespace to new-root.
 
-```console
-$ kubectl accurate sub move your-sub new-root
+```bash
+kubectl accurate sub move your-sub new-root
 ```
 
 As a result, `application/testhttpd` in your-sub will be out of sync.
 Please change the project of `application/testhttpd` correctly.
 
-```console
-$ kubectl patch app testhttpd -n your-sub --type='json' -p '[{ "op": "replace", "path": "/spec/project", "value": "new-team"}]'
+```bash
+kubectl patch app testhttpd -n your-sub --type='json' -p '[{ "op": "replace", "path": "/spec/project", "value": "new-team"}]'
 ```
 
 The application will be synced again.
@@ -133,6 +133,7 @@ The application will be synced again.
 ## Remove resources
 
 When an administrator deleted a tenant resource:
+
 - Root-namespaces and sub-namespaces for the tenant will remain
 - RoleBinding on the namespaces will be deleted
 - Applications on the namespaces will be deleted
