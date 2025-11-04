@@ -185,12 +185,12 @@
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <p>Argo CD has a feature called Sync Windows.
 This is a functionality to restrict application synchronization during specific time periods.<br />
-https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/</p>
+<a href="https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/">https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/</a></p>
 <p>However, to configure Sync Windows, you need to modify the <code>AppProject</code> resource.
 Modifying the <code>AppProject</code> resource is essentially equivalent to having administrator privileges.
 Therefore, when operating Argo CD in a multi-tenant environment, tenant users cannot freely configure Sync Windows.</p>
 <p>Similar concerns have been raised in Argo CD Issues as well.<br />
-https://github.com/argoproj/argo-cd/issues/11755</p>
+<a href="https://github.com/argoproj/argo-cd/issues/11755">https://github.com/argoproj/argo-cd/issues/11755</a></p>
 <p>Therefore, Cattage provides a <a href="crd_syncwindow.html"><code>SyncWindow</code> custom resource</a> that allows tenant users to create it freely.
 Cattage identifies the tenant to which the namespace where the <code>SyncWindow</code> resource is created belongs, and configures syncWindows field in the <code>AppProject</code> resource associated with that tenant.</p>
 <p>When multiple <code>SyncWindow</code> resources are created within the same tenant, their contents are merged and reflected in the <code>AppProject</code> resource.</p>

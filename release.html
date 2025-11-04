@@ -201,6 +201,7 @@ echo $VERSION
 <li>
 <p>Add a git tag to the main HEAD, then push it.</p>
 <pre><code class="language-sh">git switch main
+git pull
 git tag -a -m "Release v$VERSION" "v$VERSION"
 git tag -ln | grep $VERSION
 git push origin v$VERSION

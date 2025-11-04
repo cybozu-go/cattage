@@ -190,7 +190,7 @@ The location can be changed with <code>--config-file</code> flag.</p>
 <tr><td><code>namespace.commonLabels</code></td><td><code>map[string]string</code></td><td>Labels to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.labels</code> of a tenant resource.</td></tr>
 <tr><td><code>namespace.commonAnnotations</code></td><td><code>map[string]string</code></td><td>Annotations to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.annotations</code> of a tenant resource.</td></tr>
 <tr><td><code>namespace.roleBindingTemplate</code></td><td><code>string</code></td><td>Template for RoleBinding resource that is created on all namespaces belonging to a tenant.</td></tr>
-<tr><td><code>argocd.namepsace</code></td><td><code>string</code></td><td>The name of namespace where Argo CD is running.</td></tr>
+<tr><td><code>argocd.namespace</code></td><td><code>string</code></td><td>The name of namespace where Argo CD is running.</td></tr>
 <tr><td><code>argocd.appProjectTemplate</code></td><td><code>string</code></td><td>Template for AppProject resources that is created for each tenant.</td></tr>
 <tr><td><code>argocd.preventAppCreationInArgoCDNamespace</code></td><td><code>bool</code></td><td>If true, prevent creating applications in the Argo CD namespace. This is used to enable sharding.</td></tr>
 </tbody></table>

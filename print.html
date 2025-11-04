@@ -352,7 +352,7 @@ NAME        STATUS   AGE
 your-root   Active   1m
 </code></pre>
 <p>RoleBinding and AppProject resource are also automatically created.</p>
-<pre><code class="language-console">$ kubeclt get rolebinding -n your-root
+<pre><code class="language-console">$ kubectl get rolebinding -n your-root
 NAME              ROLE                AGE
 your-team-admin   ClusterRole/admin   2m
 </code></pre>
@@ -415,11 +415,11 @@ spec:
     - name: new-root
 </code></pre>
 <p>Use <code>kubectl accurate sub move</code> command to change the parent of your-sub namespace to new-root.</p>
-<pre><code class="language-console">$ kubectl accurate sub move your-sub new-root
+<pre><code class="language-bash">kubectl accurate sub move your-sub new-root
 </code></pre>
 <p>As a result, <code>application/testhttpd</code> in your-sub will be out of sync.
 Please change the project of <code>application/testhttpd</code> correctly.</p>
-<pre><code class="language-console">$ kubectl patch app testhttpd -n your-sub --type='json' -p '[{ "op": "replace", "path": "/spec/project", "value": "new-team"}]'
+<pre><code class="language-bash">kubectl patch app testhttpd -n your-sub --type='json' -p '[{ "op": "replace", "path": "/spec/project", "value": "new-team"}]'
 </code></pre>
 <p>The application will be synced again.</p>
 <h2 id="remove-resources"><a class="header" href="#remove-resources">Remove resources</a></h2>
@@ -562,12 +562,12 @@ If no controller name is specified, it will be processed by the default applicat
 <h2 id="overview-2"><a class="header" href="#overview-2">Overview</a></h2>
 <p>Argo CD has a feature called Sync Windows.
 This is a functionality to restrict application synchronization during specific time periods.<br />
-https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/</p>
+<a href="https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/">https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/</a></p>
 <p>However, to configure Sync Windows, you need to modify the <code>AppProject</code> resource.
 Modifying the <code>AppProject</code> resource is essentially equivalent to having administrator privileges.
 Therefore, when operating Argo CD in a multi-tenant environment, tenant users cannot freely configure Sync Windows.</p>
 <p>Similar concerns have been raised in Argo CD Issues as well.<br />
-https://github.com/argoproj/argo-cd/issues/11755</p>
+<a href="https://github.com/argoproj/argo-cd/issues/11755">https://github.com/argoproj/argo-cd/issues/11755</a></p>
 <p>Therefore, Cattage provides a <a href="crd_syncwindow.html"><code>SyncWindow</code> custom resource</a> that allows tenant users to create it freely.
 Cattage identifies the tenant to which the namespace where the <code>SyncWindow</code> resource is created belongs, and configures syncWindows field in the <code>AppProject</code> resource associated with that tenant.</p>
 <p>When multiple <code>SyncWindow</code> resources are created within the same tenant, their contents are merged and reflected in the <code>AppProject</code> resource.</p>
@@ -770,7 +770,7 @@ The location can be changed with <code>--config-file</code> flag.</p>
 <tr><td><code>namespace.commonLabels</code></td><td><code>map[string]string</code></td><td>Labels to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.labels</code> of a tenant resource.</td></tr>
 <tr><td><code>namespace.commonAnnotations</code></td><td><code>map[string]string</code></td><td>Annotations to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.annotations</code> of a tenant resource.</td></tr>
 <tr><td><code>namespace.roleBindingTemplate</code></td><td><code>string</code></td><td>Template for RoleBinding resource that is created on all namespaces belonging to a tenant.</td></tr>
-<tr><td><code>argocd.namepsace</code></td><td><code>string</code></td><td>The name of namespace where Argo CD is running.</td></tr>
+<tr><td><code>argocd.namespace</code></td><td><code>string</code></td><td>The name of namespace where Argo CD is running.</td></tr>
 <tr><td><code>argocd.appProjectTemplate</code></td><td><code>string</code></td><td>Template for AppProject resources that is created for each tenant.</td></tr>
 <tr><td><code>argocd.preventAppCreationInArgoCDNamespace</code></td><td><code>bool</code></td><td>If true, prevent creating applications in the Argo CD namespace. This is used to enable sharding.</td></tr>
 </tbody></table>
@@ -1004,6 +1004,7 @@ echo $VERSION
 <li>
 <p>Add a git tag to the main HEAD, then push it.</p>
 <pre><code class="language-sh">git switch main
+git pull
 git tag -a -m "Release v$VERSION" "v$VERSION"
 git tag -ln | grep $VERSION
 git push origin v$VERSION
