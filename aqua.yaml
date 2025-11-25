@@ -8,7 +8,7 @@ packages:
   - name: argoproj/argo-cd@v2.13.9
   - name: kubernetes/kubectl@v1.32.9
   - name: kubernetes-sigs/kubebuilder@v4.9.0
-  - name: kubernetes-sigs/kustomize@kustomize/v5.7.1
+  - name: kubernetes-sigs/kustomize@kustomize/v5.8.0
   - name: kubernetes-sigs/kind@v0.30.0
   - name: rust-lang/mdBook@v0.4.52
   - name: tilt-dev/tilt@v0.35.2
