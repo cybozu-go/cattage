@@ -17,4 +17,4 @@ packages:
   - name: mikefarah/yq@v4.48.1
   - name: clamoriniere/crd-to-markdown@v0.0.3
   - name: kubernetes-sigs/controller-tools/controller-gen@v0.18.0
-  - name: helm/helm@v3.19.0
+  - name: helm/helm@v3.19.1
