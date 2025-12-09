@@ -14,7 +14,7 @@ packages:
   - name: tilt-dev/tilt@v0.36.0
   - name: tilt-dev/ctlptl@v0.8.43
   - name: GoogleContainerTools/container-structure-test@v1.22.0
-  - name: mikefarah/yq@v4.49.1
+  - name: mikefarah/yq@v4.49.2
   - name: clamoriniere/crd-to-markdown@v0.0.3
   - name: kubernetes-sigs/controller-tools/controller-gen@v0.18.0
   - name: helm/helm@v3.19.2
