@@ -13,21 +13,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="favicon.svg">
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
 
@@ -37,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex.js";
+            window.path_to_searchindex_js = "searchindex-1504a8c3.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc.js"></script>
+        <script src="toc-024a95d2.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -54,7 +53,7 @@
             </div>
         </div>
     </div>
-    <div id="body-container">
+    <div id="mdbook-body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
@@ -83,12 +82,12 @@
             html.classList.add("js");
         </script>
 
-        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
             let sidebar = null;
-            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -103,39 +102,39 @@
             }
         </script>
 
-        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
                 <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
             </noscript>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
             </div>
         </nav>
 
-        <div id="page-wrapper" class="page-wrapper">
+        <div id="mdbook-page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
-                <div id="menu-bar" class="menu-bar sticky">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
-                            <i class="fa fa-bars"></i>
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
                         </label>
-                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
-                            <i class="fa fa-paint-brush"></i>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
                         </button>
-                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
-                            <i class="fa fa-search"></i>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
                         </button>
                     </div>
 
@@ -143,54 +142,55 @@
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
-                            <i id="print-button" class="fa fa-print"></i>
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
                         <a href="https://github.com/cybozu-go/cattage" title="Git repository" aria-label="Git repository">
-                            <i id="git-repository-button" class="fa fa-github"></i>
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
                         </a>
 
                     </div>
                 </div>
 
-                <div id="search-wrapper" class="hidden">
-                    <form id="searchbar-outer" class="searchbar-outer">
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
                         <div class="search-wrapper">
-                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
                             <div class="spinner-wrapper">
-                                <i class="fa fa-spinner fa-spin"></i>
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
                             </div>
                         </div>
                     </form>
-                    <div id="searchresults-outer" class="searchresults-outer hidden">
-                        <div id="searchresults-header" class="searchresults-header"></div>
-                        <ul id="searchresults">
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
                         </ul>
                     </div>
                 </div>
 
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                 <script>
-                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
-                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
-                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
                         link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
                     });
                 </script>
 
-                <div id="content" class="content">
+                <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="cattage-documentation"><a class="header" href="#cattage-documentation">Cattage documentation</a></h1>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/en/stable/">Argo CD</a> with <a href="https://github.com/cybozu-go/accurate">Accurate</a>.
 It is currently developed and maintained by <a href="https://cybozu-global.com/">Cybozu</a>.</p>
 <p>The repository is at <a href="https://github.com/cybozu-go/cattage">https://github.com/cybozu-go/cattage</a> .</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/en/stable/">Argo CD</a> with <a href="https://github.com/cybozu-go/accurate">Accurate</a>.</p>
 <h2 id="features"><a class="header" href="#features">Features</a></h2>
 <ul>
 <li>
 <p>Management of root-namespaces for tenants</p>
-<p>When an administrator creates a <a href="crd_tenant.html">tenant resource</a>, root-namespaces for the tenant will be created.
-A RoleBinding resource will be created in the namespace so that the namespace can only be accessed by the tenant's users.
+<p>When an administrator creates a <a href="#tenant-custom-resource">tenant resource</a>, root-namespaces for the tenant will be created.
+A RoleBinding resource will be created in the namespace so that the namespace can only be accessed by the tenant’s users.
 Tenant users can create sub-namespaces in those root-namespaces.</p>
 </li>
 <li>
@@ -210,7 +210,8 @@ When the parent of a sub-namespace is changed, Cattage will automatically update
 This feature is useful when you have a large number of tenants and want to avoid a single application-controller instance from being overloaded.</p>
 </li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="setup"><a class="header" href="#setup">Setup</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="setup"><a class="header" href="#setup">Setup</a></h1>
 <h2 id="kubernetes-cluster"><a class="header" href="#kubernetes-cluster">Kubernetes cluster</a></h2>
 <p>Cattage is a controller that runs in a soft multi-tenancy Kubernetes cluster.
 Namespaces must be isolated for each tenant.</p>
@@ -247,7 +248,7 @@ rules:
   - watch
   - deletecollection
 </code></pre>
-<p>Cattage requires Argo CD's <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/">Applications in any namespace</a> is enabled.
+<p>Cattage requires Argo CD’s <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/">Applications in any namespace</a> is enabled.
 In order to enable the feature, add <code>--application-namespace="*"</code> parameter to <code>argocd-server</code> and <code>argocd-application-controller</code>.</p>
 <h2 id="cert-manager"><a class="header" href="#cert-manager">cert-manager</a></h2>
 <p>Cattage and Accurate depend on <a href="https://cert-manager.io/">cert-manager</a> to issue TLS certificate for admission webhooks.
@@ -326,7 +327,7 @@ It expects <code>cattage.cybozu.io/tenant</code> labels and RoleBinding resource
             {{- end }}
 </code></pre>
 <p><code>appProjectTemplate</code> and <code>roleBindingTemplate</code> should be configured appropriately for your multi-tenancy environment.
-Read <a href="config.html">Configurations</a> for details.</p>
+Read <a href="#configurations">Configurations</a> for details.</p>
 <p>Setup Helm repository:</p>
 <pre><code class="language-sh">helm repo add cattage https://cybozu-go.github.io/cattage
 helm repo update
@@ -334,7 +335,8 @@ helm repo update
 <p>Install the Helm chart with your values.yaml:</p>
 <pre><code class="language-sh">helm install --create-namespace --namespace cattage cattage cattage/cattage -f values.yaml
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="usage"><a class="header" href="#usage">Usage</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="usage"><a class="header" href="#usage">Usage</a></h1>
 <h2 id="create-a-tenant-resource"><a class="header" href="#create-a-tenant-resource">Create a Tenant resource</a></h2>
 <p>Administrators can create the following tenant resource for a tenant team.</p>
 <pre><code class="language-yaml">apiVersion: cattage.cybozu.io/v1beta1
@@ -430,12 +432,13 @@ Please change the project of <code>application/testhttpd</code> correctly.</p>
 <li>Applications on the namespaces will be deleted</li>
 <li>AppProject for the tenant will be deleted</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="sharding"><a class="header" href="#sharding">Sharding</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="sharding"><a class="header" href="#sharding">Sharding</a></h1>
 <h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
 <p>In Argo CD, as the number of managed applications increases, the load on the Application Controller becomes significant.
 While Argo CD supports sharding, it can only shard controllers per Kubernetes cluster. (ref. <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/">https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/</a> )</p>
 <p>Cattage provides the capability to shard controllers on a per-tenant basis using <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/">applications in any namespace</a>.
-By specifying a controller name in the Tenant resource, you can designate which controller will process Applications created in that tenant's Namespaces.</p>
+By specifying a controller name in the Tenant resource, you can designate which controller will process Applications created in that tenant’s Namespaces.</p>
 <h2 id="how-to-use"><a class="header" href="#how-to-use">How to use</a></h2>
 <h3 id="setup-stakaterreloader"><a class="header" href="#setup-stakaterreloader">Setup stakater/Reloader</a></h3>
 <p><a href="https://github.com/stakater/Reloader">stakater/Reloader</a> is a Kubernetes controller that watches for changes in ConfigMaps and Secrets, executing rolling updates on Deployments and StatefulSets as needed.
@@ -543,7 +546,7 @@ spec:
 <li><code>&lt;controller name&gt;-application-controller-cm</code>: Lists namespaces for tenants with a specified controller</li>
 </ul>
 <h3 id="setup-cattage"><a class="header" href="#setup-cattage">Setup Cattage</a></h3>
-<p>Follow the <a href="./setup.html">setup instructions</a> to install Cattage.</p>
+<p>Follow the <a href="#setup">setup instructions</a> to install Cattage.</p>
 <p>Ensure <code>controller.config.argocd.preventAppCreationInArgoCDNamespace</code> in values.yaml is enabled to avoid multiple controllers processing the same Application in argocd namespace.</p>
 <h3 id="creating-tenant-resources"><a class="header" href="#creating-tenant-resources">Creating Tenant Resources</a></h3>
 <p>When creating a Tenant resource, specify the controllerName.</p>
@@ -558,17 +561,16 @@ spec:
 </code></pre>
 <p>Applications created in the Namespace of that tenant will then be processed by the specified application controller.
 If no controller name is specified, it will be processed by the default application controller.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="syncwindow"><a class="header" href="#syncwindow">SyncWindow</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="syncwindow"><a class="header" href="#syncwindow">SyncWindow</a></h1>
 <h2 id="overview-2"><a class="header" href="#overview-2">Overview</a></h2>
 <p>Argo CD has a feature called Sync Windows.
-This is a functionality to restrict application synchronization during specific time periods.<br />
-<a href="https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/">https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/</a></p>
+This is a functionality to restrict application synchronization during specific time periods.<br><a href="https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/">https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/</a></p>
 <p>However, to configure Sync Windows, you need to modify the <code>AppProject</code> resource.
 Modifying the <code>AppProject</code> resource is essentially equivalent to having administrator privileges.
 Therefore, when operating Argo CD in a multi-tenant environment, tenant users cannot freely configure Sync Windows.</p>
-<p>Similar concerns have been raised in Argo CD Issues as well.<br />
-<a href="https://github.com/argoproj/argo-cd/issues/11755">https://github.com/argoproj/argo-cd/issues/11755</a></p>
-<p>Therefore, Cattage provides a <a href="crd_syncwindow.html"><code>SyncWindow</code> custom resource</a> that allows tenant users to create it freely.
+<p>Similar concerns have been raised in Argo CD Issues as well.<br><a href="https://github.com/argoproj/argo-cd/issues/11755">https://github.com/argoproj/argo-cd/issues/11755</a></p>
+<p>Therefore, Cattage provides a <a href="#syncwindow-custom-resource"><code>SyncWindow</code> custom resource</a> that allows tenant users to create it freely.
 Cattage identifies the tenant to which the namespace where the <code>SyncWindow</code> resource is created belongs, and configures syncWindows field in the <code>AppProject</code> resource associated with that tenant.</p>
 <p>When multiple <code>SyncWindow</code> resources are created within the same tenant, their contents are merged and reflected in the <code>AppProject</code> resource.</p>
 <h2 id="how-to-use-1"><a class="header" href="#how-to-use-1">How to use</a></h2>
@@ -630,110 +632,173 @@ spec:
     namespaces:
     - default
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h3 id="custom-resources"><a class="header" href="#custom-resources">Custom Resources</a></h3>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="tenant-custom-resource"><a href="#tenant-custom-resource" class="header">Tenant custom resource</a></h1>
+<h3 id="custom-resources"><a class="header" href="#custom-resources">Custom Resources</a></h3>
 <ul>
-<li><a href="crd_tenant.html#tenant">Tenant</a></li>
+<li><a href="#tenant">Tenant</a></li>
 </ul>
 <h3 id="sub-resources"><a class="header" href="#sub-resources">Sub Resources</a></h3>
 <ul>
-<li><a href="crd_tenant.html#argocdspec">ArgoCDSpec</a></li>
-<li><a href="crd_tenant.html#delegatespec">DelegateSpec</a></li>
-<li><a href="crd_tenant.html#rootnamespacespec">RootNamespaceSpec</a></li>
-<li><a href="crd_tenant.html#tenantlist">TenantList</a></li>
-<li><a href="crd_tenant.html#tenantspec">TenantSpec</a></li>
-<li><a href="crd_tenant.html#tenantstatus">TenantStatus</a></li>
+<li><a href="#argocdspec">ArgoCDSpec</a></li>
+<li><a href="#delegatespec">DelegateSpec</a></li>
+<li><a href="#rootnamespacespec">RootNamespaceSpec</a></li>
+<li><a href="#tenantlist">TenantList</a></li>
+<li><a href="#tenantspec">TenantSpec</a></li>
+<li><a href="#tenantstatus">TenantStatus</a></li>
 </ul>
 <h4 id="argocdspec"><a class="header" href="#argocdspec">ArgoCDSpec</a></h4>
 <p>ArgoCDSpec defines the desired state of the settings for Argo CD.</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>repositories</td><td>Repositories contains list of repository URLs which can be used by the tenant.</td><td>[]string</td><td>false</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="delegatespec"><a class="header" href="#delegatespec">DelegateSpec</a></h4>
 <p>DelegateSpec defines a tenant that is delegated access to a tenant.</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>name</td><td>Name is the name of a delegated tenant.</td><td>string</td><td>true</td></tr>
 <tr><td>roles</td><td>Roles is a list of roles that the tenant has.</td><td>[]string</td><td>true</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="rootnamespacespec"><a class="header" href="#rootnamespacespec">RootNamespaceSpec</a></h4>
 <p>RootNamespaceSpec defines the desired state of Namespace.</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>name</td><td>Name is the name of namespace to be generated.</td><td>string</td><td>true</td></tr>
 <tr><td>labels</td><td>Labels are the labels to add to the namespace. This supersedes <code>namespace.commonLabels</code> in the configuration.</td><td>map[string]string</td><td>false</td></tr>
 <tr><td>annotations</td><td>Annotations are the annotations to add to the namespace. This supersedes <code>namespace.commonAnnotations</code> in the configuration.</td><td>map[string]string</td><td>false</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenant"><a class="header" href="#tenant">Tenant</a></h4>
 <p>Tenant is the Schema for the tenants API.</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>metadata</td><td></td><td>metav1.ObjectMeta</td><td>false</td></tr>
-<tr><td>spec</td><td></td><td><a href="crd_tenant.html#tenantspec">TenantSpec</a></td><td>false</td></tr>
-<tr><td>status</td><td></td><td><a href="crd_tenant.html#tenantstatus">TenantStatus</a></td><td>false</td></tr>
-</tbody></table>
+<tr><td>spec</td><td></td><td><a href="#tenantspec">TenantSpec</a></td><td>false</td></tr>
+<tr><td>status</td><td></td><td><a href="#tenantstatus">TenantStatus</a></td><td>false</td></tr>
+</tbody>
+</table>
 </div>
-<p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantlist"><a class="header" href="#tenantlist">TenantList</a></h4>
 <p>TenantList contains a list of Tenant.</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>metadata</td><td></td><td>metav1.ListMeta</td><td>false</td></tr>
-<tr><td>items</td><td></td><td>[]<a href="crd_tenant.html#tenant">Tenant</a></td><td>true</td></tr>
-</tbody></table>
+<tr><td>items</td><td></td><td>[]<a href="#tenant">Tenant</a></td><td>true</td></tr>
+</tbody>
+</table>
 </div>
-<p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantspec"><a class="header" href="#tenantspec">TenantSpec</a></h4>
 <p>TenantSpec defines the desired state of Tenant.</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
-<tr><td>rootNamespaces</td><td>RootNamespaces are the list of root namespaces that belong to this tenant.</td><td>[]<a href="crd_tenant.html#rootnamespacespec">RootNamespaceSpec</a></td><td>true</td></tr>
-<tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant.</td><td><a href="crd_tenant.html#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
-<tr><td>delegates</td><td>Delegates is a list of other tenants that are delegated access to this tenant.</td><td>[]<a href="crd_tenant.html#delegatespec">DelegateSpec</a></td><td>false</td></tr>
-<tr><td>controllerName</td><td>ControllerName is the name of the application-controller that manages this tenant's applications. If not specified, the default controller is used.</td><td>string</td><td>false</td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
+<tr><td>rootNamespaces</td><td>RootNamespaces are the list of root namespaces that belong to this tenant.</td><td>[]<a href="#rootnamespacespec">RootNamespaceSpec</a></td><td>true</td></tr>
+<tr><td>argocd</td><td>ArgoCD is the settings of Argo CD for this tenant.</td><td><a href="#argocdspec">ArgoCDSpec</a></td><td>false</td></tr>
+<tr><td>delegates</td><td>Delegates is a list of other tenants that are delegated access to this tenant.</td><td>[]<a href="#delegatespec">DelegateSpec</a></td><td>false</td></tr>
+<tr><td>controllerName</td><td>ControllerName is the name of the application-controller that manages this tenant’s applications. If not specified, the default controller is used.</td><td>string</td><td>false</td></tr>
 <tr><td>extraParams</td><td>ExtraParams is a map of extra parameters that can be used in the templates.</td><td>*Params</td><td>false</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources">Back to Custom Resources</a></p>
 <h4 id="tenantstatus"><a class="header" href="#tenantstatus">TenantStatus</a></h4>
 <p>TenantStatus defines the observed state of Tenant.</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>health</td><td>Health is the health of Tenant.</td><td>TenantHealth</td><td>false</td></tr>
 <tr><td>conditions</td><td>Conditions is an array of conditions.</td><td>[]metav1.Condition</td><td>false</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<p><a href="crd_tenant.html#custom-resources">Back to Custom Resources</a></p>
-<div style="break-before: page; page-break-before: always;"></div><h3 id="custom-resources-1"><a class="header" href="#custom-resources-1">Custom Resources</a></h3>
+<p><a href="#custom-resources">Back to Custom Resources</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="syncwindow-custom-resource"><a href="#syncwindow-custom-resource" class="header">SyncWindow custom resource</a></h1>
+<h3 id="custom-resources-1"><a class="header" href="#custom-resources-1">Custom Resources</a></h3>
 <ul>
-<li><a href="crd_syncwindow.html#syncwindow">SyncWindow</a></li>
+<li><a href="#syncwindow-1">SyncWindow</a></li>
 </ul>
 <h3 id="sub-resources-1"><a class="header" href="#sub-resources-1">Sub Resources</a></h3>
 <ul>
-<li><a href="crd_syncwindow.html#syncwindowlist">SyncWindowList</a></li>
-<li><a href="crd_syncwindow.html#syncwindowsetting">SyncWindowSetting</a></li>
-<li><a href="crd_syncwindow.html#syncwindowspec">SyncWindowSpec</a></li>
-<li><a href="crd_syncwindow.html#syncwindowstatus">SyncWindowStatus</a></li>
+<li><a href="#syncwindowlist">SyncWindowList</a></li>
+<li><a href="#syncwindowsetting">SyncWindowSetting</a></li>
+<li><a href="#syncwindowspec">SyncWindowSpec</a></li>
+<li><a href="#syncwindowstatus">SyncWindowStatus</a></li>
 </ul>
 <h4 id="syncwindow-1"><a class="header" href="#syncwindow-1">SyncWindow</a></h4>
 <p>SyncWindow is the Schema for the syncwindows API</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>metadata</td><td></td><td>metav1.ObjectMeta</td><td>false</td></tr>
-<tr><td>spec</td><td></td><td><a href="crd_syncwindow.html#syncwindowspec">SyncWindowSpec</a></td><td>false</td></tr>
-<tr><td>status</td><td></td><td><a href="crd_syncwindow.html#syncwindowstatus">SyncWindowStatus</a></td><td>false</td></tr>
-</tbody></table>
+<tr><td>spec</td><td></td><td><a href="#syncwindowspec">SyncWindowSpec</a></td><td>false</td></tr>
+<tr><td>status</td><td></td><td><a href="#syncwindowstatus">SyncWindowStatus</a></td><td>false</td></tr>
+</tbody>
+</table>
 </div>
-<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources-1">Back to Custom Resources</a></p>
 <h4 id="syncwindowlist"><a class="header" href="#syncwindowlist">SyncWindowList</a></h4>
 <p>SyncWindowList contains a list of SyncWindow</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>metadata</td><td></td><td>metav1.ListMeta</td><td>false</td></tr>
-<tr><td>items</td><td></td><td>[]<a href="crd_syncwindow.html#syncwindow">SyncWindow</a></td><td>true</td></tr>
-</tbody></table>
+<tr><td>items</td><td></td><td>[]<a href="#syncwindow-1">SyncWindow</a></td><td>true</td></tr>
+</tbody>
+</table>
 </div>
-<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources-1">Back to Custom Resources</a></p>
 <h4 id="syncwindowsetting"><a class="header" href="#syncwindowsetting">SyncWindowSetting</a></h4>
 <p>SyncWindowSetting contains the kind, time, duration and attributes that are used to assign the syncWindows to apps</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>kind</td><td>Kind defines if the window allows or blocks syncs</td><td>string</td><td>false</td></tr>
 <tr><td>schedule</td><td>Schedule is the time the window will begin, specified in cron format</td><td>string</td><td>false</td></tr>
 <tr><td>duration</td><td>Duration is the amount of time the sync window will be open</td><td>string</td><td>false</td></tr>
@@ -744,36 +809,56 @@ spec:
 <tr><td>timeZone</td><td>TimeZone of the sync that will be applied to the schedule</td><td>string</td><td>false</td></tr>
 <tr><td>andOperator</td><td>UseAndOperator use AND operator for matching applications, namespaces and clusters instead of the default OR operator</td><td>bool</td><td>false</td></tr>
 <tr><td>description</td><td>Description of the sync that will be applied to the schedule, can be used to add any information such as a ticket number for example</td><td>string</td><td>false</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources-1">Back to Custom Resources</a></p>
 <h4 id="syncwindowspec"><a class="header" href="#syncwindowspec">SyncWindowSpec</a></h4>
 <p>SyncWindowSpec defines the desired state of SyncWindow</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>syncWindows</td><td>SyncWindows is a list of sync windows</td><td>SyncWindows</td><td>true</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
+<p><a href="#custom-resources-1">Back to Custom Resources</a></p>
 <h4 id="syncwindowstatus"><a class="header" href="#syncwindowstatus">SyncWindowStatus</a></h4>
 <p>SyncWindowStatus defines the observed state of SyncWindow</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th><th>Scheme</th><th>Required</th></tr>
+</thead>
+<tbody>
 <tr><td>conditions</td><td>Conditions is an array of conditions.</td><td>[]metav1.Condition</td><td>false</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<p><a href="crd_syncwindow.html#custom-resources">Back to Custom Resources</a></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="configurations"><a class="header" href="#configurations">Configurations</a></h1>
+<p><a href="#custom-resources-1">Back to Custom Resources</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="configurations"><a class="header" href="#configurations">Configurations</a></h1>
 <h2 id="configuration-file"><a class="header" href="#configuration-file">Configuration file</a></h2>
 <p><code>cattage-controller</code> reads a configuration file on startup. The default location is <code>/etc/cattage/config.yaml</code>.
 The location can be changed with <code>--config-file</code> flag.</p>
 <p>The configuration file should be a JSON or YAML file having the following keys:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Type</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td><code>namespace.commonLabels</code></td><td><code>map[string]string</code></td><td>Labels to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.labels</code> of a tenant resource.</td></tr>
 <tr><td><code>namespace.commonAnnotations</code></td><td><code>map[string]string</code></td><td>Annotations to be added to all namespaces belonging to all tenants. This may be overridden by <code>rootNamespaces.annotations</code> of a tenant resource.</td></tr>
 <tr><td><code>namespace.roleBindingTemplate</code></td><td><code>string</code></td><td>Template for RoleBinding resource that is created on all namespaces belonging to a tenant.</td></tr>
 <tr><td><code>argocd.namespace</code></td><td><code>string</code></td><td>The name of namespace where Argo CD is running.</td></tr>
 <tr><td><code>argocd.appProjectTemplate</code></td><td><code>string</code></td><td>Template for AppProject resources that is created for each tenant.</td></tr>
 <tr><td><code>argocd.preventAppCreationInArgoCDNamespace</code></td><td><code>bool</code></td><td>If true, prevent creating applications in the Argo CD namespace. This is used to enable sharding.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>The repository includes an example as follows:</p>
 <pre><code class="language-yaml">namespace:
@@ -831,29 +916,54 @@ argocd:
 </code></pre>
 <p><code>roleBindingTemplate</code> and <code>appProjectTemplate</code> can be written in go-template format.</p>
 <p><code>roleBindingTemplate</code> can use the following variables:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Type</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
 <tr><td><code>Roles</code></td><td><code>map[string]Role</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
 <tr><td><code>ExtraParams</code></td><td><code>map[string]string</code></td><td>Extra parameters specified per tenant.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p><code>appProjectTemplate</code> can use the following variables:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Type</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
 <tr><td><code>Namespaces</code></td><td><code>[]string</code></td><td>List of namespaces belonging to a tenant (including sub-namespaces).</td></tr>
 <tr><td><code>Repositories</code></td><td><code>[]string</code></td><td>List of repository URLs which can be used by the tenant.</td></tr>
 <tr><td><code>Roles</code></td><td><code>map[string]Role</code></td><td>Map of other tenants that are accessible to this tenant. The key is a role name.</td></tr>
 <tr><td><code>ExtraParams</code></td><td><code>map[string]string</code></td><td>Extra parameters specified per tenant.</td></tr>
-</tbody></table>
-</div><div class="table-wrapper"><table><thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead><tbody>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Type</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td><code>Name</code></td><td><code>string</code></td><td>The name of the tenant.</td></tr>
 <tr><td><code>ExtraParams</code></td><td><code>map[string]string</code></td><td>Extra parameters specified per tenant.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h2 id="environment-variables"><a class="header" href="#environment-variables">Environment variables</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Required</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Required</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td><code>POD_NAMESPACE</code></td><td>Yes</td><td>The namespace name where <code>cattage</code> is running.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h2 id="command-line-flags"><a class="header" href="#command-line-flags">Command-line flags</a></h2>
 <pre><code class="language-txt">Flags:
@@ -882,7 +992,8 @@ argocd:
       --zap-log-level level              Zap Level to configure the verbosity of logging. Can be one of 'debug', 'info', 'error', or any integer value &gt; 0 which corresponds to custom debug levels of increasing verbosity
       --zap-stacktrace-level level       Zap Level at and above which stacktraces are captured (one of 'info', 'error', 'panic').
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="design-notes"><a class="header" href="#design-notes">Design notes</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="design-notes"><a class="header" href="#design-notes">Design notes</a></h1>
 <h2 id="overview-3"><a class="header" href="#overview-3">Overview</a></h2>
 <p>Cattage is a Kubernetes controller that enhances the multi-tenancy of <a href="https://argo-cd.readthedocs.io/">Argo CD</a> with <a href="https://cybozu-go.github.io/accurate/">Accurate</a>.</p>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
@@ -911,7 +1022,7 @@ No more manual operations to add Applications, AppProjects and Namespaces.</p>
 <h3 id="adding-an-app-of-apps-application"><a class="header" href="#adding-an-app-of-apps-application">Adding an app-of-apps Application</a></h3>
 <p>Tenant users can create Application resources within their sub-namespaces.
 Application resources are strictly validated.
-No more deploying to another tenant's namespace by mistake.</p>
+No more deploying to another tenant’s namespace by mistake.</p>
 <h3 id="changing-ownership"><a class="header" href="#changing-ownership">Changing ownership</a></h3>
 <p>There are cases where you want to move ownership of an application between tenants.
 Accurate supports <code>kubectl accurate sub move</code> command to change the parent of a sub-namespace.</p>
@@ -937,8 +1048,9 @@ Also, it does not solve our some problems.</p>
 <li><a href="https://github.com/pipe-cd/pipe">https://github.com/pipe-cd/pipe</a></li>
 </ul>
 <p>However, we love Argo CD (the many features and the useful UI).
-We already have a lot of manifests managed by Argo CD. It's hard to switch to another tool now.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="development"><a class="header" href="#development">Development</a></h1>
+We already have a lot of manifests managed by Argo CD. It’s hard to switch to another tool now.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="development"><a class="header" href="#development">Development</a></h1>
 <ol>
 <li>
 <p>Prepare a Linux box running Docker.</p>
@@ -984,7 +1096,8 @@ make dev
 </code></pre>
 </li>
 </ol>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="release-procedure"><a class="header" href="#release-procedure">Release procedure</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="release-procedure"><a class="header" href="#release-procedure">Release procedure</a></h1>
 <p>This document describes how to release a new version.</p>
 <h2 id="labeling"><a class="header" href="#labeling">Labeling</a></h2>
 <p>Release notes are automatically generated based on PRs included in the release.
@@ -1011,7 +1124,8 @@ git push origin v$VERSION
 </code></pre>
 </li>
 </ol>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="maintenance"><a class="header" href="#maintenance">Maintenance</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="maintenance"><a class="header" href="#maintenance">Maintenance</a></h1>
 <h2 id="how-to-update-supported-kubernetes"><a class="header" href="#how-to-update-supported-kubernetes">How to update supported Kubernetes</a></h2>
 <p>Cattage supports the three latest Kubernetes versions.
 If a new Kubernetes is released, please update the following files.</p>
@@ -1051,6 +1165,11 @@ However, Argo CD is not subject to Renovate. Also, Kubernetes is only updated wi
 
         </div>
 
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
 
 
 
@@ -1059,13 +1178,13 @@ However, Argo CD is not subject to Renovate. Also, Kubernetes is only updated wi
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 
