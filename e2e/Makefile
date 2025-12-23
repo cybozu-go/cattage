@@ -1,4 +1,4 @@
-KUBERNETES_VERSION = v1.32.5@sha256:e3b2327e3a5ab8c76f5ece68936e4cafaa82edf58486b769727ab0b3b97a5b0d # renovate: kindest/node
+KUBERNETES_VERSION = v1.33.4@sha256:25a6018e48dfcaee478f4a59af81157a437f15e6e140bf103f85a2e7cd0cbbf2 # renovate: kindest/node
 
 KIND_CONFIG = kind-config.yaml
 export KUBECONFIG
