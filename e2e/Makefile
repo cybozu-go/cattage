@@ -52,7 +52,7 @@ generate-second-controller:
 .PHONY: test
 test:
 	env RUN_E2E=1 \
-		go test -v -race . -ginkgo.progress -ginkgo.v -ginkgo.failFast
+		go test -v -race . -ginkgo.v -ginkgo.fail-fast
 
 .PHONY: logs
 logs:
