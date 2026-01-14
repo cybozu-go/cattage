@@ -3,7 +3,7 @@
 # https://aquaproj.github.io/
 registries:
   - type: standard
-    ref: v4.449.0 # renovate: depName=aquaproj/aqua-registry
+    ref: v4.450.0 # renovate: depName=aquaproj/aqua-registry
 packages:
   - name: argoproj/argo-cd@v2.13.9
   - name: kubernetes/kubectl@v1.34.3
