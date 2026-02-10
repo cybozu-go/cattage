@@ -16,24 +16,7 @@ Cattage is a Kubernetes controller that enhances the multi-tenancy of [Argo CD][
 
 ## Supported Version
 
-Cattage depends on the specification of Argo CD and Accurate.
-
-Cattage supports the following versions:
-
-| Cattage      | Argo CD | Accurate |
-|--------------|---------|----------|
-| 1.7.1        | 2.13.x  | 1.7.x    |
-| 1.7.0        | 2.13.x  | 1.7.x    |
-| 1.6.0        | 2.13.x  | 1.7.x    |
-| 1.5.0        | 2.13.x  | 1.4.x    |
-| 1.4.3        | 2.11.x  | 1.4.x    |
-| 1.2.0        | 2.10.x  | 1.3.x    |
-| 1.1.0        | 2.6.x   | 1.0.x    |
-| 1.0.0        | 2.5.x   | 0.4.x    |
-| 0.1.4        | 2.4.17  | 0.4.x    |
-| 0.1.3        | 2.3.9   | 0.4.x    |
-| 0.1.2        | 2.3.2   | 0.3.x    |
-| 0.1.0, 0.1.1 | 2.2.5   | 0.3.x    |
+Cattage depends on the specification of Argo CD and Accurate. While it is expected to work in most cases, please open an issue if you encounter any errors with a specific combination of versions.
 
 ## Documentation
 
