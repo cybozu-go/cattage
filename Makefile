@@ -82,10 +82,10 @@ crds:
 	curl -fsL -o test/crd/appproject.yaml https://raw.githubusercontent.com/argoproj/argo-cd/v$(ARGOCD_VERSION)/manifests/crds/appproject-crd.yaml
 
 .PHONY: envtest
-envtest: setup-envtest crds
-	source <($(SETUP_ENVTEST) use -p env); \
+envtest: crds
+	source <(setup-envtest use -p env); \
 		go test -v -count 1 -race ./internal/controller -ginkgo.v -ginkgo.fail-fast
-	source <($(SETUP_ENVTEST) use -p env); \
+	source <(setup-envtest use -p env); \
 		go test -v -count 1 -race ./internal/hooks -ginkgo.v -ginkgo.fail-fast
 
 .PHONY: test
@@ -137,12 +137,6 @@ login-argocd:
 	argocd login localhost:8080 --insecure --username admin --password $$(kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 
 ##@ Tools
-
-SETUP_ENVTEST := $(BIN_DIR)/setup-envtest
-.PHONY: setup-envtest
-setup-envtest: ## Download setup-envtest locally if necessary
-	# see https://github.com/kubernetes-sigs/controller-runtime/tree/master/tools/setup-envtest
-	GOBIN=$(BIN_DIR) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 
 .PHONY: test-tools
 test-tools: $(STATICCHECK)
