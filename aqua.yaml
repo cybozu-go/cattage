@@ -5,7 +5,7 @@ registries:
   - type: standard
     ref: v4.486.0 # renovate: depName=aquaproj/aqua-registry
 packages:
-  - name: argoproj/argo-cd@v3.0.23
+  - name: argoproj/argo-cd@v3.3.6
   - name: clamoriniere/crd-to-markdown@v0.0.3
   - name: GoogleContainerTools/container-structure-test@v1.22.1
   - name: helm/helm@v4.1.3
