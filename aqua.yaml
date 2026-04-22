@@ -19,3 +19,4 @@ packages:
   - name: rust-lang/mdBook@v0.5.2
   - name: tilt-dev/ctlptl@v0.9.0
   - name: tilt-dev/tilt@v0.37.0
+  - name: dominikh/go-tools/staticcheck@2026.1
