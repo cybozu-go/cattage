@@ -23,5 +23,5 @@ If Argo CD API has changed, please fix the relevant source code.
 
 ## How to update dependencies
 
-Renovate will create PRs that update dependencies once a week.
+Renovate will create PRs that update dependencies when you [trigger the workflow with `workflow_dispatch`](https://github.com/cybozu-go/cattage/actions/workflows/renovate.yaml).
 However, Argo CD is not subject to Renovate. Also, Kubernetes is only updated with patched versions.
