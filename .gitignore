@@ -25,3 +25,4 @@
 
 # Temporary directories
 /tmp
+/e2e/tmp
