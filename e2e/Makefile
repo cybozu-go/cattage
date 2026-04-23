@@ -69,7 +69,7 @@ setup-accurate:
 .PHONY: prepare
 prepare: setup-cert-manager setup-reloader setup-accurate
 	# Setup Argo CD
-	kubectl create namespace argocd
+	kubectl get ns argocd || kubectl create namespace argocd
 	kustomize build --enable-helm ./manifests | kubectl apply -f -
 	kubectl -n argocd wait --for=condition=available --timeout=180s --all deployments
 
