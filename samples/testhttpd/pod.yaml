@@ -5,7 +5,7 @@ metadata:
   namespace: sub-1
 spec:
   containers:
-  - image: ghcr.io/cybozu/testhttpd:0
+  - image: ghcr.io/cybozu/testhttpd:0.3.4@sha256:0eab0837c64860c5487fe6f369a8373a0b80fb2466ba2fb3899428b54d1dad4c
     imagePullPolicy: IfNotPresent
     name: testhttpd
     ports:

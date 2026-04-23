@@ -1,6 +1,6 @@
 load('ext://restart_process', 'docker_build_with_restart')
 
-DOCKERFILE = '''FROM golang:alpine
+DOCKERFILE = '''FROM golang:1.26.2-alpine3.23@sha256:f85330846cde1e57ca9ec309382da3b8e6ae3ab943d2739500e08c86393a21b1
 WORKDIR /
 COPY ./bin/cattage-controller /
 CMD ["/cattage-controller"]
