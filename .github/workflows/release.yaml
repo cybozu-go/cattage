@@ -31,10 +31,12 @@ jobs:
         run: |
           export TAG=$(curl -s "https://api.github.com/repos/cybozu-go/cattage/releases/latest" | jq -r .tag_name)
           echo "GORELEASER_PREVIOUS_TAG=${TAG}" >> $GITHUB_ENV
+      - name: Install cosign for goreleaser
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
       - name: GoReleaser
         uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
         with:
-          version: latest
+          version: v2.15.3
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
