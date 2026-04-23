@@ -4,6 +4,9 @@ CERT_MANAGER_VERSION := v1.20.2
 CERT_MANAGER_SHA256 := 1ce11cae912adecc69e6bb623435fafc9ed21505f9efff98bd71d7b80f01db1f
 CERT_MANAGER_URL := https://github.com/cert-manager/cert-manager/releases/download/$(CERT_MANAGER_VERSION)/cert-manager.yaml
 
+RELOADER_CHART_VERSION := 2.2.11
+RELOADER_CHART_SHA256 := 3c587e013f37369a67e2c2e6e1f2f7a6efe00cc3d38063eeb567c426529ddc92
+
 TMP_DIR := $(abspath $(CURDIR)/tmp)
 
 KIND_CONFIG = kind-config.yaml
@@ -36,14 +39,20 @@ setup-cert-manager:
 	kubectl apply -f $(TMP_DIR)/cert-manager.yaml
 	kubectl -n cert-manager wait --for=condition=available --timeout=180s --all deployments
 
-.PHONY: prepare
-prepare: setup-cert-manager
-	# Setup stakater/Reloader
+.PHONY: setup-reloader
+setup-reloader:
+	mkdir -p $(TMP_DIR)
 	helm repo add stakater https://stakater.github.io/stakater-charts
 	helm repo update
-	helm install --create-namespace --namespace reloader reloader -f manifests/reloader-values.yaml stakater/reloader
+	helm pull stakater/reloader --version $(RELOADER_CHART_VERSION) --destination $(TMP_DIR)
+	echo "$(RELOADER_CHART_SHA256)  $(TMP_DIR)/reloader-$(RELOADER_CHART_VERSION).tgz" | sha256sum -c -
+	helm upgrade --install --create-namespace --namespace reloader reloader \
+		-f manifests/reloader-values.yaml \
+		$(TMP_DIR)/reloader-$(RELOADER_CHART_VERSION).tgz
 	kubectl -n reloader wait --for=condition=available --timeout=180s --all deployments
 
+.PHONY: prepare
+prepare: setup-cert-manager setup-reloader
 	# Setup Argo CD
 	kubectl create namespace argocd
 	kustomize build --enable-helm ./manifests | kubectl apply -f -
