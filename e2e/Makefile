@@ -7,6 +7,9 @@ CERT_MANAGER_URL := https://github.com/cert-manager/cert-manager/releases/downlo
 RELOADER_CHART_VERSION := 2.2.11
 RELOADER_CHART_SHA256 := 3c587e013f37369a67e2c2e6e1f2f7a6efe00cc3d38063eeb567c426529ddc92
 
+ACCURATE_CHART_VERSION := 0.7.12
+ACCURATE_CHART_SHA256 := 7004356f40d8dcbc80709c199d6fed285d525e1a32dc56f76c6fd654d4bc5527
+
 TMP_DIR := $(abspath $(CURDIR)/tmp)
 
 KIND_CONFIG = kind-config.yaml
@@ -51,18 +54,24 @@ setup-reloader:
 		$(TMP_DIR)/reloader-$(RELOADER_CHART_VERSION).tgz
 	kubectl -n reloader wait --for=condition=available --timeout=180s --all deployments
 
+.PHONY: setup-accurate
+setup-accurate:
+	mkdir -p $(TMP_DIR)
+	helm repo add accurate https://cybozu-go.github.io/accurate
+	helm repo update
+	helm pull accurate/accurate --version $(ACCURATE_CHART_VERSION) --destination $(TMP_DIR)
+	echo "$(ACCURATE_CHART_SHA256)  $(TMP_DIR)/accurate-$(ACCURATE_CHART_VERSION).tgz" | sha256sum -c -
+	helm upgrade --install --create-namespace --namespace accurate accurate \
+		-f manifests/accurate-values.yaml \
+		$(TMP_DIR)/accurate-$(ACCURATE_CHART_VERSION).tgz
+	kubectl -n accurate wait --for=condition=available --timeout=180s --all deployments
+
 .PHONY: prepare
-prepare: setup-cert-manager setup-reloader
+prepare: setup-cert-manager setup-reloader setup-accurate
 	# Setup Argo CD
 	kubectl create namespace argocd
 	kustomize build --enable-helm ./manifests | kubectl apply -f -
 	kubectl -n argocd wait --for=condition=available --timeout=180s --all deployments
-
-	# Setup accurate
-	helm repo add accurate https://cybozu-go.github.io/accurate
-	helm repo update
-	helm install --create-namespace --namespace accurate accurate -f manifests/accurate-values.yaml accurate/accurate
-	kubectl -n accurate wait --for=condition=available --timeout=180s --all deployments
 
 .PHONY: generate-second-controller
 generate-second-controller:
