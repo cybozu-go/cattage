@@ -15,6 +15,9 @@ TMP_DIR := $(abspath $(CURDIR)/tmp)
 KIND_CONFIG = kind-config.yaml
 export KUBECONFIG
 
+$(TMP_DIR):
+	mkdir -p $(TMP_DIR)
+
 .PHONY: help
 help:
 	@echo "Choose one of the following target"
@@ -34,36 +37,48 @@ start:
 	kubectl apply -k ../config/default
 	kubectl -n cattage wait --for=condition=available --timeout=180s --all deployments
 
+$(TMP_DIR)/cert-manager-$(CERT_MANAGER_VERSION).yaml: | $(TMP_DIR)
+	curl -sSLf -o $@ $(CERT_MANAGER_URL)
+
+$(TMP_DIR)/cert-manager.yaml: $(TMP_DIR)/cert-manager-$(CERT_MANAGER_VERSION).yaml
+	echo "$(CERT_MANAGER_SHA256)  $<" | sha256sum -c -
+	ln -sf "$<" "$@"
+
 .PHONY: setup-cert-manager
-setup-cert-manager:
-	mkdir -p $(TMP_DIR)
-	curl -sSLf -o $(TMP_DIR)/cert-manager.yaml $(CERT_MANAGER_URL)
-	echo "$(CERT_MANAGER_SHA256)  $(TMP_DIR)/cert-manager.yaml" | sha256sum -c -
-	kubectl apply -f $(TMP_DIR)/cert-manager.yaml
+setup-cert-manager: $(TMP_DIR)/cert-manager.yaml
+	kubectl apply -f "$<"
 	kubectl -n cert-manager wait --for=condition=available --timeout=180s --all deployments
 
+$(TMP_DIR)/reloader-$(RELOADER_CHART_VERSION).tgz: | $(TMP_DIR)
+	helm pull reloader \
+		--repo https://stakater.github.io/stakater-charts \
+		--version $(RELOADER_CHART_VERSION) \
+		--destination $(TMP_DIR)
+
+$(TMP_DIR)/reloader.tgz: $(TMP_DIR)/reloader-$(RELOADER_CHART_VERSION).tgz
+	echo "$(RELOADER_CHART_SHA256)  $<" | sha256sum -c -
+	ln -sf "$<" "$@"
+
 .PHONY: setup-reloader
-setup-reloader:
-	mkdir -p $(TMP_DIR)
-	helm repo add stakater https://stakater.github.io/stakater-charts
-	helm repo update
-	helm pull stakater/reloader --version $(RELOADER_CHART_VERSION) --destination $(TMP_DIR)
-	echo "$(RELOADER_CHART_SHA256)  $(TMP_DIR)/reloader-$(RELOADER_CHART_VERSION).tgz" | sha256sum -c -
+setup-reloader: $(TMP_DIR)/reloader.tgz
 	helm upgrade --install --create-namespace --namespace reloader reloader \
-		-f manifests/reloader-values.yaml \
-		$(TMP_DIR)/reloader-$(RELOADER_CHART_VERSION).tgz
+		-f manifests/reloader-values.yaml "$<"
 	kubectl -n reloader wait --for=condition=available --timeout=180s --all deployments
 
+$(TMP_DIR)/accurate-$(ACCURATE_CHART_VERSION).tgz: | $(TMP_DIR)
+	helm pull accurate \
+		--repo https://cybozu-go.github.io/accurate \
+		--version $(ACCURATE_CHART_VERSION) \
+		--destination $(TMP_DIR)
+
+$(TMP_DIR)/accurate.tgz: $(TMP_DIR)/accurate-$(ACCURATE_CHART_VERSION).tgz
+	echo "$(ACCURATE_CHART_SHA256)  $<" | sha256sum -c -
+	ln -sf "$<" "$@"
+
 .PHONY: setup-accurate
-setup-accurate:
-	mkdir -p $(TMP_DIR)
-	helm repo add accurate https://cybozu-go.github.io/accurate
-	helm repo update
-	helm pull accurate/accurate --version $(ACCURATE_CHART_VERSION) --destination $(TMP_DIR)
-	echo "$(ACCURATE_CHART_SHA256)  $(TMP_DIR)/accurate-$(ACCURATE_CHART_VERSION).tgz" | sha256sum -c -
+setup-accurate: $(TMP_DIR)/accurate.tgz
 	helm upgrade --install --create-namespace --namespace accurate accurate \
-		-f manifests/accurate-values.yaml \
-		$(TMP_DIR)/accurate-$(ACCURATE_CHART_VERSION).tgz
+		-f manifests/accurate-values.yaml "$<"
 	kubectl -n accurate wait --for=condition=available --timeout=180s --all deployments
 
 .PHONY: prepare
