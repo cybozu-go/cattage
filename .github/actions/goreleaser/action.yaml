@@ -5,9 +5,6 @@ inputs:
   args:
     description: "Arguments to pass to goreleaser"
     required: true
-  github_token:
-    description: "GitHub Token"
-    required: true
 
 runs:
   using: composite
@@ -20,4 +17,4 @@ runs:
         version: v2.15.3
         args: ${{ inputs.args }}
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_TOKEN: ${{ github.token }}

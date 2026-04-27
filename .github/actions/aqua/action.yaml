@@ -1,13 +1,9 @@
 name: "Setup tools"
 description: "Setup tools with aqua"
-inputs:
-  github_token:
-    description: "GitHub Token"
-    required: true
 runs:
   using: composite
   steps:
     - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
       with:
         aqua_version: v2.57.0
-        github_token: ${{ inputs.github_token }}
+        github_token: ${{ github.token }}

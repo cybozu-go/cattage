@@ -34,7 +34,6 @@ jobs:
       - uses: ./.github/actions/goreleaser
         with:
           args: release --clean
-          github_token: ${{ secrets.GITHUB_TOKEN }}
   chart-release:
     runs-on: ubuntu-24.04
     needs: release

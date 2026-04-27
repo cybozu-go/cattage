@@ -15,8 +15,6 @@ jobs:
         go-version-file: go.mod
         cache: true
     - uses: ./.github/actions/aqua
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
     - run: make build
   check-goreleaser-config:
     name: Check goreleaser.yml
@@ -32,7 +30,6 @@ jobs:
       - uses: ./.github/actions/goreleaser
         with:
           args: check -f .goreleaser.yml
-          github_token: ${{ secrets.GITHUB_TOKEN }}
   test:
     name: Small tests
     runs-on: ubuntu-24.04
@@ -43,8 +40,6 @@ jobs:
         go-version-file: go.mod
         cache: true
     - uses: ./.github/actions/aqua
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
     - run: make test
     - run: make check-generate
     - run: make envtest
@@ -64,8 +59,6 @@ jobs:
         go-version-file: go.mod
         cache: true
     - uses: ./.github/actions/aqua
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
     - run: make start KUBERNETES_VERSION=${{ matrix.k8s-version }}
       working-directory: e2e
     - run: make test
@@ -94,8 +87,6 @@ jobs:
           go-version-file: go.mod
           cache: true
       - uses: ./.github/actions/aqua
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
       - run: make dev
       - run: tilt ci
   dry-run:
@@ -114,14 +105,11 @@ jobs:
           go-version-file: go.mod
           cache: true
       - uses: ./.github/actions/aqua
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup tag for goreleaser
         run: |
           echo "GORELEASER_CURRENT_TAG=$(git describe --tags --abbrev=0 --match "v*" || echo v0.0.0)" >> $GITHUB_ENV
       - uses: ./.github/actions/goreleaser
         with:
           args: --snapshot --skip=publish --clean
-          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Test built containers
         run: make container-structure-test
