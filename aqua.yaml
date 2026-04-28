@@ -1,6 +1,13 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json
 # aqua - Declarative CLI Version Manager
 # https://aquaproj.github.io/
+checksum:
+  enabled: true
+  require_checksum: true
+  supported_envs:
+  - linux
+  - darwin
 registries:
   - type: standard
     ref: v4.486.0 # renovate: depName=aquaproj/aqua-registry
@@ -19,3 +26,4 @@ packages:
   - name: rust-lang/mdBook@v0.5.2
   - name: tilt-dev/ctlptl@v0.9.0
   - name: tilt-dev/tilt@v0.37.0
+  - name: dominikh/go-tools/staticcheck@2026.1

@@ -4,7 +4,6 @@ ARGOCD_VERSION = 3.3.6
 
 # Test tools
 BIN_DIR := $(shell pwd)/bin
-STATICCHECK := $(BIN_DIR)/staticcheck
 NILERR := $(BIN_DIR)/nilerr
 SUDO = sudo
 
@@ -89,12 +88,12 @@ envtest: crds
 		go test -v -count 1 -race ./internal/hooks -ginkgo.v -ginkgo.fail-fast
 
 .PHONY: test
-test: test-tools
+test: setup
 	go test -v -count 1 -race ./internal/config
 	go install ./...
 	go vet ./...
 	test -z $$(gofmt -s -l . | tee /dev/stderr)
-	$(STATICCHECK) ./...
+	staticcheck ./...
 
 .PHONY: container-structure-test
 container-structure-test:
@@ -138,9 +137,6 @@ login-argocd:
 
 ##@ Tools
 
-.PHONY: test-tools
-test-tools: $(STATICCHECK)
-
-$(STATICCHECK):
-	mkdir -p $(BIN_DIR)
-	GOBIN=$(BIN_DIR) go install honnef.co/go/tools/cmd/staticcheck@latest
+.PHONY: setup
+setup:
+	aqua install -l

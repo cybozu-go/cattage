@@ -1,0 +1,20 @@
+name: "GoReleaser with Cosign"
+description: "Install cosign and run goreleaser with the given args"
+
+inputs:
+  args:
+    description: "Arguments to pass to goreleaser"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install cosign for goreleaser
+      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+    - name: GoReleaser
+      uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+      with:
+        version: v2.15.3
+        args: ${{ inputs.args }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}

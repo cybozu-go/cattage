@@ -22,3 +22,7 @@
 /vendor
 
 /tilt_modules
+
+# Temporary directories
+/tmp
+/e2e/tmp
