@@ -1,6 +1,6 @@
 # Tool versions
 CTRL_RUNTIME_VERSION := $(shell awk '/sigs.k8s.io\/controller-runtime/ {print substr($$2, 2)}' go.mod)
-ARGOCD_VERSION = 3.3.6
+ARGOCD_VERSION := $(shell awk -F '@v' '/argoproj\/argo-cd/ {print $$2}' aqua.yaml)
 
 # Test tools
 BIN_DIR := $(shell pwd)/bin
