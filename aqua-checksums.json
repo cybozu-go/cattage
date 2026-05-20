@@ -21,6 +21,26 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/argoproj/argo-cd/v3.3.10/argocd-darwin-amd64",
+      "checksum": "6C83A8EE7033BFCBB37C1434F58438AB37DB2F32F26FB33B4F25C5F7811B3826",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/argoproj/argo-cd/v3.3.10/argocd-darwin-arm64",
+      "checksum": "065A55DC174BA70AE53AFF6332D4CF6E91113CD84534272E4C82C23833A6DC62",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/argoproj/argo-cd/v3.3.10/argocd-linux-amd64",
+      "checksum": "910F9A5EA6193F4B25608FCAC0C3A29B71F63B2A1A5B9232FE2A715C8B0D88AE",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/argoproj/argo-cd/v3.3.10/argocd-linux-arm64",
+      "checksum": "FDC81EF30DA8622474F10ED68A9F4ED2EE716D2FCFEC3FC08A786CF7BF900B7E",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/argoproj/argo-cd/v3.3.6/argocd-darwin-amd64",
       "checksum": "08683B717C2BF7F12A3C77953B3B79576F28FD41864B3F84C6BDC76BCED1CE93",
       "algorithm": "sha256"
