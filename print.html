@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-cf77699c.js";
+            window.path_to_searchindex_js = "searchindex-eda8c66c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-13066d6f.js"></script>
@@ -1137,10 +1137,10 @@ If a new Kubernetes is released, please update the following files.</p>
 <p>If Kubernetes or controller-runtime API has changed, please fix the relevant source code.</p>
 <h2 id="how-to-update-supported-argo-cd"><a class="header" href="#how-to-update-supported-argo-cd">How to update supported Argo CD</a></h2>
 <p>Cattage supports one Argo CD version.
-If a new Argo CD is released, please update the following files.</p>
+When a new version of Argo CD is released, follow the steps below:</p>
 <ul>
-<li>Update Argo CD Version in <code>aqua.yaml</code> and <code>Makefile</code>.</li>
-<li>Update Supported Version metrics in <a href="../README.html">README.md</a></li>
+<li>Update the Argo CD version in <code>aqua.yaml</code> by running <code>aqua update argocd@${VERSION}</code></li>
+<li>Update the checksums in <code>aqua-checksums.json</code> by running <code>aqua update-checksum</code></li>
 </ul>
 <p>If Argo CD API has changed, please fix the relevant source code.</p>
 <h2 id="how-to-update-dependencies"><a class="header" href="#how-to-update-dependencies">How to update dependencies</a></h2>
