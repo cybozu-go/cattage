@@ -14,10 +14,10 @@ If Kubernetes or controller-runtime API has changed, please fix the relevant sou
 ## How to update supported Argo CD
 
 Cattage supports one Argo CD version.
-If a new Argo CD is released, please update the following files.
+When a new version of Argo CD is released, follow the steps below:
 
-- Update Argo CD Version in `aqua.yaml` and `Makefile`.
-- Update Supported Version metrics in [README.md](../README.md)
+- Update the Argo CD version in `aqua.yaml` by running `aqua update argocd@${VERSION}`
+- Update the checksums in `aqua-checksums.json` by running `aqua update-checksum`
 
 If Argo CD API has changed, please fix the relevant source code.
 
