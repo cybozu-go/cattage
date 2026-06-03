@@ -181,6 +181,11 @@
   postUpdateOptions: [
     "gomodTidy"
   ],
+  postUpgradeTasks: {
+    "commands": ["aqua update-checksum"],
+    "fileFilters": ["aqua-checksums.json"],
+    "executionMode": "branch"
+  },
   customManagers: [
     {
       customType: "regex",
