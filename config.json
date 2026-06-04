@@ -3,5 +3,5 @@
   "platform": "github",
   "onboarding": false,
   "repositories": ["cybozu-go/cattage"],
-  "allowedCommands": ["^aqua update-checksum$"]
+  "allowedCommands": ["^aqua update-checksum --prune$"]
 }
