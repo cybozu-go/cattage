@@ -41,26 +41,6 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/argoproj/argo-cd/v3.3.6/argocd-darwin-amd64",
-      "checksum": "08683B717C2BF7F12A3C77953B3B79576F28FD41864B3F84C6BDC76BCED1CE93",
-      "algorithm": "sha256"
-    },
-    {
-      "id": "github_release/github.com/argoproj/argo-cd/v3.3.6/argocd-darwin-arm64",
-      "checksum": "71F2453DA600FA2F0AB000619808E362331BEEAC12ABC84EAE782164A6B5CE9C",
-      "algorithm": "sha256"
-    },
-    {
-      "id": "github_release/github.com/argoproj/argo-cd/v3.3.6/argocd-linux-amd64",
-      "checksum": "36C243AFEB46BBAEDEC3C9B6823C043A741A36B1B8215147676BB8F18F21EF73",
-      "algorithm": "sha256"
-    },
-    {
-      "id": "github_release/github.com/argoproj/argo-cd/v3.3.6/argocd-linux-arm64",
-      "checksum": "4D88F03863A83C82F3C7D712DFEBE19B8D256A02EE57368F3685D6906841E4C9",
-      "algorithm": "sha256"
-    },
-    {
       "id": "github_release/github.com/clamoriniere/crd-to-markdown/v0.0.3/crd-to-markdown_Darwin_x86_64",
       "checksum": "90FBC1E0625C1A7F765EC658849F07A78DFF5A3CA469A1734F6DD23B313F7ECD",
       "algorithm": "sha256"
@@ -246,23 +226,23 @@
       "algorithm": "sha256"
     },
     {
-      "id": "http/dl.k8s.io/v1.34.6/bin/darwin/amd64/kubectl",
-      "checksum": "3BDE7B469F34195C0654A251453106409DD1FF970A0E2BCD143155F6685F4C5A",
+      "id": "http/dl.k8s.io/v1.34.8/bin/darwin/amd64/kubectl",
+      "checksum": "149BE66A64B26C59A7BF5037A895B8ECB244D8224D84F533584457355A44520B",
       "algorithm": "sha256"
     },
     {
-      "id": "http/dl.k8s.io/v1.34.6/bin/darwin/arm64/kubectl",
-      "checksum": "5629F4F9C82C58092C617D18DECA543F7DEC388AED28D22AADE18E183C794E0F",
+      "id": "http/dl.k8s.io/v1.34.8/bin/darwin/arm64/kubectl",
+      "checksum": "173E101C8F9F195EA16771A1262313EA4C916D4D517F72902B0AFD57F61C1917",
       "algorithm": "sha256"
     },
     {
-      "id": "http/dl.k8s.io/v1.34.6/bin/linux/amd64/kubectl",
-      "checksum": "3166155B17198C0AF34FF5A360BD4D9D58DB98BAFADC6F3C2A57AE560563CD6B",
+      "id": "http/dl.k8s.io/v1.34.8/bin/linux/amd64/kubectl",
+      "checksum": "F6249132865C13ABE3C9DD5038F5DA65849CB86EEE1608C001831504E481AA8C",
       "algorithm": "sha256"
     },
     {
-      "id": "http/dl.k8s.io/v1.34.6/bin/linux/arm64/kubectl",
-      "checksum": "A49A439F83F504E6BC051F516A8BAF8D2220D74110F7F9BCAF25FEAC69E368D1",
+      "id": "http/dl.k8s.io/v1.34.8/bin/linux/arm64/kubectl",
+      "checksum": "4C9FE1F717738950C638C38056130A8DB5075E6413AE36D8687221A240CDF88B",
       "algorithm": "sha256"
     },
     {
