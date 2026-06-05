@@ -182,7 +182,7 @@
     "gomodTidy"
   ],
   postUpgradeTasks: {
-    "commands": ["aqua update-checksum --prune"],
+    "commands": ["/usr/local/bin/aqua update-checksum --prune"],
     "fileFilters": ["aqua-checksums.json"],
     "executionMode": "branch"
   },
