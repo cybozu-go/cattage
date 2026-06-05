@@ -12,7 +12,6 @@ jobs:
       - uses: ./.github/actions/aqua
       - name: Resolve the installation path of `aqua`
         id: resolve-aqua-path
-        # Please refer to https://aquaproj.github.io/docs/products/aqua-installer/#shell-script about the installation path of `aqua`.
         run: echo "AQUA_PATH=$(readlink -f $(which aqua))" >> "$GITHUB_OUTPUT"
       - name: Self-hosted Renovate
         uses: renovatebot/github-action@abd08c7549b2a864af5df4a2e369c43f035a6a9d # v46.1.5
