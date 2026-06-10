@@ -14,7 +14,7 @@ jobs:
         id: resolve-aqua-path
         run: echo "AQUA_PATH=$(readlink -f $(which aqua))" >> "$GITHUB_OUTPUT"
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@abd08c7549b2a864af5df4a2e369c43f035a6a9d # v46.1.5
+        uses: renovatebot/github-action@693b9ef15eec82123529a37c782242f091365961 # v46.1.14
         with:
           configurationFile: config.json
           token: ${{ secrets.RENOVATE_TOKEN_PUBLIC }}
