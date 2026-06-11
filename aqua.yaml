@@ -17,10 +17,10 @@ packages:
   - name: GoogleContainerTools/container-structure-test@v1.22.1
   - name: helm/helm@v4.2.0
   - name: kubernetes/kubectl@v1.34.8
-  - name: kubernetes-sigs/controller-runtime/setup-envtest@v0.23.3
+  - name: kubernetes-sigs/controller-runtime/setup-envtest@v0.24.1
   - name: kubernetes-sigs/controller-tools/controller-gen@v0.19.0
   - name: kubernetes-sigs/kind@v0.31.0
-  - name: kubernetes-sigs/kubebuilder@v4.13.0
+  - name: kubernetes-sigs/kubebuilder@v4.14.0
   - name: kubernetes-sigs/kustomize@kustomize/v5.8.1
   - name: mikefarah/yq@v4.53.2
   - name: rust-lang/mdBook@v0.5.3
