@@ -25,3 +25,5 @@ jobs:
           docker-volumes: |
             /tmp:/tmp ;
             ${{ steps.resolve-aqua-path.outputs.AQUA_PATH }}:/usr/local/bin/aqua
+        env:
+          LOG_LEVEL: 'debug'
