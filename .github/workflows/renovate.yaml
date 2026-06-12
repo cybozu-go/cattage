@@ -5,7 +5,10 @@ jobs:
   renovate:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
+      issues: write
+      statuses: write
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -17,7 +20,7 @@ jobs:
         uses: renovatebot/github-action@693b9ef15eec82123529a37c782242f091365961 # v46.1.14
         with:
           configurationFile: config.json
-          token: ${{ secrets.RENOVATE_TOKEN_PUBLIC }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           # Mount the aqua installed on the runner into the renovate container so that `aqua update-checksum` can be executed within it.
           docker-volumes: |
             /tmp:/tmp ;
