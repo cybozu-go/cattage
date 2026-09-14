@@ -11,13 +11,13 @@ jobs:
       statuses: write
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/aqua
       - name: Resolve the installation path of `aqua`
         id: resolve-aqua-path
         run: echo "AQUA_PATH=$(readlink -f $(which aqua))" >> "$GITHUB_OUTPUT"
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@693b9ef15eec82123529a37c782242f091365961 # v46.1.14
+        uses: renovatebot/github-action@5402b206248e5a8c8427a15102702eb9c1793efc # v46.2.4
         with:
           configurationFile: config.json
           token: ${{ secrets.GITHUB_TOKEN }}

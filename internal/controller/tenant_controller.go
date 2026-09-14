@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 	"text/template"
+	"time"
 
 	cattagev1beta1 "github.com/cybozu-go/cattage/api/v1beta1"
 	"github.com/cybozu-go/cattage/internal/accurate"
@@ -84,7 +85,7 @@ func (r *TenantReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res
 		return ctrl.Result{}, err
 	}
 	if needRequeue {
-		return ctrl.Result{Requeue: true}, nil
+		return ctrl.Result{RequeueAfter: time.Second}, nil
 	}
 
 	tenant := &cattagev1beta1.Tenant{}
