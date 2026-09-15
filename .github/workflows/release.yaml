@@ -9,6 +9,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -23,10 +24,10 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        uses: ./.github/actions/setup-go
         with:
-          go-version-file: go.mod
           cache: true
+          bot-id: ${{ vars.TAKUMI_GUARD_BOT_ID }}
       - uses: ./.github/actions/aqua
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

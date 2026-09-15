@@ -10,12 +10,13 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      id-token: write
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+    - uses: ./.github/actions/setup-go
       with:
-        go-version-file: go.mod
         cache: true
+        bot-id: ${{ vars.TAKUMI_GUARD_BOT_ID }}
     - uses: ./.github/actions/aqua
     - run: make build
   check-goreleaser-config:
@@ -23,14 +24,14 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        uses: ./.github/actions/setup-go
         with:
-          go-version-file: go.mod
           cache: true
-
+          bot-id: ${{ vars.TAKUMI_GUARD_BOT_ID }}
       - uses: ./.github/actions/goreleaser
         with:
           args: check -f .goreleaser.yml
@@ -39,12 +40,13 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      id-token: write
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+    - uses: ./.github/actions/setup-go
       with:
-        go-version-file: go.mod
         cache: true
+        bot-id: ${{ vars.TAKUMI_GUARD_BOT_ID }}
     - uses: ./.github/actions/aqua
     - run: make test
     - run: make check-generate
@@ -60,12 +62,13 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      id-token: write
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+    - uses: ./.github/actions/setup-go
       with:
-        go-version-file: go.mod
         cache: true
+        bot-id: ${{ vars.TAKUMI_GUARD_BOT_ID }}
     - uses: ./.github/actions/aqua
     - run: make start KUBERNETES_VERSION=${{ matrix.k8s-version }}
       working-directory: e2e
@@ -90,12 +93,13 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: ./.github/actions/setup-go
         with:
-          go-version-file: go.mod
           cache: true
+          bot-id: ${{ vars.TAKUMI_GUARD_BOT_ID }}
       - uses: ./.github/actions/aqua
       - run: make dev
       - run: tilt ci
@@ -104,6 +108,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -112,10 +117,10 @@ jobs:
       - uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
       - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
       - name: Setup go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        uses: ./.github/actions/setup-go
         with:
-          go-version-file: go.mod
           cache: true
+          bot-id: ${{ vars.TAKUMI_GUARD_BOT_ID }}
       - uses: ./.github/actions/aqua
       - name: Setup tag for goreleaser
         run: |
