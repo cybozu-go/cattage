@@ -28,8 +28,6 @@ jobs:
           go-version-file: go.mod
           cache: true
       - uses: ./.github/actions/aqua
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set previous release tag for GoReleaser
         run: |
           export TAG=$(curl -s "https://api.github.com/repos/cybozu-go/cattage/releases/latest" | jq -r .tag_name)
