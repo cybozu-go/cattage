@@ -21,23 +21,23 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/argoproj/argo-cd/v3.3.10/argocd-darwin-amd64",
-      "checksum": "6C83A8EE7033BFCBB37C1434F58438AB37DB2F32F26FB33B4F25C5F7811B3826",
+      "id": "github_release/github.com/argoproj/argo-cd/v3.3.16/argocd-darwin-amd64",
+      "checksum": "73EBACB0D1FDF192B19EA56F75FC3E8A6F6552A3B9CE558B08FD6E81F16B0F84",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/argoproj/argo-cd/v3.3.10/argocd-darwin-arm64",
-      "checksum": "065A55DC174BA70AE53AFF6332D4CF6E91113CD84534272E4C82C23833A6DC62",
+      "id": "github_release/github.com/argoproj/argo-cd/v3.3.16/argocd-darwin-arm64",
+      "checksum": "A63461B314AD28702249F15104918A76979009AF5958B62F26EFBF68E578CC4A",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/argoproj/argo-cd/v3.3.10/argocd-linux-amd64",
-      "checksum": "910F9A5EA6193F4B25608FCAC0C3A29B71F63B2A1A5B9232FE2A715C8B0D88AE",
+      "id": "github_release/github.com/argoproj/argo-cd/v3.3.16/argocd-linux-amd64",
+      "checksum": "116D6B4A2ED75E32FA01C3194D55021D63D29E43E02AC48CC0F39DBF4745B645",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/argoproj/argo-cd/v3.3.10/argocd-linux-arm64",
-      "checksum": "FDC81EF30DA8622474F10ED68A9F4ED2EE716D2FCFEC3FC08A786CF7BF900B7E",
+      "id": "github_release/github.com/argoproj/argo-cd/v3.3.16/argocd-linux-arm64",
+      "checksum": "F378B50542F5636DC3E1B16BED4DED5E3441FD1E711461BA55067EE5E8DBC526",
       "algorithm": "sha256"
     },
     {
@@ -286,8 +286,8 @@
       "algorithm": "sha256"
     },
     {
-      "id": "registries/github_content/github.com/aquaproj/aqua-registry/v4.555.0/registry.yaml",
-      "checksum": "C3A707573C81DD2FB404B7758EF0FCBFA401AE416211928ABD182DFDA0E41F55",
+      "id": "registries/github_content/github.com/aquaproj/aqua-registry/v4.579.0/registry.yaml",
+      "checksum": "5BC609335C3E930F66B52E4EF44824852868C88898137557B078570C3CE9DF94",
       "algorithm": "sha256"
     }
   ]
