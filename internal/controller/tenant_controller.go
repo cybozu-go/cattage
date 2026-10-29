@@ -25,13 +25,11 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	accorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	acrbacv1 "k8s.io/client-go/applyconfigurations/rbac/v1"
-	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -314,16 +312,9 @@ func (r *TenantReconciler) finalize(ctx context.Context, tenant *cattagev1beta1.
 
 func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.NamespaceApplyConfiguration) error {
 	logger := log.FromContext(ctx)
-	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(ns)
-	if err != nil {
-		return err
-	}
-	patch := &unstructured.Unstructured{
-		Object: obj,
-	}
 
 	var orig corev1.Namespace
-	err = r.client.Get(ctx, client.ObjectKey{Name: *ns.Name}, &orig)
+	err := r.client.Get(ctx, client.ObjectKey{Name: *ns.Name}, &orig)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return err
 	}
@@ -338,24 +329,17 @@ func (r *TenantReconciler) patchNamespace(ctx context.Context, ns *accorev1.Name
 	}
 
 	logger.Info("patching namespace", "namespace", ns, "managed", managed)
-	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
-		FieldManager: constants.TenantFieldManager,
-		Force:        ptr.To(true),
-	})
+	return r.client.Apply(ctx, ns,
+		client.FieldOwner(constants.TenantFieldManager),
+		client.ForceOwnership,
+	)
 }
 
 func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.RoleBindingApplyConfiguration) error {
 	logger := log.FromContext(ctx)
-	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(rb)
-	if err != nil {
-		return err
-	}
-	patch := &unstructured.Unstructured{
-		Object: obj,
-	}
 
 	var orig rbacv1.RoleBinding
-	err = r.client.Get(ctx, client.ObjectKey{Namespace: *rb.Namespace, Name: *rb.Name}, &orig)
+	err := r.client.Get(ctx, client.ObjectKey{Namespace: *rb.Namespace, Name: *rb.Name}, &orig)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return err
 	}
@@ -370,10 +354,10 @@ func (r *TenantReconciler) patchRoleBinding(ctx context.Context, rb *acrbacv1.Ro
 	}
 
 	logger.Info("patching RoleBinding", "rolebinding", rb, "managed", managed)
-	return r.client.Patch(ctx, patch, client.Apply, &client.PatchOptions{
-		FieldManager: constants.TenantFieldManager,
-		Force:        ptr.To(true),
-	})
+	return r.client.Apply(ctx, rb,
+		client.FieldOwner(constants.TenantFieldManager),
+		client.ForceOwnership,
+	)
 }
 
 func (r *TenantReconciler) rolesMap(ctx context.Context, delegates []cattagev1beta1.DelegateSpec) (map[string][]Role, error) {
@@ -590,10 +574,10 @@ func (r *TenantReconciler) reconcileArgoCD(ctx context.Context, tenant *cattagev
 	}
 
 	logger.Info("patching AppProject", "namespaces", namespaces, "roles", roles, "repositories", repos, "extraParams", params)
-	err = r.client.Patch(ctx, proj, client.Apply, &client.PatchOptions{
-		Force:        ptr.To(true),
-		FieldManager: constants.TenantFieldManager,
-	})
+	err = r.client.Apply(ctx, client.ApplyConfigurationFromUnstructured(proj),
+		client.FieldOwner(constants.TenantFieldManager),
+		client.ForceOwnership,
+	)
 	if err != nil {
 		logger.Error(err, "failed to patch AppProject")
 		return err
