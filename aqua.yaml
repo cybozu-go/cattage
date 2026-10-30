@@ -16,15 +16,15 @@ packages:
   - name: clamoriniere/crd-to-markdown@v0.0.3
   - name: GoogleContainerTools/container-structure-test@v1.22.1
   - name: helm/helm@v4.2.4
-  - name: kubernetes/kubectl@v1.34.8
+  - name: kubernetes/kubectl@v1.35.10
   - name: kubernetes-sigs/controller-runtime/setup-envtest@v0.23.3
-  - name: kubernetes-sigs/controller-tools/controller-gen@v0.19.0
-  - name: kubernetes-sigs/kind@v0.31.0
-  - name: kubernetes-sigs/kubebuilder@v4.13.0
-  - name: kubernetes-sigs/kustomize@kustomize/v5.8.1
+  - name: kubernetes-sigs/controller-tools/controller-gen@v0.20.1
+  - name: kubernetes-sigs/kind@v0.33.0
+  - name: kubernetes-sigs/kubebuilder@v4.14.0
+  - name: kubernetes-sigs/kustomize@kustomize/v5.8.3
   - name: mikefarah/yq@v4.53.6
   - name: rust-lang/mdBook@v0.5.4
-  - name: tilt-dev/ctlptl@v0.9.4
+  - name: tilt-dev/ctlptl@v0.9.5
   - name: tilt-dev/tilt@v0.37.7
   - name: dominikh/go-tools/staticcheck@2026.2.1
   - name: suzuki-shunsuke/pinact@v4.1.1
