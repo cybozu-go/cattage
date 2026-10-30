@@ -10,9 +10,9 @@ checksum:
   - darwin
 registries:
   - type: standard
-    ref: v4.555.0 # renovate: depName=aquaproj/aqua-registry
+    ref: v4.579.0 # renovate: depName=aquaproj/aqua-registry
 packages:
-  - name: argoproj/argo-cd@v3.3.10
+  - name: argoproj/argo-cd@v3.3.16
   - name: clamoriniere/crd-to-markdown@v0.0.3
   - name: GoogleContainerTools/container-structure-test@v1.22.1
   - name: helm/helm@v4.2.4
