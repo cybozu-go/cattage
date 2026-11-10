@@ -96,6 +96,26 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/kubernetes-sigs/controller-runtime/v0.24.1/setup-envtest-darwin-amd64",
+      "checksum": "3FB17F2B1B0F09B7E5395180BD2BCB1D53BB78D72BB0415106B7AE8BF64E23D0",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/kubernetes-sigs/controller-runtime/v0.24.1/setup-envtest-darwin-arm64",
+      "checksum": "7E59A0D526F6946AA2F114D34B2E309639C811F3A4F83D56F37B6E3197C6FDFB",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/kubernetes-sigs/controller-runtime/v0.24.1/setup-envtest-linux-amd64",
+      "checksum": "A9A78FADFC338A38188332F36863C76877F1C86DF1A83D2241D2BFC3935297D2",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/kubernetes-sigs/controller-runtime/v0.24.1/setup-envtest-linux-arm64",
+      "checksum": "C5D8968EC3F2A120B66BC13BD36F80FE4150C34AAE7CC491BF9624C8680296C7",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/kubernetes-sigs/kind/v0.33.0/kind-darwin-amd64",
       "checksum": "5A99F26F57246DC9319DD294803313197A0F34D33C525B3EA8B655DB5916ECE0",
       "algorithm": "sha256"
@@ -263,6 +283,26 @@
     {
       "id": "http/dl.k8s.io/v1.35.10/bin/linux/arm64/kubectl",
       "checksum": "283F1BE6A46B3695B625E25030106B8FFE18BD0D3A900F5B65C259CA407F04F5",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/dl.k8s.io/v1.36.6/bin/darwin/amd64/kubectl",
+      "checksum": "2E22D382F2423C88D9D076246F860BB3D5C743DD279CA63E113474BB88382426",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/dl.k8s.io/v1.36.6/bin/darwin/arm64/kubectl",
+      "checksum": "1CF735C3D35CCFEC28D0618784CB06A4614D2C42AADE28B6BE0EAB76A2FFB623",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/dl.k8s.io/v1.36.6/bin/linux/amd64/kubectl",
+      "checksum": "29818B6729DC9262B692307470D0558D027725E738BE5DD47C760261868A2634",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/dl.k8s.io/v1.36.6/bin/linux/arm64/kubectl",
+      "checksum": "35507EF408C3D38849E5D3203E18F8E861DB822AA664101A9CED0869EDD06046",
       "algorithm": "sha256"
     },
     {
