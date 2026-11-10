@@ -1,8 +1,6 @@
 package client
 
 import (
-	"bytes"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/structured-merge-diff/v6/fieldpath"
@@ -17,7 +15,7 @@ func ExtractManagedFields(u *unstructured.Unstructured, manager string) (map[str
 			continue
 		}
 		fs := &fieldpath.Set{}
-		err := fs.FromJSON(bytes.NewReader(mf.FieldsV1.Raw))
+		err := fs.FromJSON(mf.FieldsV1.GetRawReader())
 		if err != nil {
 			return nil, err
 		}
