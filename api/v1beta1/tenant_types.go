@@ -111,7 +111,3 @@ type TenantList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Tenant `json:"items"`
 }
-
-func init() {
-	SchemeBuilder.Register(&Tenant{}, &TenantList{})
-}
